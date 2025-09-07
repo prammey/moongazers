@@ -20,6 +20,15 @@ import {
 const ASTROSPHERIC_KEY = process.env.ASTROSPHERIC_KEY;
 const TIMEZONEDB_KEY = process.env.TIMEZONEDB_KEY;
 
+// Validate environment variables
+if (!ASTROSPHERIC_KEY) {
+  console.warn('[API] Warning: ASTROSPHERIC_KEY not found in environment variables');
+}
+
+if (!TIMEZONEDB_KEY) {
+  console.warn('[API] Warning: TIMEZONEDB_KEY not found in environment variables');
+}
+
 // Cache functions
 const getCachedGeocode = unstable_cache(
   async (location: string) => await geocodeLocation(location),
