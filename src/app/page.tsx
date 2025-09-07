@@ -84,7 +84,7 @@ export default function Home() {
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
                 placeholder="e.g., 60540 or Naperville, IL"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black placeholder:text-gray-500"
                 disabled={loading}
               />
             </div>
