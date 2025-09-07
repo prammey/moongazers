@@ -255,7 +255,7 @@ export default function Home() {
                             <h4 className="text-xl font-black text-gray-900 mb-4 text-center">★ Stars</h4>
                             {window.stars.length > 0 ? (
                               <div className="flex flex-wrap gap-3 justify-center">
-                                {window.stars.slice(0, 4).map((star: string, i: number) => (
+                                {window.stars.map((star: string, i: number) => (
                                   <span
                                     key={i}
                                     style={{ backgroundColor: '#9d6bd6', border: '4px solid #000000', boxShadow: '3px 3px 0px #000000' }}
@@ -264,11 +264,6 @@ export default function Home() {
                                     {star}
                                   </span>
                                 ))}
-                                {window.stars.length > 4 && (
-                                  <span style={{ backgroundColor: '#8b7355', border: '4px solid #000000', boxShadow: '3px 3px 0px #000000' }} className="inline-block px-4 py-2 text-white font-black">
-                                    +{window.stars.length - 4} more
-                                  </span>
-                                )}
                               </div>
                             ) : (
                               <p className="text-gray-500 font-bold text-center italic text-lg">None visible</p>
