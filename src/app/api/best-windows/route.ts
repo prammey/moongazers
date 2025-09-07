@@ -49,50 +49,184 @@ const getCachedSkyData = unstable_cache(
   { revalidate: 60 * 60 * 12 } // 12 hours
 );
 
-// Geocoding using US Census with fallback
+// Geocoding with international support including Canada
 async function geocodeLocation(location: string): Promise<{ coordinates: Coordinates; location: string }> {
-  // First try the onelineaddress endpoint
-  let url = `https://geocoding.geo.census.gov/geocoder/locations/onelineaddress?address=${encodeURIComponent(location)}&benchmark=Public_AR_Current&format=json`;
+  const trimmedLocation = location.trim();
   
-  let response = await fetch(url);
-  if (!response.ok) {
-    throw new Error('Geocoding failed');
-  }
-  
-  let data = await response.json();
-  console.log('[Geocoding] First attempt response:', JSON.stringify(data, null, 2));
-  
-  // If no matches and location looks like a ZIP code, try a different approach
-  if (!data.result?.addressMatches?.length && /^\d{5}(-\d{4})?$/.test(location.trim())) {
-    console.log('[Geocoding] Trying ZIP code specific search...');
-    // Try searching for the ZIP code with "USA" appended
-    url = `https://geocoding.geo.census.gov/geocoder/locations/onelineaddress?address=${encodeURIComponent(location + ', USA')}&benchmark=Public_AR_Current&format=json`;
+  // Helper function to detect location type
+  const detectLocationType = (loc: string) => {
+    // US ZIP codes (5 digits or 5+4 format)
+    if (/^\d{5}(-\d{4})?$/.test(loc)) return 'us_zip';
     
-    response = await fetch(url);
-    if (response.ok) {
-      data = await response.json();
-      console.log('[Geocoding] ZIP code attempt response:', JSON.stringify(data, null, 2));
+    // Canadian postal codes (A1A 1A1 or A1A1A1 format)
+    if (/^[A-Za-z]\d[A-Za-z]\s?\d[A-Za-z]\d$/.test(loc)) return 'ca_postal';
+    
+    // UK postcodes (various formats)
+    if (/^[A-Za-z]{1,2}\d{1,2}[A-Za-z]?\s?\d[A-Za-z]{2}$/.test(loc)) return 'uk_postal';
+    
+    // General location (city, address, etc.)
+    return 'general';
+  };
+
+  const locationType = detectLocationType(trimmedLocation);
+  console.log(`[Geocoding] Detected location type: ${locationType} for "${trimmedLocation}"`);
+
+  // For US locations, try US Census first
+  if (locationType === 'us_zip') {
+    try {
+      console.log('[Geocoding] Attempting US Census geocoding...');
+      
+      // First try the onelineaddress endpoint
+      let url = `https://geocoding.geo.census.gov/geocoder/locations/onelineaddress?address=${encodeURIComponent(trimmedLocation)}&benchmark=Public_AR_Current&format=json`;
+      
+      let response = await fetch(url);
+      if (response.ok) {
+        const data = await response.json();
+        console.log('[Geocoding] US Census response:', JSON.stringify(data, null, 2));
+        
+        if (data.result?.addressMatches?.length) {
+          const match = data.result.addressMatches[0];
+          
+          // Enhance US location with additional details
+          let enhancedLocation = match.matchedAddress;
+          
+          // Try to get more details from the address components
+          if (match.addressComponents) {
+            const components = match.addressComponents;
+            const details = [];
+            
+            // Add ZIP code if available
+            if (components.zip) {
+              details.push(`[ZIP: ${components.zip}]`);
+            }
+            
+            // Add city and state details
+            if (components.city && components.state) {
+              enhancedLocation = `${components.city}, ${components.state}`;
+              
+              // Add county if available
+              if (match.tigerLine?.side && match.tigerLine.side.county) {
+                details.push(`[County: ${match.tigerLine.side.county}]`);
+              }
+              
+              // Add state district if available
+              if (match.tigerLine?.side && match.tigerLine.side.district) {
+                details.push(`[District: ${match.tigerLine.side.district}]`);
+              }
+              
+              // Add details if we have them
+              if (details.length > 0) {
+                enhancedLocation = `${enhancedLocation} (${details.join(' • ')})`;
+              }
+            }
+          }
+          
+          console.log('[Geocoding] Enhanced US location:', enhancedLocation);
+          
+          return {
+            coordinates: {
+              lat: parseFloat(match.coordinates.y),
+              lng: parseFloat(match.coordinates.x)
+            },
+            location: enhancedLocation || match.matchedAddress
+          };
+        }
+      }
+
+      // Try ZIP code with USA appended
+      url = `https://geocoding.geo.census.gov/geocoder/locations/onelineaddress?address=${encodeURIComponent(trimmedLocation + ', USA')}&benchmark=Public_AR_Current&format=json`;
+      
+      response = await fetch(url);
+      if (response.ok) {
+        const data = await response.json();
+        console.log('[Geocoding] US Census with USA response:', JSON.stringify(data, null, 2));
+        
+        if (data.result?.addressMatches?.length) {
+          const match = data.result.addressMatches[0];
+          
+          // Enhance US location with additional details
+          let enhancedLocation = match.matchedAddress;
+          
+          // Try to get more details from the address components
+          if (match.addressComponents) {
+            const components = match.addressComponents;
+            const details = [];
+            
+            // Add ZIP code if available
+            if (components.zip) {
+              details.push(`[ZIP: ${components.zip}]`);
+            }
+            
+            // Add city and state details
+            if (components.city && components.state) {
+              enhancedLocation = `${components.city}, ${components.state}`;
+              
+              // Add county if available
+              if (match.tigerLine?.side && match.tigerLine.side.county) {
+                details.push(`[County: ${match.tigerLine.side.county}]`);
+              }
+              
+              // Add state district if available
+              if (match.tigerLine?.side && match.tigerLine.side.district) {
+                details.push(`[District: ${match.tigerLine.side.district}]`);
+              }
+              
+              // Add details if we have them
+              if (details.length > 0) {
+                enhancedLocation = `${enhancedLocation} (${details.join(' • ')})`;
+              }
+            }
+          }
+          
+          console.log('[Geocoding] Enhanced US location (with USA):', enhancedLocation);
+          
+          return {
+            coordinates: {
+              lat: parseFloat(match.coordinates.y),
+              lng: parseFloat(match.coordinates.x)
+            },
+            location: enhancedLocation || match.matchedAddress
+          };
+        }
+      }
+    } catch (error) {
+      console.log('[Geocoding] US Census failed, falling back to international search:', error);
     }
   }
+
+  // International geocoding using OpenStreetMap Nominatim (supports all countries)
+  console.log('[Geocoding] Using international OpenStreetMap geocoding...');
   
-  // If still no matches, try the address search endpoint
-  if (!data.result?.addressMatches?.length) {
-    console.log('[Geocoding] Trying address search endpoint...');
-    url = `https://geocoding.geo.census.gov/geocoder/locations/address?street=&city=&state=&zip=${encodeURIComponent(location)}&benchmark=Public_AR_Current&format=json`;
-    
-    response = await fetch(url);
-    if (response.ok) {
-      data = await response.json();
-      console.log('[Geocoding] Address endpoint response:', JSON.stringify(data, null, 2));
-    }
+  // Build search query based on location type
+  let searchQuery = trimmedLocation;
+  let countryHint = '';
+  
+  switch (locationType) {
+    case 'ca_postal':
+      // Add Canada hint for postal codes
+      searchQuery = trimmedLocation + ', Canada';
+      countryHint = '&countrycodes=ca';
+      break;
+    case 'uk_postal':
+      // Add UK hint for postcodes
+      searchQuery = trimmedLocation + ', United Kingdom';
+      countryHint = '&countrycodes=gb';
+      break;
+    case 'us_zip':
+      // Add USA hint for ZIP codes
+      searchQuery = trimmedLocation + ', USA';
+      countryHint = '&countrycodes=us';
+      break;
+    default:
+      // For general locations, let Nominatim search globally
+      searchQuery = trimmedLocation;
+      countryHint = '';
+      break;
   }
+
+  const nominatimUrl = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(searchQuery)}${countryHint}&addressdetails=1`;
   
-  // Check if we have any address matches
-  if (!data.result?.addressMatches?.length) {
-    // As a last resort, try a simple OpenStreetMap Nominatim search (free, no key needed)
-    console.log('[Geocoding] Trying OpenStreetMap fallback...');
-    const nominatimUrl = `https://nominatim.openstreetmap.org/search?format=json&countrycodes=us&limit=1&q=${encodeURIComponent(location)}`;
-    
+  try {
     const nominatimResponse = await fetch(nominatimUrl, {
       headers: {
         'User-Agent': 'Moongazers-App/1.0'
@@ -105,43 +239,135 @@ async function geocodeLocation(location: string): Promise<{ coordinates: Coordin
       
       if (nominatimData.length > 0) {
         const place = nominatimData[0];
+        
+        // Build a detailed location name with district info
+        let locationName = place.display_name;
+        if (place.address) {
+          const addr = place.address;
+          const parts = [];
+          const details = [];
+          
+          // Add postal code if available
+          if (addr.postcode) {
+            details.push(`[ZIP: ${addr.postcode}]`);
+          }
+          
+          // Add district/neighborhood info
+          if (addr.suburb) details.push(`[Suburb: ${addr.suburb}]`);
+          else if (addr.neighbourhood) details.push(`[Neighborhood: ${addr.neighbourhood}]`);
+          else if (addr.district) details.push(`[District: ${addr.district}]`);
+          else if (addr.quarter) details.push(`[Quarter: ${addr.quarter}]`);
+          
+          // Add city/town/village
+          if (addr.city) parts.push(addr.city);
+          else if (addr.town) parts.push(addr.town);
+          else if (addr.village) parts.push(addr.village);
+          else if (addr.municipality) parts.push(addr.municipality);
+          
+          // Add administrative levels (county, state, etc.)
+          if (addr.county && !parts.some(p => p.includes(addr.county))) {
+            details.push(`[County: ${addr.county}]`);
+          }
+          
+          // Add state/province
+          if (addr.state) parts.push(addr.state);
+          else if (addr.province) parts.push(addr.province);
+          else if (addr.region) parts.push(addr.region);
+          
+          // Add country
+          if (addr.country) parts.push(addr.country);
+          
+          // Build the final location string
+          if (parts.length > 0) {
+            locationName = parts.join(', ');
+            
+            // Add detailed info if available
+            if (details.length > 0) {
+              locationName = `${locationName} (${details.join(' • ')})`;
+            }
+          }
+          
+          console.log('[Geocoding] Built detailed location:', locationName);
+        }
+        
         return {
           coordinates: {
             lat: parseFloat(place.lat),
             lng: parseFloat(place.lon)
           },
-          location: place.display_name
+          location: locationName
         };
       }
     }
-    
-    throw new Error(`Location not found: ${location}. Please try a more specific address.`);
+  } catch (error) {
+    console.error('[Geocoding] Nominatim error:', error);
   }
-  
-  const match = data.result.addressMatches[0];
-  console.log('[Geocoding] Using match:', match);
-  
-  return {
-    coordinates: {
-      lat: parseFloat(match.coordinates.y),
-      lng: parseFloat(match.coordinates.x)
-    },
-    location: match.matchedAddress
-  };
+
+  throw new Error(`Location not found: ${trimmedLocation}. Please try a more specific address, city name, or postal/ZIP code.`);
 }
 
-// Get timezone using TimeZoneDB
+// Get timezone using TimeZoneDB with intelligent fallbacks
 async function getTimezone(lat: number, lng: number): Promise<string> {
-  const url = `http://api.timezonedb.com/v2.1/get-time-zone?key=${TIMEZONEDB_KEY}&format=json&lat=${lat}&lng=${lng}`;
+  try {
+    const url = `http://api.timezonedb.com/v2.1/get-time-zone?key=${TIMEZONEDB_KEY}&format=json&lat=${lat}&lng=${lng}`;
+    
+    const response = await fetch(url);
+    if (response.ok) {
+      const data = await response.json();
+      if (data.zoneName) {
+        console.log(`[Timezone] Found timezone: ${data.zoneName}`);
+        return data.zoneName;
+      }
+    }
+  } catch (error) {
+    console.log('[Timezone] TimeZoneDB failed, using fallback logic:', error);
+  }
+
+  // Intelligent fallback based on coordinates
+  console.log(`[Timezone] Using coordinate-based fallback for lat: ${lat}, lng: ${lng}`);
   
-  const response = await fetch(url);
-  if (!response.ok) {
-    // Fallback to America/Chicago for US locations
-    return 'America/Chicago';
+  // North America
+  if (lat >= 25 && lat <= 71 && lng >= -180 && lng <= -50) {
+    if (lng >= -75) return 'America/New_York';      // Eastern
+    if (lng >= -90) return 'America/Chicago';       // Central  
+    if (lng >= -105) return 'America/Denver';       // Mountain
+    if (lng >= -125) return 'America/Los_Angeles';  // Pacific
+    return 'America/Anchorage';                     // Alaska/Western
   }
   
-  const data = await response.json();
-  return data.zoneName || 'America/Chicago';
+  // Europe
+  if (lat >= 35 && lat <= 71 && lng >= -10 && lng <= 40) {
+    if (lng <= 15) return 'Europe/London';          // Western Europe
+    if (lng <= 30) return 'Europe/Berlin';          // Central Europe
+    return 'Europe/Helsinki';                       // Eastern Europe
+  }
+  
+  // Asia-Pacific
+  if (lat >= -50 && lat <= 70 && lng >= 60 && lng <= 180) {
+    if (lng <= 90) return 'Asia/Kolkata';           // South/Central Asia
+    if (lng <= 120) return 'Asia/Shanghai';         // East Asia
+    if (lng <= 150) return 'Asia/Tokyo';            // Far East Asia
+    return 'Pacific/Auckland';                      // Pacific
+  }
+  
+  // Australia/Oceania
+  if (lat >= -50 && lat <= -10 && lng >= 110 && lng <= 180) {
+    return 'Australia/Sydney';
+  }
+  
+  // South America
+  if (lat >= -60 && lat <= 15 && lng >= -85 && lng <= -30) {
+    return 'America/Sao_Paulo';
+  }
+  
+  // Africa
+  if (lat >= -35 && lat <= 40 && lng >= -20 && lng <= 55) {
+    return 'Africa/Johannesburg';
+  }
+  
+  // Default fallback to UTC
+  console.log('[Timezone] No specific region match, defaulting to UTC');
+  return 'UTC';
 }
 
 // Astrospheric API calls

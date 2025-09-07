@@ -1,13 +1,66 @@
 'use client';
 
-import { useState } from 'react';
-import { BestWindowsResponse, TimeWindow } from '@/types';
+import { useState, useRef, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+
+// Country data with common postal/ZIP code formats
+const COUNTRIES = [
+  { code: 'US', name: 'United States', flag: '🇺🇸', placeholder: '12345 or 12345-6789', example: '60540' },
+  { code: 'CA', name: 'Canada', flag: '🇨🇦', placeholder: 'A1A 1A1', example: 'M5V 3A8' },
+  { code: 'GB', name: 'United Kingdom', flag: '🇬🇧', placeholder: 'SW1A 1AA', example: 'SW1A 1AA' },
+  { code: 'AU', name: 'Australia', flag: '🇦🇺', placeholder: '1000', example: '2000' },
+  { code: 'DE', name: 'Germany', flag: '🇩🇪', placeholder: '12345', example: '10115' },
+  { code: 'FR', name: 'France', flag: '🇫🇷', placeholder: '75001', example: '75001' },
+  { code: 'JP', name: 'Japan', flag: '🇯🇵', placeholder: '100-0001', example: '100-0001' },
+  { code: 'IT', name: 'Italy', flag: '🇮🇹', placeholder: '00100', example: '00100' },
+  { code: 'ES', name: 'Spain', flag: '🇪🇸', placeholder: '28001', example: '28001' },
+  { code: 'NL', name: 'Netherlands', flag: '🇳🇱', placeholder: '1000 AA', example: '1012 JS' },
+  { code: 'SE', name: 'Sweden', flag: '🇸🇪', placeholder: '123 45', example: '111 29' },
+  { code: 'NO', name: 'Norway', flag: '🇳🇴', placeholder: '0001', example: '0150' },
+  { code: 'DK', name: 'Denmark', flag: '🇩🇰', placeholder: '1000', example: '1050' },
+  { code: 'CH', name: 'Switzerland', flag: '🇨🇭', placeholder: '1000', example: '8001' },
+  { code: 'AT', name: 'Austria', flag: '🇦🇹', placeholder: '1010', example: '1010' },
+  { code: 'BE', name: 'Belgium', flag: '🇧🇪', placeholder: '1000', example: '1000' },
+  { code: 'NZ', name: 'New Zealand', flag: '🇳🇿', placeholder: '1010', example: '1010' },
+  { code: 'IE', name: 'Ireland', flag: '🇮🇪', placeholder: 'D01 F5P2', example: 'D01 F5P2' },
+  { code: 'FI', name: 'Finland', flag: '🇫🇮', placeholder: '00100', example: '00100' },
+  { code: 'PL', name: 'Poland', flag: '🇵🇱', placeholder: '00-001', example: '00-001' },
+  { code: 'BR', name: 'Brazil', flag: '🇧🇷', placeholder: '01000-000', example: '01310-100' },
+  { code: 'MX', name: 'Mexico', flag: '🇲🇽', placeholder: '01000', example: '06600' },
+  { code: 'IN', name: 'India', flag: '🇮🇳', placeholder: '110001', example: '110001' },
+  { code: 'SG', name: 'Singapore', flag: '🇸🇬', placeholder: '018956', example: '018956' },
+  { code: 'ZA', name: 'South Africa', flag: '🇿🇦', placeholder: '0001', example: '8001' },
+];
 
 export default function Home() {
+  const router = useRouter();
   const [location, setLocation] = useState('');
+  const [selectedCountry, setSelectedCountry] = useState(COUNTRIES[0]); // Default to US
+  const [countrySearch, setCountrySearch] = useState('');
+  const [showCountryDropdown, setShowCountryDropdown] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [data, setData] = useState<BestWindowsResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+  
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowCountryDropdown(false);
+        setCountrySearch('');
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Filter countries based on search
+  const filteredCountries = COUNTRIES.filter(country =>
+    country.name.toLowerCase().includes(countrySearch.toLowerCase()) ||
+    country.code.toLowerCase().includes(countrySearch.toLowerCase())
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -15,47 +68,29 @@ export default function Home() {
 
     setLoading(true);
     setError(null);
-    setData(null);
 
     try {
-      const response = await fetch('/api/best-windows', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ location: location.trim() }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch moongazing data');
+      // Combine postal code with country for better geocoding
+      let searchLocation = location.trim();
+      
+      // If it looks like a postal/ZIP code, add country context
+      const isPostalCode = /^[A-Za-z0-9\s\-]{3,10}$/.test(searchLocation) && !searchLocation.includes(',');
+      if (isPostalCode && selectedCountry) {
+        searchLocation = `${searchLocation}, ${selectedCountry.name}`;
       }
 
-      const result = await response.json();
-      setData(result);
+      // Navigate to results page with search parameters
+      const params = new URLSearchParams({
+        location: searchLocation,
+        country: selectedCountry.code
+      });
+      
+      router.push(`/results?${params.toString()}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
       setLoading(false);
     }
-  };
-
-  const getCloudBadge = (cloudPercent: number) => {
-    if (cloudPercent <= 20) {
-      return { text: 'Clear', color: 'bg-green-600 text-white' };
-    } else if (cloudPercent <= 60) {
-      return { text: 'Partly Cloudy', color: 'bg-yellow-600 text-white' };
-    } else {
-      return { text: 'Cloudy', color: 'bg-red-600 text-white' };
-    }
-  };
-
-  const getMoonImpactTag = (impact: string) => {
-    const colors = {
-      Low: 'bg-green-100 text-green-800 border-green-200',
-      Medium: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-      High: 'bg-red-100 text-red-800 border-red-200',
-    };
-    return colors[impact as keyof typeof colors] || colors.Low;
   };
 
   return (
@@ -78,7 +113,7 @@ export default function Home() {
         {/* Main Content Card */}
         <div style={{ backgroundColor: '#f8f6f0', boxShadow: '8px 8px 0px #000000', border: '4px solid #000000' }} className="p-8 mb-8">
           
-          {!data && !error && (
+          {!error && (
             <>
               {/* Header */}
               <div className="text-center mb-8">
@@ -93,13 +128,89 @@ export default function Home() {
               {/* Search Form */}
               <form onSubmit={handleSubmit} className="max-w-md mx-auto">
                 <div className="space-y-6">
+                  
+                  {/* Country Selection */}
                   <div>
                     <label className="block text-lg font-black text-gray-900 mb-3">
-                      Enter your location (US only)
+                      Select your country
+                    </label>
+                    <div className="relative" ref={dropdownRef}>
+                      <button
+                        type="button"
+                        onClick={() => setShowCountryDropdown(!showCountryDropdown)}
+                        className="w-full px-6 py-4 border-4 border-gray-300 focus:ring-0 focus:border-gray-600 text-black font-bold text-lg text-left flex items-center justify-between bg-white hover:bg-gray-50 transition-colors"
+                        style={{ boxShadow: 'inset 4px 4px 8px rgba(0,0,0,0.2)' }}
+                        disabled={loading}
+                      >
+                        <span className="flex items-center gap-3">
+                          <span className="text-2xl">{selectedCountry.flag}</span>
+                          <span className="text-gray-900 font-semibold">{selectedCountry.name}</span>
+                        </span>
+                        <span className="text-gray-500 font-bold">
+                          {showCountryDropdown ? '▲' : '▼'}
+                        </span>
+                      </button>
+                      
+                      {/* Dropdown */}
+                      {showCountryDropdown && (
+                        <div 
+                          className="absolute z-[100] w-full mt-2 bg-white border-4 border-black max-h-64 overflow-hidden shadow-2xl"
+                          style={{ boxShadow: '6px 6px 0px #000000' }}
+                        >
+                          {/* Search Input */}
+                          <div className="p-3 border-b-2 border-gray-200 bg-gray-50">
+                            <input
+                              type="text"
+                              placeholder="🔍 Search countries..."
+                              value={countrySearch}
+                              onChange={(e) => setCountrySearch(e.target.value)}
+                              className="w-full px-3 py-2 border-2 border-gray-300 focus:ring-0 focus:border-blue-500 text-black placeholder:text-gray-500 font-medium bg-white rounded"
+                              onClick={(e) => e.stopPropagation()}
+                              autoFocus
+                            />
+                          </div>
+                          
+                          {/* Country Options */}
+                          <div className="max-h-48 overflow-y-auto bg-white">
+                            {filteredCountries.map((country) => (
+                              <button
+                                key={country.code}
+                                type="button"
+                                onClick={() => {
+                                  setSelectedCountry(country);
+                                  setShowCountryDropdown(false);
+                                  setCountrySearch('');
+                                }}
+                                className={`w-full px-4 py-3 text-left hover:bg-blue-50 flex items-center gap-3 font-medium transition-all duration-200 border-b border-gray-100 ${
+                                  selectedCountry.code === country.code ? 'bg-blue-100 text-blue-900 border-blue-200' : 'text-gray-900 hover:text-blue-700'
+                                }`}
+                              >
+                                <span className="text-xl flex-shrink-0">{country.flag}</span>
+                                <span className="font-semibold text-gray-900 flex-1">{country.name}</span>
+                                <span className="text-gray-500 text-sm font-medium">({country.code})</span>
+                              </button>
+                            ))}
+                            {filteredCountries.length === 0 && (
+                              <div className="px-4 py-6 text-gray-500 text-center font-medium">
+                                <div className="text-2xl mb-2">🌍</div>
+                                <div>No countries found</div>
+                                <div className="text-sm mt-1">Try a different search term</div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Location Input */}
+                  <div>
+                    <label className="block text-lg font-black text-gray-900 mb-3">
+                      Enter postal/ZIP code or city
                     </label>
                     <input
                       type="text"
-                      placeholder="ZIP code or City, State"
+                      placeholder={selectedCountry.placeholder}
                       value={location}
                       onChange={(e) => setLocation(e.target.value)}
                       className="w-full px-6 py-4 border-4 border-gray-300 focus:ring-0 focus:border-gray-600 text-black placeholder:text-gray-500 font-bold text-lg"
@@ -107,7 +218,7 @@ export default function Home() {
                       disabled={loading}
                     />
                     <p className="text-sm text-gray-600 font-medium mt-2">
-                      Examples: 60540, Chicago IL, Los Angeles CA
+                      Example for {selectedCountry.name}: {selectedCountry.example}
                     </p>
                   </div>
 
@@ -125,7 +236,14 @@ export default function Home() {
                       e.currentTarget.style.boxShadow = '6px 6px 0px #000000';
                     }}
                   >
-                    {loading ? 'Searching...' : 'Find Best Times'}
+                    {loading ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <span className="animate-spin">🌙</span>
+                        Searching {selectedCountry.name}...
+                      </span>
+                    ) : (
+                      'Find Best Times'
+                    )}
                   </button>
                 </div>
               </form>
@@ -150,145 +268,6 @@ export default function Home() {
                 Try Again
               </button>
             </div>
-          )}
-
-          {/* Results */}
-          {data && (
-            <>
-              <div className="text-center mb-8">
-                <h2 className="text-3xl font-black text-gray-900 mb-3">
-                  Best Stargazing Times
-                </h2>
-                <p className="text-xl text-gray-600 font-bold">📍 {data.location}</p>
-              </div>
-
-              {data.windows.length === 0 ? (
-                <div className="text-center">
-                  <div style={{ backgroundColor: '#fff4d6', border: '4px solid #000000', boxShadow: '6px 6px 0px #000000' }} className="p-8">
-                    <h3 className="text-2xl font-black text-yellow-800 mb-3">☁ No Clear Skies</h3>
-                    <p className="text-yellow-700 font-bold text-lg">
-                      Weather conditions aren&apos;t ideal for stargazing in the next 72 hours. Check back later!
-                    </p>
-                  </div>
-                </div>
-              ) : (
-                <div className="space-y-8">
-                  {data.windows.map((window: TimeWindow, index: number) => {
-                    const cloudBadge = getCloudBadge(window.weather.cloud);
-                    const moonTag = getMoonImpactTag(window.moon.impact);
-
-                    return (
-                      <div
-                        key={index}
-                        style={{ backgroundColor: '#f5f2e8', border: '4px solid #000000', boxShadow: '8px 8px 0px #000000' }}
-                        className="p-6 transition-all duration-300"
-                      >
-                        {/* Time Range Header */}
-                        <div className="text-center mb-6 pb-4" style={{ borderBottom: '4px solid #000000' }}>
-                          <h3 className="text-2xl font-black text-gray-900 mb-3">
-                            {window.start} - {window.end}
-                          </h3>
-                          <span 
-                            className={`inline-block px-6 py-3 text-lg font-black ${cloudBadge.color}`} 
-                            style={{ boxShadow: '4px 4px 0px #000000', border: '4px solid #000000' }}
-                          >
-                            {cloudBadge.text} ({window.weather.cloud}%)
-                          </span>
-                        </div>
-
-                        <div className="grid md:grid-cols-2 gap-6">
-                          {/* Weather Section */}
-                          <div style={{ backgroundColor: '#faf8f3', border: '4px solid #000000', boxShadow: '4px 4px 0px #000000' }} className="p-6">
-                            <h4 className="text-xl font-black text-gray-900 mb-4 text-center">🌡 Weather</h4>
-                            <div className="space-y-4">
-                              <div style={{ backgroundColor: '#f0ede5', border: '2px solid #000000' }} className="flex justify-between items-center p-3">
-                                <span className="font-black text-gray-700 text-lg">Temperature:</span>
-                                <span className="font-black text-gray-900 text-xl">{window.weather.temp}°F</span>
-                              </div>
-                              <div style={{ backgroundColor: '#f0ede5', border: '2px solid #000000' }} className="flex justify-between items-center p-3">
-                                <span className="font-black text-gray-700 text-lg">Wind:</span>
-                                <span className="font-black text-gray-900 text-xl">{window.weather.wind} mph</span>
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Moon Section */}
-                          <div style={{ backgroundColor: '#faf8f3', border: '4px solid #000000', boxShadow: '4px 4px 0px #000000' }} className="p-6">
-                            <div className="text-center mb-4">
-                              <h4 className="text-xl font-black text-gray-900">🌙 Moon</h4>
-                            </div>
-                            <div className="text-center mb-4">
-                              <span className={`px-4 py-2 text-sm font-black border-4 border-black ${moonTag}`} style={{ boxShadow: '3px 3px 0px #000000' }}>
-                                {window.moon.impact} Impact
-                              </span>
-                            </div>
-                            <div className="space-y-2 text-center">
-                              <div className="font-black text-gray-900 text-lg">{window.moon.phase}</div>
-                              <div className="font-bold text-gray-700">{window.moon.illum}% illuminated</div>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="grid md:grid-cols-2 gap-6 mt-6">
-                          {/* Planets Section */}
-                          <div style={{ backgroundColor: '#faf8f3', border: '4px solid #000000', boxShadow: '4px 4px 0px #000000' }} className="p-6">
-                            <h4 className="text-xl font-black text-gray-900 mb-4 text-center">● Planets</h4>
-                            {window.planets.length > 0 ? (
-                              <div className="flex flex-wrap gap-3 justify-center">
-                                {window.planets.map((planet: string, i: number) => (
-                                  <span
-                                    key={i}
-                                    style={{ backgroundColor: '#6b83d6', border: '4px solid #000000', boxShadow: '3px 3px 0px #000000' }}
-                                    className="inline-block px-4 py-2 text-white font-black transition-transform hover:translate-x-1 hover:translate-y-1"
-                                  >
-                                    {planet}
-                                  </span>
-                                ))}
-                              </div>
-                            ) : (
-                              <p className="text-gray-500 font-bold text-center italic text-lg">None visible</p>
-                            )}
-                          </div>
-
-                          {/* Stars Section */}
-                          <div style={{ backgroundColor: '#faf8f3', border: '4px solid #000000', boxShadow: '4px 4px 0px #000000' }} className="p-6">
-                            <h4 className="text-xl font-black text-gray-900 mb-4 text-center">★ Stars</h4>
-                            {window.stars.length > 0 ? (
-                              <div className="flex flex-wrap gap-3 justify-center">
-                                {window.stars.map((star: string, i: number) => (
-                                  <span
-                                    key={i}
-                                    style={{ backgroundColor: '#9d6bd6', border: '4px solid #000000', boxShadow: '3px 3px 0px #000000' }}
-                                    className="inline-block px-4 py-2 text-white font-black transition-transform hover:translate-x-1 hover:translate-y-1"
-                                  >
-                                    {star}
-                                  </span>
-                                ))}
-                              </div>
-                            ) : (
-                              <p className="text-gray-500 font-bold text-center italic text-lg">None visible</p>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-
-              <div className="mt-8 text-center">
-                <button
-                  onClick={() => {
-                    setData(null);
-                    setLocation('');
-                  }}
-                  style={{ backgroundColor: '#8b7355', border: '4px solid #000000', boxShadow: '6px 6px 0px #000000' }}
-                  className="text-white px-8 py-4 hover:bg-opacity-90 font-black text-lg transition-all duration-200 transform hover:translate-x-1 hover:translate-y-1"
-                >
-                  Search New Location
-                </button>
-              </div>
-            </>
           )}
         </div>
 
