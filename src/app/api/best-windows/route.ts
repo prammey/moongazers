@@ -49,21 +49,78 @@ const getCachedSkyData = unstable_cache(
   { revalidate: 60 * 60 * 12 } // 12 hours
 );
 
-// Geocoding using US Census
+// Geocoding using US Census with fallback
 async function geocodeLocation(location: string): Promise<{ coordinates: Coordinates; location: string }> {
-  const url = `https://geocoding.geo.census.gov/geocoder/locations/onelineaddress?address=${encodeURIComponent(location)}&benchmark=Public_AR_Current&format=json`;
+  // First try the onelineaddress endpoint
+  let url = `https://geocoding.geo.census.gov/geocoder/locations/onelineaddress?address=${encodeURIComponent(location)}&benchmark=Public_AR_Current&format=json`;
   
-  const response = await fetch(url);
+  let response = await fetch(url);
   if (!response.ok) {
     throw new Error('Geocoding failed');
   }
   
-  const data = await response.json();
+  let data = await response.json();
+  console.log('[Geocoding] First attempt response:', JSON.stringify(data, null, 2));
+  
+  // If no matches and location looks like a ZIP code, try a different approach
+  if (!data.result?.addressMatches?.length && /^\d{5}(-\d{4})?$/.test(location.trim())) {
+    console.log('[Geocoding] Trying ZIP code specific search...');
+    // Try searching for the ZIP code with "USA" appended
+    url = `https://geocoding.geo.census.gov/geocoder/locations/onelineaddress?address=${encodeURIComponent(location + ', USA')}&benchmark=Public_AR_Current&format=json`;
+    
+    response = await fetch(url);
+    if (response.ok) {
+      data = await response.json();
+      console.log('[Geocoding] ZIP code attempt response:', JSON.stringify(data, null, 2));
+    }
+  }
+  
+  // If still no matches, try the address search endpoint
   if (!data.result?.addressMatches?.length) {
-    throw new Error('Location not found');
+    console.log('[Geocoding] Trying address search endpoint...');
+    url = `https://geocoding.geo.census.gov/geocoder/locations/address?street=&city=&state=&zip=${encodeURIComponent(location)}&benchmark=Public_AR_Current&format=json`;
+    
+    response = await fetch(url);
+    if (response.ok) {
+      data = await response.json();
+      console.log('[Geocoding] Address endpoint response:', JSON.stringify(data, null, 2));
+    }
+  }
+  
+  // Check if we have any address matches
+  if (!data.result?.addressMatches?.length) {
+    // As a last resort, try a simple OpenStreetMap Nominatim search (free, no key needed)
+    console.log('[Geocoding] Trying OpenStreetMap fallback...');
+    const nominatimUrl = `https://nominatim.openstreetmap.org/search?format=json&countrycodes=us&limit=1&q=${encodeURIComponent(location)}`;
+    
+    const nominatimResponse = await fetch(nominatimUrl, {
+      headers: {
+        'User-Agent': 'Moongazers-App/1.0'
+      }
+    });
+    
+    if (nominatimResponse.ok) {
+      const nominatimData = await nominatimResponse.json();
+      console.log('[Geocoding] Nominatim response:', nominatimData);
+      
+      if (nominatimData.length > 0) {
+        const place = nominatimData[0];
+        return {
+          coordinates: {
+            lat: parseFloat(place.lat),
+            lng: parseFloat(place.lon)
+          },
+          location: place.display_name
+        };
+      }
+    }
+    
+    throw new Error(`Location not found: ${location}. Please try a more specific address.`);
   }
   
   const match = data.result.addressMatches[0];
+  console.log('[Geocoding] Using match:', match);
+  
   return {
     coordinates: {
       lat: parseFloat(match.coordinates.y),

@@ -148,11 +148,11 @@ export default function Home() {
                       <div className="mb-4 space-y-2">
                         <div className="flex justify-between text-sm">
                           <span className="text-gray-600">Temperature:</span>
-                          <span className="font-medium">{window.weather.temp}°F</span>
+                          <span className="font-medium text-gray-800">{window.weather.temp}°F</span>
                         </div>
                         <div className="flex justify-between text-sm">
                           <span className="text-gray-600">Wind:</span>
-                          <span className="font-medium">{window.weather.wind} mph</span>
+                          <span className="font-medium text-gray-800">{window.weather.wind} mph</span>
                         </div>
                       </div>
 
@@ -165,7 +165,7 @@ export default function Home() {
                           </span>
                         </div>
                         <div className="text-sm">
-                          <span className="font-medium">{window.moon.phase}</span>
+                          <span className="font-medium text-gray-800">{window.moon.phase}</span>
                           <span className="text-gray-600"> ({window.moon.illum}% illuminated)</span>
                         </div>
                       </div>
