@@ -3,10 +3,12 @@
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useState, useEffect, Suspense } from 'react';
 import { BestWindowsResponse, TimeWindow } from '@/types';
+import { useTheme } from '@/contexts/ThemeContext';
 
 function ResultsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { theme } = useTheme();
   const [data, setData] = useState<BestWindowsResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -124,14 +126,21 @@ function ResultsContent() {
 
   if (loading) {
     return (
-      <div className="min-h-screen" style={{ backgroundColor: '#fef7ed' }}>
+      <div 
+        className="min-h-screen transition-colors duration-300" 
+        style={{ backgroundColor: theme === 'light' ? '#fef7ed' : '#1a1a1a' }}
+      >
         <div className="max-w-6xl mx-auto px-6 py-12">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-32 w-32 border-8 border-gray-300 border-t-gray-900 mx-auto mb-8"></div>
-            <h2 className="text-3xl font-black text-gray-900 mb-4">
+            <div className={`animate-spin rounded-full h-32 w-32 border-8 mx-auto mb-8 ${
+              theme === 'light' 
+                ? 'border-gray-300 border-t-gray-900' 
+                : 'border-gray-600 border-t-gray-300'
+            }`}></div>
+            <h2 className={`text-3xl font-black mb-4 ${theme === 'light' ? 'text-gray-900' : 'text-white'}`}>
               Finding Perfect Stargazing Times...
             </h2>
-            <p className="text-xl text-gray-600 font-bold">
+            <p className={`text-xl font-bold ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'}`}>
               {getCountryFlag(country || '')} Analyzing conditions for {location}
             </p>
           </div>
@@ -142,23 +151,38 @@ function ResultsContent() {
 
   if (error) {
     return (
-      <div className="min-h-screen" style={{ backgroundColor: '#fef7ed' }}>
+      <div 
+        className="min-h-screen transition-colors duration-300" 
+        style={{ backgroundColor: theme === 'light' ? '#fef7ed' : '#1a1a1a' }}
+      >
         <div className="max-w-6xl mx-auto px-6 py-12">
           <div className="text-center">
             <div className="text-6xl mb-6">❌</div>
-            <h2 className="text-3xl font-black text-red-600 mb-4">Oops! Something went wrong</h2>
-            <p className="text-xl text-gray-600 font-bold mb-8">{error}</p>
+            <h2 className={`text-3xl font-black mb-4 ${theme === 'light' ? 'text-red-600' : 'text-red-400'}`}>
+              Oops! Something went wrong
+            </h2>
+            <p className={`text-xl font-bold mb-8 ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'}`}>
+              {error}
+            </p>
             <div className="space-x-4">
               <button
                 onClick={() => router.push('/')}
-                style={{ backgroundColor: '#8b7355', border: '4px solid #000000', boxShadow: '6px 6px 0px #000000' }}
+                style={{ 
+                  backgroundColor: theme === 'light' ? '#8b7355' : '#6b5b47', 
+                  border: theme === 'light' ? '4px solid #000000' : '4px solid #666666', 
+                  boxShadow: '6px 6px 0px #000000' 
+                }}
                 className="text-white px-8 py-4 hover:bg-opacity-90 font-black text-lg transition-all duration-200 transform hover:translate-x-1 hover:translate-y-1"
               >
                 Back to Search
               </button>
               <button
                 onClick={retryFetch}
-                style={{ backgroundColor: '#4a90e2', border: '4px solid #000000', boxShadow: '6px 6px 0px #000000' }}
+                style={{ 
+                  backgroundColor: theme === 'light' ? '#4a90e2' : '#3a7bd5', 
+                  border: theme === 'light' ? '4px solid #000000' : '4px solid #666666', 
+                  boxShadow: '6px 6px 0px #000000' 
+                }}
                 className="text-white px-8 py-4 hover:bg-opacity-90 font-black text-lg transition-all duration-200 transform hover:translate-x-1 hover:translate-y-1"
               >
                 Try Again
@@ -172,13 +196,22 @@ function ResultsContent() {
 
   if (!data) {
     return (
-      <div className="min-h-screen" style={{ backgroundColor: '#fef7ed' }}>
+      <div 
+        className="min-h-screen transition-colors duration-300" 
+        style={{ backgroundColor: theme === 'light' ? '#fef7ed' : '#1a1a1a' }}
+      >
         <div className="max-w-6xl mx-auto px-6 py-12">
           <div className="text-center">
-            <h2 className="text-3xl font-black text-gray-900 mb-4">No Data Available</h2>
+            <h2 className={`text-3xl font-black mb-4 ${theme === 'light' ? 'text-gray-900' : 'text-white'}`}>
+              No Data Available
+            </h2>
             <button
               onClick={() => router.push('/')}
-              style={{ backgroundColor: '#8b7355', border: '4px solid #000000', boxShadow: '6px 6px 0px #000000' }}
+              style={{ 
+                backgroundColor: theme === 'light' ? '#8b7355' : '#6b5b47', 
+                border: theme === 'light' ? '4px solid #000000' : '4px solid #666666', 
+                boxShadow: '6px 6px 0px #000000' 
+              }}
               className="text-white px-8 py-4 hover:bg-opacity-90 font-black text-lg transition-all duration-200 transform hover:translate-x-1 hover:translate-y-1"
             >
               Back to Search
@@ -190,13 +223,20 @@ function ResultsContent() {
   }
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#fef7ed' }}>
+    <div 
+      className="min-h-screen transition-colors duration-300" 
+      style={{ backgroundColor: theme === 'light' ? '#fef7ed' : '#1a1a1a' }}
+    >
       <div className="max-w-6xl mx-auto px-6 py-12">
         {/* Header with Back Button */}
         <div className="mb-8">
           <button
             onClick={() => router.push('/')}
-            style={{ backgroundColor: '#8b7355', border: '4px solid #000000', boxShadow: '4px 4px 0px #000000' }}
+            style={{ 
+              backgroundColor: theme === 'light' ? '#8b7355' : '#6b5b47', 
+              border: theme === 'light' ? '4px solid #000000' : '4px solid #666666', 
+              boxShadow: '4px 4px 0px #000000' 
+            }}
             className="text-white px-6 py-3 hover:bg-opacity-90 font-black text-base transition-all duration-200 transform hover:translate-x-1 hover:translate-y-1 mb-6"
           >
             ← Back to Search
@@ -205,10 +245,10 @@ function ResultsContent() {
 
         {/* Results Header */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-black text-gray-900 mb-4">
+          <h1 className={`text-4xl font-black mb-4 ${theme === 'light' ? 'text-gray-900' : 'text-white'}`}>
             Best Stargazing Times
           </h1>
-          <p className="text-2xl text-gray-600 font-bold flex items-center justify-center gap-3">
+          <p className={`text-2xl font-bold flex items-center justify-center gap-3 ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'}`}>
             <span className="text-3xl">{getCountryFlag(country || '')}</span>
             {data.location}
           </p>
@@ -217,9 +257,18 @@ function ResultsContent() {
         {/* Results Content */}
         {data.windows.length === 0 ? (
           <div className="text-center">
-            <div style={{ backgroundColor: '#fff4d6', border: '4px solid #000000', boxShadow: '6px 6px 0px #000000' }} className="p-8">
-              <h3 className="text-2xl font-black text-yellow-800 mb-3">☁ No Clear Skies</h3>
-              <p className="text-yellow-700 font-bold text-lg">
+            <div 
+              style={{ 
+                backgroundColor: theme === 'light' ? '#fff4d6' : '#2d2a1f', 
+                border: theme === 'light' ? '4px solid #000000' : '4px solid #666666', 
+                boxShadow: '6px 6px 0px #000000' 
+              }} 
+              className="p-8"
+            >
+              <h3 className={`text-2xl font-black mb-3 ${theme === 'light' ? 'text-yellow-800' : 'text-yellow-400'}`}>
+                ☁ No Clear Skies
+              </h3>
+              <p className={`font-bold text-lg ${theme === 'light' ? 'text-yellow-700' : 'text-yellow-300'}`}>
                 Weather conditions aren&apos;t ideal for stargazing in the next 72 hours. Check back later!
               </p>
             </div>
@@ -233,60 +282,128 @@ function ResultsContent() {
               return (
                 <div
                   key={index}
-                  style={{ backgroundColor: '#f5f2e8', border: '4px solid #000000', boxShadow: '8px 8px 0px #000000' }}
+                  style={{ 
+                    backgroundColor: theme === 'light' ? '#f5f2e8' : '#2a2a2a', 
+                    border: theme === 'light' ? '4px solid #000000' : '4px solid #666666', 
+                    boxShadow: '8px 8px 0px #000000' 
+                  }}
                   className="p-6 transition-all duration-300 hover:transform hover:translate-x-1 hover:translate-y-1"
                 >
                   {/* Time Range Header */}
-                  <div className="text-center mb-6 pb-4" style={{ borderBottom: '4px solid #000000' }}>
-                    <h3 className="text-xl font-black text-gray-900 mb-3">
+                  <div 
+                    className="text-center mb-6 pb-4" 
+                    style={{ borderBottom: theme === 'light' ? '4px solid #000000' : '4px solid #666666' }}
+                  >
+                    <h3 className={`text-xl font-black mb-3 ${theme === 'light' ? 'text-gray-900' : 'text-white'}`}>
                       {window.start} - {window.end}
                     </h3>
                     <span 
                       className={`inline-block px-4 py-2 text-sm font-black ${cloudBadge.color}`} 
-                      style={{ boxShadow: '3px 3px 0px #000000', border: '3px solid #000000' }}
+                      style={{ 
+                        boxShadow: '3px 3px 0px #000000', 
+                        border: theme === 'light' ? '3px solid #000000' : '3px solid #666666' 
+                      }}
                     >
                       {cloudBadge.text} ({window.weather.cloud}%)
                     </span>
                   </div>
 
                   {/* Weather Section */}
-                  <div style={{ backgroundColor: '#faf8f3', border: '3px solid #000000', boxShadow: '3px 3px 0px #000000' }} className="p-4 mb-4">
-                    <h4 className="text-lg font-black text-gray-900 mb-3 text-center">🌡 Weather</h4>
+                  <div 
+                    style={{ 
+                      backgroundColor: theme === 'light' ? '#faf8f3' : '#333333', 
+                      border: theme === 'light' ? '3px solid #000000' : '3px solid #666666', 
+                      boxShadow: '3px 3px 0px #000000' 
+                    }} 
+                    className="p-4 mb-4"
+                  >
+                    <h4 className={`text-lg font-black mb-3 text-center ${theme === 'light' ? 'text-gray-900' : 'text-white'}`}>
+                      🌡 Weather
+                    </h4>
                     <div className="space-y-3">
-                      <div style={{ backgroundColor: '#f0ede5', border: '2px solid #000000' }} className="flex justify-between items-center p-3">
-                        <span className="font-black text-gray-700">Temp:</span>
-                        <span className="font-black text-gray-900">{window.weather.temp}°F</span>
+                      <div 
+                        style={{ 
+                          backgroundColor: theme === 'light' ? '#f0ede5' : '#404040', 
+                          border: theme === 'light' ? '2px solid #000000' : '2px solid #666666' 
+                        }} 
+                        className="flex justify-between items-center p-3"
+                      >
+                        <span className={`font-black ${theme === 'light' ? 'text-gray-700' : 'text-gray-300'}`}>
+                          Temp:
+                        </span>
+                        <span className={`font-black ${theme === 'light' ? 'text-gray-900' : 'text-white'}`}>
+                          {window.weather.temp}°F
+                        </span>
                       </div>
-                      <div style={{ backgroundColor: '#f0ede5', border: '2px solid #000000' }} className="flex justify-between items-center p-3">
-                        <span className="font-black text-gray-700">Wind:</span>
-                        <span className="font-black text-gray-900">{window.weather.wind} mph</span>
+                      <div 
+                        style={{ 
+                          backgroundColor: theme === 'light' ? '#f0ede5' : '#404040', 
+                          border: theme === 'light' ? '2px solid #000000' : '2px solid #666666' 
+                        }} 
+                        className="flex justify-between items-center p-3"
+                      >
+                        <span className={`font-black ${theme === 'light' ? 'text-gray-700' : 'text-gray-300'}`}>
+                          Wind:
+                        </span>
+                        <span className={`font-black ${theme === 'light' ? 'text-gray-900' : 'text-white'}`}>
+                          {window.weather.wind} mph
+                        </span>
                       </div>
                     </div>
                   </div>
 
                   {/* Moon Section */}
-                  <div style={{ backgroundColor: '#faf8f3', border: '3px solid #000000', boxShadow: '3px 3px 0px #000000' }} className="p-4 mb-4">
-                    <h4 className="text-lg font-black text-gray-900 text-center mb-3">🌙 Moon</h4>
+                  <div 
+                    style={{ 
+                      backgroundColor: theme === 'light' ? '#faf8f3' : '#333333', 
+                      border: theme === 'light' ? '3px solid #000000' : '3px solid #666666', 
+                      boxShadow: '3px 3px 0px #000000' 
+                    }} 
+                    className="p-4 mb-4"
+                  >
+                    <h4 className={`text-lg font-black text-center mb-3 ${theme === 'light' ? 'text-gray-900' : 'text-white'}`}>
+                      🌙 Moon
+                    </h4>
                     <div className="text-center mb-3">
-                      <span className={`px-3 py-1 text-xs font-black border-3 border-black ${moonTag}`} style={{ boxShadow: '2px 2px 0px #000000' }}>
+                      <span 
+                        className={`px-3 py-1 text-xs font-black border-3 border-black ${moonTag}`} 
+                        style={{ boxShadow: '2px 2px 0px #000000' }}
+                      >
                         {window.moon.impact} Impact
                       </span>
                     </div>
                     <div className="space-y-1 text-center">
-                      <div className="font-black text-gray-900">{window.moon.phase}</div>
-                      <div className="font-bold text-gray-700 text-sm">{window.moon.illum}% illuminated</div>
+                      <div className={`font-black ${theme === 'light' ? 'text-gray-900' : 'text-white'}`}>
+                        {window.moon.phase}
+                      </div>
+                      <div className={`font-bold text-sm ${theme === 'light' ? 'text-gray-700' : 'text-gray-300'}`}>
+                        {window.moon.illum}% illuminated
+                      </div>
                     </div>
                   </div>
 
                   {/* Planets Section */}
-                  <div style={{ backgroundColor: '#faf8f3', border: '3px solid #000000', boxShadow: '3px 3px 0px #000000' }} className="p-4 mb-4">
-                    <h4 className="text-lg font-black text-gray-900 mb-3 text-center">● Planets</h4>
+                  <div 
+                    style={{ 
+                      backgroundColor: theme === 'light' ? '#faf8f3' : '#333333', 
+                      border: theme === 'light' ? '3px solid #000000' : '3px solid #666666', 
+                      boxShadow: '3px 3px 0px #000000' 
+                    }} 
+                    className="p-4 mb-4"
+                  >
+                    <h4 className={`text-lg font-black mb-3 text-center ${theme === 'light' ? 'text-gray-900' : 'text-white'}`}>
+                      ● Planets
+                    </h4>
                     {window.planets.length > 0 ? (
                       <div className="flex flex-wrap gap-2 justify-center">
                         {window.planets.map((planet: string, i: number) => (
                           <span
                             key={i}
-                            style={{ backgroundColor: '#6b83d6', border: '2px solid #000000', boxShadow: '2px 2px 0px #000000' }}
+                            style={{ 
+                              backgroundColor: '#6b83d6', 
+                              border: theme === 'light' ? '2px solid #000000' : '2px solid #666666', 
+                              boxShadow: '2px 2px 0px #000000' 
+                            }}
                             className="inline-block px-3 py-1 text-white font-black text-sm"
                           >
                             {planet}
@@ -294,19 +411,34 @@ function ResultsContent() {
                         ))}
                       </div>
                     ) : (
-                      <p className="text-gray-500 font-bold text-center italic">None visible</p>
+                      <p className={`font-bold text-center italic ${theme === 'light' ? 'text-gray-500' : 'text-gray-400'}`}>
+                        None visible
+                      </p>
                     )}
                   </div>
 
                   {/* Stars Section */}
-                  <div style={{ backgroundColor: '#faf8f3', border: '3px solid #000000', boxShadow: '3px 3px 0px #000000' }} className="p-4">
-                    <h4 className="text-lg font-black text-gray-900 mb-3 text-center">★ Stars</h4>
+                  <div 
+                    style={{ 
+                      backgroundColor: theme === 'light' ? '#faf8f3' : '#333333', 
+                      border: theme === 'light' ? '3px solid #000000' : '3px solid #666666', 
+                      boxShadow: '3px 3px 0px #000000' 
+                    }} 
+                    className="p-4"
+                  >
+                    <h4 className={`text-lg font-black mb-3 text-center ${theme === 'light' ? 'text-gray-900' : 'text-white'}`}>
+                      ★ Stars
+                    </h4>
                     {window.stars.length > 0 ? (
                       <div className="flex flex-wrap gap-2 justify-center">
                         {window.stars.map((star: string, i: number) => (
                           <span
                             key={i}
-                            style={{ backgroundColor: '#9d6bd6', border: '2px solid #000000', boxShadow: '2px 2px 0px #000000' }}
+                            style={{ 
+                              backgroundColor: '#9d6bd6', 
+                              border: theme === 'light' ? '2px solid #000000' : '2px solid #666666', 
+                              boxShadow: '2px 2px 0px #000000' 
+                            }}
                             className="inline-block px-3 py-1 text-white font-black text-sm"
                           >
                             {star}
@@ -314,7 +446,9 @@ function ResultsContent() {
                         ))}
                       </div>
                     ) : (
-                      <p className="text-gray-500 font-bold text-center italic">None visible</p>
+                      <p className={`font-bold text-center italic ${theme === 'light' ? 'text-gray-500' : 'text-gray-400'}`}>
+                        None visible
+                      </p>
                     )}
                   </div>
                 </div>
@@ -336,7 +470,7 @@ function ResultsContent() {
 
         {/* Footer */}
         <div className="text-center mt-12">
-          <p className="text-sm text-gray-600 font-medium">
+          <p className={`text-sm font-medium ${theme === 'light' ? 'text-gray-600' : 'text-gray-400'}`}>
             Data provided by Astrospheric API and Open-Meteo.<br/>
             Times shown are for the next 72 hours in your local timezone.
           </p>
@@ -347,15 +481,24 @@ function ResultsContent() {
 }
 
 function LoadingFallback() {
+  const { theme } = useTheme();
+  
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#fef7ed' }}>
+    <div 
+      className="min-h-screen transition-colors duration-300" 
+      style={{ backgroundColor: theme === 'light' ? '#fef7ed' : '#1a1a1a' }}
+    >
       <div className="max-w-6xl mx-auto px-6 py-12">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-8 border-gray-300 border-t-gray-900 mx-auto mb-8"></div>
-          <h2 className="text-3xl font-black text-gray-900 mb-4">
+          <div className={`animate-spin rounded-full h-32 w-32 border-8 mx-auto mb-8 ${
+            theme === 'light' 
+              ? 'border-gray-300 border-t-gray-900' 
+              : 'border-gray-600 border-t-gray-300'
+          }`}></div>
+          <h2 className={`text-3xl font-black mb-4 ${theme === 'light' ? 'text-gray-900' : 'text-white'}`}>
             Loading Results...
           </h2>
-          <p className="text-xl text-gray-600 font-bold">
+          <p className={`text-xl font-bold ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'}`}>
             Please wait while we prepare your stargazing data
           </p>
         </div>

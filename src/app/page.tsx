@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTheme } from '@/contexts/ThemeContext';
 
 // Country data with common postal/ZIP code formats
 const COUNTRIES = [
@@ -34,6 +35,7 @@ const COUNTRIES = [
 
 export default function Home() {
   const router = useRouter();
+  const { theme } = useTheme();
   const [location, setLocation] = useState('');
   const [selectedCountry, setSelectedCountry] = useState(COUNTRIES[0]); // Default to US
   const [countrySearch, setCountrySearch] = useState('');
@@ -94,33 +96,45 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#fff2cc' }}>
+    <div 
+      className="min-h-screen transition-colors duration-300" 
+      style={{ 
+        backgroundColor: theme === 'light' ? '#fff2cc' : '#1a1a1a'
+      }}
+    >
       <div className="container mx-auto px-6 py-12 max-w-4xl">
         
         {/* Progress Bar */}
         {loading && (
           <div className="mb-8">
             <div className="flex justify-between items-center mb-3">
-              <span className="text-sm font-bold text-gray-700">Searching...</span>
-              <span className="text-sm font-bold text-gray-600">Finding best times</span>
+              <span className={`text-sm font-bold ${theme === 'light' ? 'text-gray-700' : 'text-gray-300'}`}>Searching...</span>
+              <span className={`text-sm font-bold ${theme === 'light' ? 'text-gray-600' : 'text-gray-400'}`}>Finding best times</span>
             </div>
-            <div className="w-full bg-gray-300 h-3 shadow-lg">
-              <div className="bg-gray-700 h-3 w-2/3 animate-pulse shadow-inner"></div>
+            <div className={`w-full h-3 shadow-lg ${theme === 'light' ? 'bg-gray-300' : 'bg-gray-600'}`}>
+              <div className={`h-3 w-2/3 animate-pulse shadow-inner ${theme === 'light' ? 'bg-gray-700' : 'bg-gray-300'}`}></div>
             </div>
           </div>
         )}
 
         {/* Main Content Card */}
-        <div style={{ backgroundColor: '#f8f6f0', boxShadow: '8px 8px 0px #000000', border: '4px solid #000000' }} className="p-8 mb-8">
+        <div 
+          style={{ 
+            backgroundColor: theme === 'light' ? '#f8f6f0' : '#2d2d2d', 
+            boxShadow: theme === 'light' ? '8px 8px 0px #000000' : '8px 8px 0px #000000', 
+            border: theme === 'light' ? '4px solid #000000' : '4px solid #666666' 
+          }} 
+          className="p-8 mb-8 transition-all duration-300"
+        >
           
           {!error && (
             <>
               {/* Header */}
               <div className="text-center mb-8">
-                <h1 className="text-4xl font-black text-gray-900 mb-4">
+                <h1 className={`text-4xl font-black mb-4 ${theme === 'light' ? 'text-gray-900' : 'text-white'}`}>
                   Moongazers
                 </h1>
-                <p className="text-xl text-gray-600 font-bold">
+                <p className={`text-xl font-bold ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'}`}>
                   Find the best stargazing times in your area
                 </p>
               </div>
@@ -131,22 +145,26 @@ export default function Home() {
                   
                   {/* Country Selection */}
                   <div>
-                    <label className="block text-lg font-black text-gray-900 mb-3">
+                    <label className={`block text-lg font-black mb-3 ${theme === 'light' ? 'text-gray-900' : 'text-white'}`}>
                       Select your country
                     </label>
                     <div className="relative" ref={dropdownRef}>
                       <button
                         type="button"
                         onClick={() => setShowCountryDropdown(!showCountryDropdown)}
-                        className="w-full px-6 py-4 border-4 border-gray-300 focus:ring-0 focus:border-gray-600 text-black font-bold text-lg text-left flex items-center justify-between bg-white hover:bg-gray-50 transition-colors"
+                        className={`w-full px-6 py-4 border-4 focus:ring-0 font-bold text-lg text-left flex items-center justify-between transition-colors ${
+                          theme === 'light' 
+                            ? 'border-gray-300 focus:border-gray-600 text-black bg-white hover:bg-gray-50' 
+                            : 'border-gray-600 focus:border-gray-400 text-white bg-gray-800 hover:bg-gray-700'
+                        }`}
                         style={{ boxShadow: 'inset 4px 4px 8px rgba(0,0,0,0.2)' }}
                         disabled={loading}
                       >
                         <span className="flex items-center gap-3">
                           <span className="text-2xl">{selectedCountry.flag}</span>
-                          <span className="text-gray-900 font-semibold">{selectedCountry.name}</span>
+                          <span className={`font-semibold ${theme === 'light' ? 'text-gray-900' : 'text-white'}`}>{selectedCountry.name}</span>
                         </span>
-                        <span className="text-gray-500 font-bold">
+                        <span className={`font-bold ${theme === 'light' ? 'text-gray-500' : 'text-gray-400'}`}>
                           {showCountryDropdown ? '▲' : '▼'}
                         </span>
                       </button>
@@ -154,17 +172,29 @@ export default function Home() {
                       {/* Dropdown */}
                       {showCountryDropdown && (
                         <div 
-                          className="absolute z-[100] w-full mt-2 bg-white border-4 border-black max-h-64 overflow-hidden shadow-2xl"
+                          className={`absolute z-[100] w-full mt-2 border-4 max-h-64 overflow-hidden shadow-2xl ${
+                            theme === 'light' 
+                              ? 'bg-white border-black' 
+                              : 'bg-gray-800 border-gray-600'
+                          }`}
                           style={{ boxShadow: '6px 6px 0px #000000' }}
                         >
                           {/* Search Input */}
-                          <div className="p-3 border-b-2 border-gray-200 bg-gray-50">
+                          <div className={`p-3 border-b-2 ${
+                            theme === 'light' 
+                              ? 'border-gray-200 bg-gray-50' 
+                              : 'border-gray-600 bg-gray-700'
+                          }`}>
                             <input
                               type="text"
                               placeholder="🔍 Search countries..."
                               value={countrySearch}
                               onChange={(e) => setCountrySearch(e.target.value)}
-                              className="w-full px-3 py-2 border-2 border-gray-300 focus:ring-0 focus:border-blue-500 text-black placeholder:text-gray-500 font-medium bg-white rounded"
+                              className={`w-full px-3 py-2 border-2 focus:ring-0 font-medium rounded ${
+                                theme === 'light'
+                                  ? 'border-gray-300 focus:border-blue-500 text-black placeholder:text-gray-500 bg-white'
+                                  : 'border-gray-600 focus:border-blue-400 text-white placeholder:text-gray-400 bg-gray-900'
+                              }`}
                               onClick={(e) => e.stopPropagation()}
                               autoFocus
                             />
