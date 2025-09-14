@@ -30,3 +30,31 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Kosugi Maru helper class */
+.kosugi-maru {
+  font-family: 'Kosugi Maru', sans-serif;
+}
+
+/* Custom scrollbar styles for the documentation modal */
+.doc-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(100,100,100,0.5) rgba(240,240,240,0.8);
+}
+
+/* WebKit-based browsers */
+.doc-scroll::-webkit-scrollbar {
+  width: 10px;
+}
+.doc-scroll::-webkit-scrollbar-track {
+  background: rgba(240,240,240,0.9);
+  border-radius: 8px;
+}
+.doc-scroll::-webkit-scrollbar-thumb {
+  background-color: rgba(80,80,80,0.35);
+  border-radius: 8px;
+  border: 2px solid rgba(240,240,240,0.9);
+}
+.doc-scroll::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(80,80,80,0.55);
+}

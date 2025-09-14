@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useWeather } from '@/contexts/WeatherContext';
 import CurrentWeather from '@/components/CurrentWeather';
 import ToggleSwitch from '@/components/ToggleSwitch';
@@ -29,6 +29,21 @@ export default function Home() {
     skyQuality: string;
   } | null>(null);
   const [showContactDialog, setShowContactDialog] = useState(false);
+  const [showDocDialog, setShowDocDialog] = useState(false);
+  
+  // Handle Escape key for Doc modal
+  useEffect(() => {
+    if (!showDocDialog) return;
+    
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setShowDocDialog(false);
+      }
+    };
+    
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [showDocDialog]);
   
   
   // Removed country selection functionality for simpler input
@@ -92,7 +107,15 @@ export default function Home() {
       <CurrentWeather weatherData={currentWeatherData || undefined} />
 
       {/* Rocket GIF - Top Right */}
-      <div className="absolute top-2 right-4 sm:top-3 sm:right-6 lg:top-4 lg:right-8">
+      <div className="absolute top-2 right-4 sm:top-3 sm:right-6 lg:top-4 lg:right-8 flex items-center gap-3">
+        <button
+          type="button"
+          onClick={() => setShowDocDialog(true)}
+          className="text-sm bg-white border border-gray-300 px-3 py-1 rounded-md shadow-sm hover:shadow-md focus:outline-none transition-shadow kosugi-maru text-black text-bold cursor-pointer"
+          style={{ fontFamily: "'Kosugi Maru', sans-serif" }}
+        >
+          Doc
+        </button>
         <Image
           src="/rocket.gif"
           alt="Rocket"
@@ -351,6 +374,115 @@ export default function Home() {
                   OK
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Doc Modal */}
+      {showDocDialog && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/20"
+            onClick={() => setShowDocDialog(false)}
+          />
+
+          {/* Modal */}
+          <div className="relative bg-white rounded-lg border border-gray-200 shadow-lg w-full max-w-4xl max-h-[85vh] overflow-hidden">
+            {/* Header */}
+            <div className="flex items-center justify-between p-4 border-b border-gray-100" style={{ boxShadow: '0 6px 8px -6px rgba(0,0,0,0.25)' }}>
+              <h3 className="text-lg font-semibold text-gray-900">Documentation</h3>
+              <button
+                type="button"
+                onClick={() => setShowDocDialog(false)}
+                aria-label="Close documentation"
+                className="w-9 h-9 flex items-center justify-center bg-red-600 text-white font-bold transition-shadow hover:bg-red-700 cursor-pointer"
+                style={{ borderRadius: '6px', boxShadow: '0 2px 6px rgba(0,0,0,0.15)' }}
+              >
+                <span style={{ lineHeight: 0 }}>✕</span>
+              </button>
+            </div>
+
+            {/* Scrollable Content */}
+            <div className="p-6 overflow-auto max-h-[75vh] prose prose-sm max-w-none doc-scroll">
+              <h2 className="text-xl font-bold mb-4 text-gray-900">How the app chooses the best nights to stargaze</h2>
+              
+              <h3 className="text-lg font-semibold mb-3 text-gray-800">Overview</h3>
+              <p className="mb-4 text-gray-700">
+                This document explains the server-side API used by the Moongazers app, what data is fetched from external providers, 
+                how it&apos;s processed, cached, and where the results are used in the frontend.
+              </p>
+
+              <h3 className="text-lg font-semibold mb-3 text-gray-800">Primary API endpoint</h3>
+              <ul className="mb-4 text-gray-700">
+                <li><strong>POST /api/best-windows</strong></li>
+                <li><strong>Purpose:</strong> Accepts a location string (US ZIP or global place), geocodes it to coordinates, fetches weather and sky data, scores candidate night-time windows for stargazing, and returns the best windows and current weather summary.</li>
+                <li><strong>Input:</strong> JSON {`{ location: string }`}</li>
+                <li><strong>Output:</strong> JSON with location, coordinates, currentWeather, and windows array</li>
+              </ul>
+
+              <h3 className="text-lg font-semibold mb-3 text-gray-800">How It Works - Step by Step</h3>
+              <ol className="mb-4 text-gray-700 space-y-2">
+                <li><strong>1. Geocoding:</strong> Your ZIP code or location is converted to latitude/longitude coordinates using US Census (for US ZIP codes) or OpenStreetMap Nominatim (for international locations).</li>
+                <li><strong>2. Weather Data:</strong> Hourly weather data is fetched from Astrospheric (primary) or Open-Meteo (fallback), including cloud cover, temperature, and wind speed.</li>
+                <li><strong>3. Astronomical Calculations:</strong> Moon phase, illumination percentage, and visibility are calculated using the Astronomy Engine.</li>
+                <li><strong>4. Time Window Scoring:</strong> Each 3-hour nighttime window gets a visibility score based on cloud cover and moon interference.</li>
+                <li><strong>5. Ranking & Selection:</strong> Windows are ranked by score and the top results are returned with detailed information.</li>
+              </ol>
+
+              <h3 className="text-lg font-semibold mb-3 text-gray-800">Scoring Logic</h3>
+              <p className="mb-2 text-gray-700">Each time window gets a visibility score calculated as:</p>
+              <ul className="mb-4 text-gray-700">
+                <li><strong>Base Score:</strong> 1 - (cloudCover / 100) — lower cloud cover = higher score</li>
+                <li><strong>Moon Penalty:</strong> If moon is visible and ≥60% illuminated, score is reduced by 0.2</li>
+                <li><strong>Threshold:</strong> Only windows with score ≥0.6 are considered &quot;good&quot; for stargazing</li>
+              </ul>
+
+              <h3 className="text-lg font-semibold mb-3 text-gray-800">Weather Data Sources</h3>
+              <ul className="mb-4 text-gray-700">
+                <li><strong>Primary:</strong> Astrospheric API (astronomy-focused weather data)</li>
+                <li><strong>Fallback:</strong> Open-Meteo (free weather service)</li>
+                <li><strong>Data Used:</strong> Hourly cloud cover, temperature, wind speed, plus sunrise/sunset times</li>
+              </ul>
+
+              <h3 className="text-lg font-semibold mb-3 text-gray-800">Caching Strategy</h3>
+              <p className="mb-4 text-gray-700">
+                To improve performance and reduce external API calls, data is cached with different durations:
+                geocoding (long-term), weather forecasts (6 hours), and sky data (12 hours).
+              </p>
+
+              <h3 className="text-lg font-semibold mb-3 text-gray-800">Cloud Coverage Labels</h3>
+              <p className="mb-2 text-gray-700">Cloud cover percentages are converted to user-friendly labels:</p>
+              <ul className="mb-4 text-gray-700">
+                <li><strong>0-10%:</strong> No Cloud Coverage</li>
+                <li><strong>11-30%:</strong> Low Cloud Coverage</li>
+                <li><strong>31-60%:</strong> Medium Cloud Coverage</li>
+                <li><strong>61-100%:</strong> High Cloud Coverage</li>
+              </ul>
+
+              <h3 className="text-lg font-semibold mb-3 text-gray-800">What You See in Results</h3>
+              <p className="mb-2 text-gray-700">Each recommended time window includes:</p>
+              <ul className="mb-4 text-gray-700">
+                <li><strong>Time Range:</strong> Start and end times for optimal viewing</li>
+                <li><strong>Weather:</strong> Cloud coverage, temperature, and wind conditions</li>
+                <li><strong>Moon Info:</strong> Phase, illumination percentage, and impact on visibility</li>
+                <li><strong>Visible Objects:</strong> Lists of planets and bright stars you can expect to see</li>
+              </ul>
+
+              <h3 className="text-lg font-semibold mb-3 text-gray-800">Error Handling</h3>
+              <p className="mb-4 text-gray-700">
+                The system includes multiple fallback mechanisms: if the primary weather service fails, it switches to the backup service. 
+                If US geocoding fails, it tries international geocoding. All errors are converted to user-friendly messages.
+              </p>
+
+              <h3 className="text-lg font-semibold mb-3 text-gray-800">Technical Notes</h3>
+              <ul className="mb-4 text-gray-700">
+                <li>Built with Next.js 15 App Router and TypeScript</li>
+                <li>Uses server-side caching with revalidation</li>
+                <li>Moon illumination values are clamped to 0-100% range</li>
+                <li>Responsive design works on mobile and desktop</li>
+              </ul>
             </div>
           </div>
         </div>
