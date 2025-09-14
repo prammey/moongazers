@@ -63,7 +63,18 @@ export default function Home() {
         });
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      const errorMessage = err instanceof Error ? err.message : 'An error occurred';
+      
+      // Check if the error is related to ZIP code validation
+      if (errorMessage.toLowerCase().includes('location not found') || 
+          errorMessage.toLowerCase().includes('not found') ||
+          errorMessage.toLowerCase().includes('invalid') ||
+          errorMessage.toLowerCase().includes('zip') ||
+          errorMessage.toLowerCase().includes('postal')) {
+        setError('Please check the provided ZIP code. Make sure it\'s a valid US ZIP code (e.g., 10001 or 90210).');
+      } else {
+        setError(errorMessage);
+      }
     } finally {
       setLoading(false);
     }
