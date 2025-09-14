@@ -110,21 +110,27 @@ export default function Home() {
         <div className="w-full mb-16 sm:mb-20 md:mb-24">
           {/* Moon Image - positioned higher and fixed size */}
           <div className="flex justify-center">
-            <div className="relative">
+            <div className="relative group">
               <Image
-                src="/moon.png"
-                alt="Moon"
-                width={128}
-                height={128}
-                className="w-32 h-32 object-contain"
+              src="/moon.png"
+              alt="Moon"
+              width={128}
+              height={128}
+              className="w-32 h-32 object-contain cursor-pointer hover:scale-105 transition-transform"
               />
+              {/* Tooltip */}
+              <div className="absolute top-full right-0 mt-2 px-3 py-1 bg-white border border-gray-300 text-gray-800 text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap shadow-lg">
+              clicked by me :)
+              {/* Arrow */}
+              <div className="absolute bottom-full right-4 w-0 h-0 border-l-4 border-r-4 border-b-4 border-transparent border-b-white"></div>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Welcome Text */}
         <div className="text-center mb-16 sm:mb-20 md:mb-24">
-          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-8 sm:mb-10 md:mb-12" style={{ 
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl mb-8 sm:mb-10 md:mb-12" style={{ 
             color: '#000000',
             textShadow: '0 4px 8px rgba(0, 0, 0, 0.3), 0 8px 16px rgba(0, 0, 0, 0.15), 0 12px 24px rgba(0, 0, 0, 0.1)'
           }}>
@@ -212,7 +218,7 @@ export default function Home() {
         {/* Default/Loading State - Always show heading */}
         {(!stargazingData && !error) && (
           <div className="w-full px-4 sm:px-6 lg:px-8">
-            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-center mb-8 sm:mb-10 md:mb-12" style={{ color: '#000000', textShadow: '2px 2px 4px rgba(0, 0, 0, 0.3)' }}>
+            <h2 className="text-xl sm:text-2xl md:text-3xl text-center mb-8 sm:mb-10 md:mb-12" style={{ color: '#000000', textShadow: '2px 2px 4px rgba(0, 0, 0, 0.3)' }}>
               Here are the best days to go out and stargaze...
             </h2>
             <div className="text-center py-12 text-gray-600">
@@ -224,7 +230,7 @@ export default function Home() {
         {/* Results Section - below if not searching */}
         {!loading && (stargazingData || error) && (
           <div className="w-full mb-12 px-4 sm:px-6 lg:px-8">
-            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-center mb-8 sm:mb-10 md:mb-12" style={{ color: '#000000', textShadow: '2px 2px 4px rgba(0, 0, 0, 0.3)' }}>
+            <h2 className="text-xl sm:text-2xl md:text-3xl text-center mb-8 sm:mb-10 md:mb-12" style={{ color: '#000000', textShadow: '2px 2px 4px rgba(0, 0, 0, 0.3)' }}>
               Here are the best days to go out and stargaze...
             </h2>
             <InlineResults 

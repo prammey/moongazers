@@ -87,7 +87,7 @@ export default function InlineResults({ data, loading, error }: InlineResultsPro
     <div className="w-full max-w-6xl mx-auto mt-8">
       {/* Results Header */}
       <div className="text-center mb-8">
-        <h2 className="text-3xl font-bold mb-2 text-gray-900">
+        <h2 className="text-2xl mb-2 text-gray-900">
           Best Stargazing Times
         </h2>
         <p className="text-lg text-gray-600">
