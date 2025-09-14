@@ -58,10 +58,6 @@ export default function CurrentWeather({ weatherData }: CurrentWeatherProps) {
             <div className="text-xs sm:text-sm font-medium mb-1">
               {formatTemperature(weatherData.temperature)}
             </div>
-            <div className="text-xs sm:text-sm text-gray-600 flex items-center">
-              <span className="inline-block w-1.5 h-1.5 sm:w-2 sm:h-2 bg-orange-400 rounded-full mr-1 sm:mr-2"></span>
-              <span className="text-xs sm:text-sm">WANING CRESCENT</span>
-            </div>
           </>
         )}
       </div>

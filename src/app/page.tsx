@@ -138,7 +138,7 @@ export default function Home() {
                     type="text"
                     value={location}
                     onChange={(e) => setLocation(e.target.value)}
-                    placeholder="Enter your ZIP code..."
+                    placeholder="Enter your US ZIP code..."
                     className="flex-1 p-3 text-sm sm:text-base bg-transparent text-gray-900 placeholder-gray-500 focus:outline-none min-w-0 rounded-l-lg"
                     disabled={loading}
                   />
@@ -157,7 +157,7 @@ export default function Home() {
                     }}
                   >
                     {loading ? (
-                      <span className="text-xl">⏳</span>
+                      <span className="text-xl animate-spin" style={{ animationDuration: '2s' }}>⏳</span>
                     ) : (
                       <span className="text-xl font-bold" style={{ 
                         textShadow: '0 1px 2px rgba(0, 0, 0, 0.1)',
@@ -197,6 +197,18 @@ export default function Home() {
           )}
         </div>
 
+        {/* Default/Loading State - Always show heading */}
+        {(!stargazingData && !error) && (
+          <div className="w-full px-4 sm:px-6 lg:px-8">
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-center mb-8 sm:mb-10 md:mb-12" style={{ color: '#000000', textShadow: '2px 2px 4px rgba(0, 0, 0, 0.3)' }}>
+              Here are the best days to go out and stargaze...
+            </h2>
+            <div className="text-center py-12 text-gray-600">
+              {loading ? '[ fetching... ]' : '[ waiting for zip code... ]'}
+            </div>
+          </div>
+        )}
+
         {/* Results Section - below if not searching */}
         {!loading && (stargazingData || error) && (
           <div className="w-full mb-12 px-4 sm:px-6 lg:px-8">
@@ -211,18 +223,6 @@ export default function Home() {
           </div>
         )}
 
-        {/* Loading State */}
-        {loading && (
-          <div className="w-full px-4 sm:px-6 lg:px-8">
-            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-center mb-8 sm:mb-10 md:mb-12" style={{ color: '#000000', textShadow: '2px 2px 4px rgba(0, 0, 0, 0.3)' }}>
-              Here are the best days to go out and stargaze...
-            </h2>
-            <div className="text-center py-12 text-gray-600">
-              [ waiting for zip code... ]
-            </div>
-          </div>
-        )}
-
         {/* Footer */}
         <footer className="w-full mt-16 py-8 px-4 sm:px-6 lg:px-8" style={{ fontFamily: 'Helvetica Neue, Arial, sans-serif' }}>
           <div className="max-w-2xl mx-auto text-center">
@@ -233,29 +233,29 @@ export default function Home() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-6">
               <a
                 href="#newsletter"
-                className="flex items-center gap-2 px-4 py-2 border-2 border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                className="flex items-center gap-2 px-4 py-2 border-2 border-gray-800 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
               >
-                <span>📧</span>
+                <Image src="/letter.png" alt="Newsletter" width={16} height={16} />
                 <span>Newsletter</span>
               </a>
               
               <a
-                href="https://twitter.com/parameet"
+                href="https://parameet.space"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 px-4 py-2 border-2 border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                className="flex items-center gap-2 px-4 py-2 border-2 border-gray-800 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
               >
-                <span>🐦</span>
-                <span>Twitter</span>
+                <Image src="/x.png" alt="X" width={20} height={20} />
+                <span>Follow me</span>
               </a>
               
               <a
                 href="https://buymeacoffee.com/parameet"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 px-4 py-2 border-2 border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                className="flex items-center gap-2 px-4 py-2 border-2 border-gray-800 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
               >
-                <span>☕</span>
+                <Image src="/coffee.png" alt="Buy me a coffee" width={16} height={16} />
                 <span>Buy me a coffee</span>
               </a>
             </div>
