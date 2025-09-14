@@ -265,10 +265,13 @@ export default function Home() {
             </p>
             
             <div className="mt-8 pt-6 border-t border-gray-200">
-              <p className="text-gray-500 text-xs leading-relaxed">
+              <p className="text-gray-500 text-xs leading-relaxed mb-2">
                 <strong>Disclaimer:</strong> Data provided by Astrospheric API and Open-Meteo. 
                 Moon illumination values are approximate; conditions may vary depending on local light pollution. 
                 Built with Next.js, Tailwind CSS, NeonDB, and Vercel Cron.
+              </p>
+              <p className="text-gray-500 text-xs leading-relaxed">
+                Note: Conditions may vary depending on local weather and light pollution.
               </p>
             </div>
           </div>

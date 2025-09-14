@@ -440,7 +440,7 @@ async function getFallbackSkyData(lat: number, lng: number, dateTime: string) {
   
   // Get moon data using astronomy engine
   const moonPhase = astronomy.MoonPhase(date);
-  const moonIllumination = Math.round(100 * (1 - Math.abs(0.5 - moonPhase) * 2));
+  const moonIllumination = Math.max(0, Math.min(100, Math.round(100 * (1 - Math.abs(0.5 - moonPhase) * 2))));
   
   // Simplified planet visibility (this would need more complex calculations)
   const planets: string[] = ['Jupiter', 'Saturn']; // Placeholder
@@ -677,8 +677,8 @@ export async function POST(request: NextRequest) {
       // Format moon data
       const moonData: MoonData = {
         phase: (skyData as any).moon?.phase || 'Unknown',
-        illum: (skyData as any).moon?.illumination || 0,
-        impact: getMoonImpact((skyData as any).moon?.illumination || 0, ((skyData as any).moon?.altitude || 0) > 0)
+        illum: Math.max(0, Math.min(100, (skyData as any).moon?.illumination || 0)),
+        impact: getMoonImpact(Math.max(0, Math.min(100, (skyData as any).moon?.illumination || 0)), ((skyData as any).moon?.altitude || 0) > 0)
       };
       
       // Format time strings
