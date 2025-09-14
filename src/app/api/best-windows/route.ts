@@ -682,10 +682,10 @@ export async function POST(request: NextRequest) {
         const currentTemp = hourlyData.temperature_2m[currentIndex];
         const currentCloud = hourlyData.cloudcover[currentIndex];
         
-        let skyQuality = 'Excellent';
-        if (currentCloud > 20) skyQuality = 'Good';
-        if (currentCloud > 40) skyQuality = 'Fair';
-        if (currentCloud > 60) skyQuality = 'Poor';
+        let skyQuality = 'No Cloud Coverage';
+        if (currentCloud > 15) skyQuality = 'Low Cloud Coverage';
+        if (currentCloud > 35) skyQuality = 'Medium Cloud Coverage';
+        if (currentCloud > 60) skyQuality = 'High Cloud Coverage';
         
         currentWeather = {
           temperature: currentTemp,

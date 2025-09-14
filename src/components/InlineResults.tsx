@@ -71,10 +71,10 @@ export default function InlineResults({ data, loading, error }: InlineResultsPro
   if (!data) return null;
 
   const getCloudBadge = (cloudCover: number) => {
-    if (cloudCover <= 20) return { text: 'Excellent', color: 'bg-green-500' };
-    if (cloudCover <= 40) return { text: 'Good', color: 'bg-blue-500' };
-    if (cloudCover <= 60) return { text: 'Fair', color: 'bg-yellow-500' };
-    return { text: 'Poor', color: 'bg-red-500' };
+    if (cloudCover <= 15) return { text: 'No Cloud Coverage', color: 'bg-green-500' };
+    if (cloudCover <= 35) return { text: 'Low Cloud Coverage', color: 'bg-blue-500' };
+    if (cloudCover <= 60) return { text: 'Medium Cloud Coverage', color: 'bg-yellow-500' };
+    return { text: 'High Cloud Coverage', color: 'bg-red-500' };
   };
 
   const getMoonTag = (impact: string) => {
@@ -127,6 +127,9 @@ export default function InlineResults({ data, loading, error }: InlineResultsPro
                   >
                     {cloudBadge.text} ({window.weather.cloud}%)
                   </span>
+                  <p className="text-xs text-gray-500 mt-2 italic">
+                    Based on sky coverage: 0-15% = No Coverage, 16-35% = Low, 36-60% = Medium, 60%+ = High
+                  </p>
                 </div>
 
                 {/* Weather Section */}
