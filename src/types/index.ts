@@ -19,9 +19,16 @@ export interface TimeWindow {
   stars: string[];
 }
 
+export interface CurrentWeatherData {
+  temperature: number;
+  cloudCover: number;
+  skyQuality: string;
+}
+
 export interface BestWindowsResponse {
   location: string;
   windows: TimeWindow[];
+  currentWeather?: CurrentWeatherData | null;
 }
 
 export interface Coordinates {

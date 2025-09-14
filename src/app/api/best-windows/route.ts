@@ -440,7 +440,7 @@ async function getFallbackSkyData(lat: number, lng: number, dateTime: string) {
   
   // Get moon data using astronomy engine
   const moonPhase = astronomy.MoonPhase(date);
-  const moonIllumination = Math.round(100 * (1 - Math.abs(0.5 - moonPhase) * 2));
+  const moonIllumination = Math.max(0, Math.min(100, Math.round(100 * (1 - Math.abs(0.5 - moonPhase) * 2))));
   
   // Simplified planet visibility (this would need more complex calculations)
   const planets: string[] = ['Jupiter', 'Saturn']; // Placeholder
@@ -677,8 +677,8 @@ export async function POST(request: NextRequest) {
       // Format moon data
       const moonData: MoonData = {
         phase: (skyData as any).moon?.phase || 'Unknown',
-        illum: (skyData as any).moon?.illumination || 0,
-        impact: getMoonImpact((skyData as any).moon?.illumination || 0, ((skyData as any).moon?.altitude || 0) > 0)
+        illum: Math.max(0, Math.min(100, (skyData as any).moon?.illumination || 0)),
+        impact: getMoonImpact(Math.max(0, Math.min(100, (skyData as any).moon?.illumination || 0)), ((skyData as any).moon?.altitude || 0) > 0)
       };
       
       // Format time strings
@@ -699,9 +699,36 @@ export async function POST(request: NextRequest) {
       });
     }
     
+    // Get current weather data
+    const currentTime = new Date();
+    let currentWeather = null;
+    
+    if (hourlyData && hourlyData.time.length > 0) {
+      // Find the closest hour to current time
+      const currentHour = DateTime.fromJSDate(currentTime).toFormat('yyyy-MM-dd\'T\'HH:00');
+      const currentIndex = hourlyData.time.findIndex(time => time === currentHour);
+      
+      if (currentIndex >= 0) {
+        const currentTemp = hourlyData.temperature_2m[currentIndex];
+        const currentCloud = hourlyData.cloudcover[currentIndex];
+        
+        let skyQuality = 'Excellent';
+        if (currentCloud > 20) skyQuality = 'Good';
+        if (currentCloud > 40) skyQuality = 'Fair';
+        if (currentCloud > 60) skyQuality = 'Poor';
+        
+        currentWeather = {
+          temperature: currentTemp,
+          cloudCover: currentCloud,
+          skyQuality: skyQuality
+        };
+      }
+    }
+
     const response: BestWindowsResponse = {
       location: formattedLocation,
-      windows: timeWindows
+      windows: timeWindows,
+      currentWeather: currentWeather
     };
     
     console.log(`[API] Returning ${timeWindows.length} windows`);
