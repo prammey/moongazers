@@ -52,13 +52,16 @@ export default function InlineResults({ data, loading, error }: InlineResultsPro
   if (error) {
     return (
       <div className="w-full max-w-4xl mx-auto mt-8">
-        <div className="text-center py-12 rounded-lg border-2 bg-red-50 border-red-300 text-red-900 backdrop-blur-sm">
-          <div className="text-2xl mb-4">❌</div>
-          <h3 className="text-xl font-bold mb-2 text-red-900">
-            Something went wrong
+        <div className="text-center py-12 px-8 rounded-xl bg-white/90 border border-gray-200 text-gray-700 backdrop-blur-sm shadow-lg" style={{ fontFamily: 'Helvetica Neue, Arial, sans-serif' }}>
+          <div className="text-3xl mb-6 text-gray-400">✕</div>
+          <h3 className="text-xl font-semibold mb-4 text-gray-800">
+            Unable to fetch stargazing data
           </h3>
-          <p className="text-red-700">
+          <p className="text-gray-600 text-sm leading-relaxed max-w-md mx-auto">
             {error}
+          </p>
+          <p className="text-gray-500 text-xs mt-4">
+            Please try again with a different location or check your connection.
           </p>
         </div>
       </div>

@@ -171,7 +171,7 @@ export default function Home() {
             </div>
 
             {/* Side Toggles - pushed far to the right */}
-            <div className="flex flex-row lg:flex-col gap-4 lg:gap-6 lg:mr-auto lg:ml-24 cursor-pointer">
+            <div className="flex flex-row lg:flex-col gap-4 lg:gap-6 lg:mr-auto lg:ml-24">
               <ToggleSwitch
                 leftLabel="Celsius"
                 rightLabel="Fahrenheit"
@@ -188,8 +188,11 @@ export default function Home() {
           </div>
 
           {error && (
-            <div className="mt-6 p-4 rounded-lg border-2 bg-red-50 border-red-300 text-red-800 max-w-lg mx-auto text-center">
-              {error}
+            <div className="mt-6 p-6 rounded-xl bg-white/90 border border-gray-200 text-gray-700 max-w-lg mx-auto text-center shadow-lg backdrop-blur-sm" style={{ fontFamily: 'Helvetica Neue, Arial, sans-serif' }}>
+              <div className="text-2xl mb-3 text-amber-500">⚠</div>
+              <p className="text-sm leading-relaxed">
+                {error}
+              </p>
             </div>
           )}
         </div>
@@ -197,7 +200,7 @@ export default function Home() {
         {/* Results Section - below if not searching */}
         {!loading && (stargazingData || error) && (
           <div className="w-full mb-12 px-4 sm:px-6 lg:px-8">
-            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-center mb-8 sm:mb-10 md:mb-12" style={{ color: '#000000' }}>
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-center mb-8 sm:mb-10 md:mb-12" style={{ color: '#000000', textShadow: '2px 2px 4px rgba(0, 0, 0, 0.3)' }}>
               Here are the best days to go out and stargaze...
             </h2>
             <InlineResults 
@@ -211,7 +214,7 @@ export default function Home() {
         {/* Loading State */}
         {loading && (
           <div className="w-full px-4 sm:px-6 lg:px-8">
-            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-center mb-8 sm:mb-10 md:mb-12" style={{ color: '#000000' }}>
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-center mb-8 sm:mb-10 md:mb-12" style={{ color: '#000000', textShadow: '2px 2px 4px rgba(0, 0, 0, 0.3)' }}>
               Here are the best days to go out and stargaze...
             </h2>
             <div className="text-center py-12 text-gray-600">
