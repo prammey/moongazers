@@ -699,9 +699,36 @@ export async function POST(request: NextRequest) {
       });
     }
     
+    // Get current weather data
+    const currentTime = new Date();
+    let currentWeather = null;
+    
+    if (hourlyData && hourlyData.time.length > 0) {
+      // Find the closest hour to current time
+      const currentHour = DateTime.fromJSDate(currentTime).toFormat('yyyy-MM-dd\'T\'HH:00');
+      const currentIndex = hourlyData.time.findIndex(time => time === currentHour);
+      
+      if (currentIndex >= 0) {
+        const currentTemp = hourlyData.temperature_2m[currentIndex];
+        const currentCloud = hourlyData.cloudcover[currentIndex];
+        
+        let skyQuality = 'Excellent';
+        if (currentCloud > 20) skyQuality = 'Good';
+        if (currentCloud > 40) skyQuality = 'Fair';
+        if (currentCloud > 60) skyQuality = 'Poor';
+        
+        currentWeather = {
+          temperature: currentTemp,
+          cloudCover: currentCloud,
+          skyQuality: skyQuality
+        };
+      }
+    }
+
     const response: BestWindowsResponse = {
       location: formattedLocation,
-      windows: timeWindows
+      windows: timeWindows,
+      currentWeather: currentWeather
     };
     
     console.log(`[API] Returning ${timeWindows.length} windows`);

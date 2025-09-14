@@ -1,17 +1,12 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Kosugi_Maru } from "next/font/google";
 import "./globals.css";
-import { ThemeProvider } from "@/contexts/ThemeContext";
-import ThemeToggle from "@/components/ThemeToggle";
+import { WeatherProvider } from "@/contexts/WeatherContext";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const kosugiMaru = Kosugi_Maru({
+  weight: "400",
   subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  variable: "--font-kosugi-maru",
 });
 
 export const metadata: Metadata = {
@@ -26,13 +21,19 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <link
+          href="https://fonts.googleapis.com/css2?family=Kosugi+Maru:wght@400&display=swap"
+          rel="stylesheet"
+        />
+      </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className="antialiased"
+        style={{ fontFamily: "'Helvetica Neue', Arial, sans-serif" }}
       >
-        <ThemeProvider>
-          <ThemeToggle />
+        <WeatherProvider>
           {children}
-        </ThemeProvider>
+        </WeatherProvider>
       </body>
     </html>
   );
