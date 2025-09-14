@@ -32,7 +32,7 @@ if (!TIMEZONEDB_KEY) {
 // Cache functions
 const getCachedGeocode = unstable_cache(
   async (location: string) => await geocodeLocation(location),
-  ['geocode'],
+  ['geocode-v2'], // Changed cache key to force refresh
   { revalidate: 60 * 60 * 24 * 30 } // 30 days
 );
 
@@ -104,19 +104,9 @@ async function geocodeLocation(location: string): Promise<{ coordinates: Coordin
             const components = match.addressComponents;
             const details = [];
             
-            // Add ZIP code if available
-            if (components.zip) {
-              details.push(`[ZIP: ${components.zip}]`);
-            }
-            
             // Add city and state details
             if (components.city && components.state) {
               enhancedLocation = `${components.city}, ${components.state}`;
-              
-              // Add county if available
-              if (match.tigerLine?.side && match.tigerLine.side.county) {
-                details.push(`[County: ${match.tigerLine.side.county}]`);
-              }
               
               // Add state district if available
               if (match.tigerLine?.side && match.tigerLine.side.district) {
@@ -161,19 +151,9 @@ async function geocodeLocation(location: string): Promise<{ coordinates: Coordin
             const components = match.addressComponents;
             const details = [];
             
-            // Add ZIP code if available
-            if (components.zip) {
-              details.push(`[ZIP: ${components.zip}]`);
-            }
-            
             // Add city and state details
             if (components.city && components.state) {
               enhancedLocation = `${components.city}, ${components.state}`;
-              
-              // Add county if available
-              if (match.tigerLine?.side && match.tigerLine.side.county) {
-                details.push(`[County: ${match.tigerLine.side.county}]`);
-              }
               
               // Add state district if available
               if (match.tigerLine?.side && match.tigerLine.side.district) {
@@ -256,11 +236,6 @@ async function geocodeLocation(location: string): Promise<{ coordinates: Coordin
           const parts = [];
           const details = [];
           
-          // Add postal code if available
-          if (addr.postcode) {
-            details.push(`[ZIP: ${addr.postcode}]`);
-          }
-          
           // Add district/neighborhood info
           if (addr.suburb) details.push(`[Suburb: ${addr.suburb}]`);
           else if (addr.neighbourhood) details.push(`[Neighborhood: ${addr.neighbourhood}]`);
@@ -272,11 +247,6 @@ async function geocodeLocation(location: string): Promise<{ coordinates: Coordin
           else if (addr.town) parts.push(addr.town);
           else if (addr.village) parts.push(addr.village);
           else if (addr.municipality) parts.push(addr.municipality);
-          
-          // Add administrative levels (county, state, etc.)
-          if (addr.county && !parts.some(p => p.includes(addr.county))) {
-            details.push(`[County: ${addr.county}]`);
-          }
           
           // Add state/province
           if (addr.state) parts.push(addr.state);
