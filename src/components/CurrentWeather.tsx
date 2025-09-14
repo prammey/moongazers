@@ -41,7 +41,7 @@ export default function CurrentWeather({ weatherData }: CurrentWeatherProps) {
           color: '#000000',
           fontFamily: "'Kosugi Maru', cursive"
         }}>
-          https://moongazers.xyz/
+          https://moongazers.prameet.space/
         </div>
         
         {/* Date and Time on same line */}
