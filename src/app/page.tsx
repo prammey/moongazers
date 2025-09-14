@@ -256,8 +256,8 @@ export default function Home() {
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 px-4 py-2 border-2 border-gray-800 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
               >
-                <Image src="/x.png" alt="X" width={20} height={20} />
-                <span>Follow me</span>
+                <h1>🌍</h1>
+                <span>My Portfolio</span>
               </a>
               
               <a
