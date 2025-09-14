@@ -28,6 +28,7 @@ export default function Home() {
     temperature: number;
     skyQuality: string;
   } | null>(null);
+  const [showContactDialog, setShowContactDialog] = useState(false);
   
   
   // Removed country selection functionality for simpler input
@@ -238,20 +239,20 @@ export default function Home() {
         <footer className="w-full mt-16 py-8 px-4 sm:px-6 lg:px-8" style={{ fontFamily: 'Helvetica Neue, Arial, sans-serif' }}>
           <div className="max-w-2xl mx-auto text-center">
             <p className="text-gray-600 text-sm mb-6">
-              Hi! I&apos;m Parameet. Thank you for visiting my website. Other links:
+              Hi! I&apos;m Prameet. Thank you for visiting my website. Other links:
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-6">
-              <a
-                href="#newsletter"
-                className="flex items-center gap-2 px-4 py-2 border-2 border-gray-800 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+              <button
+                onClick={() => setShowContactDialog(true)}
+                className="flex items-center gap-2 px-4 py-2 border-2 border-gray-800 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer"
               >
-                <Image src="/letter.png" alt="Newsletter" width={16} height={16} />
-                <span>Newsletter</span>
-              </a>
+                <Image src="/letter.png" alt="Contact" width={16} height={16} />
+                <span>Contact</span>
+              </button>
               
               <a
-                href="https://parameet.space"
+                href="https://prameet.space"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 px-4 py-2 border-2 border-gray-800 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
@@ -272,7 +273,7 @@ export default function Home() {
             </div>
             
             <p className="text-gray-600 text-sm">
-              Say hello: <a href="mailto:parameet.guha@gmail.com" className="text-blue-600 hover:underline">parameet.guha@gmail.com</a>
+              Say hello: <a href="mailto:prameet.guha@gmail.com" className="text-blue-600 hover:underline">prameet.guha@gmail.com</a>
             </p>
             
             <div className="mt-8 pt-6 border-t border-gray-200">
@@ -288,6 +289,58 @@ export default function Home() {
           </div>
         </footer>
       </div>
+
+      {/* Contact Dialog */}
+      {showContactDialog && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          {/* Modal */}
+          <div 
+            className="bg-white rounded-lg border-2 border-gray-800 w-full max-w-md relative"
+            style={{
+              boxShadow: '4px 4px 8px rgba(0, 0, 0, 0.15)'
+            }}
+          >
+            {/* Header */}
+            <div className="bg-white border-b-2 border-gray-800 px-4 py-3 rounded-t-lg flex justify-between items-center">
+              <h2 className="text-lg font-bold text-black" style={{ fontFamily: 'Helvetica Neue, Arial, sans-serif' }}>Contact</h2>
+              <button
+                onClick={() => setShowContactDialog(false)}
+                className="w-6 h-6 bg-red-600 text-white rounded flex items-center justify-center hover:bg-red-700 transition-colors text-sm font-bold"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="p-6 space-y-4" style={{ fontFamily: 'Helvetica Neue, Arial, sans-serif' }}>
+              <div>
+                <p className="text-black font-semibold mb-1">Email:</p>
+                <a 
+                  href="mailto:prameet.guha@gmail.com" 
+                  className="text-blue-600 underline hover:text-blue-800"
+                >
+                  prameet.guha@gmail.com
+                </a>
+              </div>
+
+              <div>
+                <p className="text-black font-semibold mb-1">Text:</p>
+                <p className="text-black">+1 (331) 269-7958</p>
+              </div>
+
+              {/* OK Button */}
+              <div className="flex justify-center pt-4">
+                <button
+                  onClick={() => setShowContactDialog(false)}
+                  className="bg-blue-500 text-white px-8 py-2 rounded border-2 border-gray-800 hover:bg-blue-600 transition-colors font-semibold"
+                >
+                  OK
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
