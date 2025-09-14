@@ -262,7 +262,7 @@ export default function Home() {
               </a>
               
               <a
-                href="https://buymeacoffee.com/parameet"
+                href="https://buymeacoffee.com/prameet"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 px-4 py-2 border-2 border-gray-800 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
@@ -295,24 +295,25 @@ export default function Home() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           {/* Modal */}
           <div 
-            className="bg-white rounded-lg border-2 border-gray-800 w-full max-w-md relative"
+            className="bg-white rounded-lg border-2 border-gray-800 w-full max-w-sm relative"
             style={{
               boxShadow: '4px 4px 8px rgba(0, 0, 0, 0.15)'
             }}
           >
             {/* Header */}
-            <div className="bg-white border-b-2 border-gray-800 px-4 py-3 rounded-t-lg flex justify-between items-center">
-              <h2 className="text-lg font-bold text-black" style={{ fontFamily: 'Helvetica Neue, Arial, sans-serif' }}>Contact</h2>
+            <div className="bg-white border-b-2 border-gray-800 px-3 py-2 rounded-t-lg flex justify-between items-center">
+              <h2 className="text-base font-bold text-black" style={{ fontFamily: 'Helvetica Neue, Arial, sans-serif' }}>Contact</h2>
               <button
                 onClick={() => setShowContactDialog(false)}
-                className="w-6 h-6 bg-red-600 text-white rounded flex items-center justify-center hover:bg-red-700 transition-colors text-sm font-bold"
+                className="w-8 h-8 bg-red-600 text-white flex items-center justify-center hover:bg-red-700 transition-colors text-lg font-bold"
+                style={{ borderRadius: '0' }}
               >
-                ✕
+                ×
               </button>
             </div>
 
             {/* Content */}
-            <div className="p-6 space-y-4" style={{ fontFamily: 'Helvetica Neue, Arial, sans-serif' }}>
+            <div className="p-4 space-y-3" style={{ fontFamily: 'Helvetica Neue, Arial, sans-serif' }}>
               <div>
                 <p className="text-black font-semibold mb-1">Email:</p>
                 <a 
@@ -329,10 +330,10 @@ export default function Home() {
               </div>
 
               {/* OK Button */}
-              <div className="flex justify-center pt-4">
+              <div className="flex justify-center pt-3">
                 <button
                   onClick={() => setShowContactDialog(false)}
-                  className="bg-blue-500 text-white px-8 py-2 rounded border-2 border-gray-800 hover:bg-blue-600 transition-colors font-semibold"
+                  className="bg-blue-500 text-white px-6 py-1.5 rounded border-2 border-gray-800 hover:bg-blue-600 transition-colors font-semibold text-sm"
                 >
                   OK
                 </button>
