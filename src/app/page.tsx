@@ -215,29 +215,36 @@ export default function Home() {
           )}
         </div>
 
-        {/* Default/Loading State - Always show heading */}
-        {(!stargazingData && !error) && (
-          <div className="w-full px-4 sm:px-6 lg:px-8">
-            <h2 className="text-xl sm:text-2xl md:text-3xl text-center mb-8 sm:mb-10 md:mb-12" style={{ color: '#000000', textShadow: '2px 2px 4px rgba(0, 0, 0, 0.3)' }}>
+        {/* Results Section - Always show heading when we have data, error, or loading */}
+        {(stargazingData || error || loading) && (
+          <div className="w-full mb-12 px-4 sm:px-6 lg:px-8">
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-center mb-8 sm:mb-10 md:mb-12" style={{ color: '#000000', textShadow: '2px 2px 4px rgba(0, 0, 0, 0.3)' }}>
               Here are the best days to go out and stargaze...
             </h2>
-            <div className="text-center py-12 text-gray-600">
-              {loading ? '[ fetching... ]' : '[ waiting for zip code... ]'}
-            </div>
+            
+            {loading ? (
+              <div className="text-center py-12 text-gray-600">
+                [ fetching... ]
+              </div>
+            ) : (
+              <InlineResults 
+                data={stargazingData} 
+                loading={loading} 
+                error={error} 
+              />
+            )}
           </div>
         )}
 
-        {/* Results Section - below if not searching */}
-        {!loading && (stargazingData || error) && (
-          <div className="w-full mb-12 px-4 sm:px-6 lg:px-8">
-            <h2 className="text-xl sm:text-2xl md:text-3xl text-center mb-8 sm:mb-10 md:mb-12" style={{ color: '#000000', textShadow: '2px 2px 4px rgba(0, 0, 0, 0.3)' }}>
+        {/* Default State - Only show when no data, no error, and not loading */}
+        {(!stargazingData && !error && !loading) && (
+          <div className="w-full px-4 sm:px-6 lg:px-8">
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-center mb-8 sm:mb-10 md:mb-12" style={{ color: '#000000', textShadow: '2px 2px 4px rgba(0, 0, 0, 0.3)' }}>
               Here are the best days to go out and stargaze...
             </h2>
-            <InlineResults 
-              data={stargazingData} 
-              loading={loading} 
-              error={error} 
-            />
+            <div className="text-center py-12 text-gray-600">
+              [ waiting for zip code... ]
+            </div>
           </div>
         )}
 
