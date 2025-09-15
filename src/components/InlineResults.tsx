@@ -107,7 +107,13 @@ export default function InlineResults({ data, loading, error }: InlineResultsPro
           </p>
         </div>
       ) : (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className={`${
+          data.windows.length === 1 
+            ? 'flex justify-center' 
+            : data.windows.length === 2 
+              ? 'flex flex-col md:flex-row justify-center gap-6' 
+              : 'grid gap-6 md:grid-cols-2 lg:grid-cols-3'
+        }`}>
           {data.windows.map((window, index) => {
             const cloudBadge = getCloudBadge(window.weather.cloud);
             const moonTag = getMoonTag(window.moon.impact);
@@ -115,7 +121,9 @@ export default function InlineResults({ data, loading, error }: InlineResultsPro
             return (
               <div
                 key={index}
-                className="p-6 rounded-lg border-2 transition-all duration-300 hover:scale-105 bg-white/90 border-gray-300 hover:border-blue-400 backdrop-blur-sm shadow-lg"
+                className={`p-6 rounded-lg border-2 transition-all duration-300 hover:scale-105 bg-white/90 border-gray-300 hover:border-blue-400 backdrop-blur-sm shadow-lg ${
+                  data.windows.length <= 2 ? 'w-full max-w-sm' : ''
+                }`}
               >
                 {/* Time Range Header */}
                 <div className="text-center mb-4 pb-4 border-b border-gray-300">
