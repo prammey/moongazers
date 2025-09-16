@@ -234,7 +234,7 @@ export default function Home() {
                 onToggle={toggleTemperatureUnit}
               />
               <ToggleSwitch
-                leftLabel="12-hr⠀"
+                leftLabel="12-hr"
                 rightLabel="24-hr"
                 isRightSelected={timeFormat === '24hr'}
                 onToggle={toggleTimeFormat}
