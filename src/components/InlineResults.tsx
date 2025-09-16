@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { useWeather } from '@/contexts/WeatherContext';
+import { useWeather } from "@/contexts/WeatherContext";
 
 interface StargazingWindow {
   start: string;
@@ -30,7 +30,11 @@ interface InlineResultsProps {
   error: string | null;
 }
 
-export default function InlineResults({ data, loading, error }: InlineResultsProps) {
+export default function InlineResults({
+  data,
+  loading,
+  error,
+}: InlineResultsProps) {
   const { formatTemperature } = useWeather();
 
   if (loading) {
@@ -52,7 +56,10 @@ export default function InlineResults({ data, loading, error }: InlineResultsPro
   if (error) {
     return (
       <div className="w-full max-w-4xl mx-auto mt-8">
-        <div className="text-center py-12 px-8 rounded-xl bg-white/90 border border-gray-200 text-gray-700 backdrop-blur-sm shadow-lg" style={{ fontFamily: 'Helvetica Neue, Arial, sans-serif' }}>
+        <div
+          className="text-center py-12 px-8 rounded-xl bg-white/90 border border-gray-200 text-gray-700 backdrop-blur-sm shadow-lg"
+          style={{ fontFamily: "Helvetica Neue, Arial, sans-serif" }}
+        >
           <div className="text-3xl mb-6 text-gray-400">✕</div>
           <h3 className="text-xl font-semibold mb-4 text-gray-800">
             Unable to fetch stargazing data
@@ -71,28 +78,27 @@ export default function InlineResults({ data, loading, error }: InlineResultsPro
   if (!data) return null;
 
   const getCloudBadge = (cloudCover: number) => {
-    if (cloudCover <= 15) return { text: 'No Cloud Coverage', color: 'bg-green-500' };
-    if (cloudCover <= 35) return { text: 'Low Cloud Coverage', color: 'bg-blue-500' };
-    if (cloudCover <= 60) return { text: 'Medium Cloud Coverage', color: 'bg-yellow-500' };
-    return { text: 'High Cloud Coverage', color: 'bg-red-500' };
+    if (cloudCover <= 15)
+      return { text: "No Cloud Coverage", color: "bg-green-500" };
+    if (cloudCover <= 35)
+      return { text: "Low Cloud Coverage", color: "bg-blue-500" };
+    if (cloudCover <= 60)
+      return { text: "Medium Cloud Coverage", color: "bg-yellow-500" };
+    return { text: "High Cloud Coverage", color: "bg-red-500" };
   };
 
   const getMoonTag = (impact: string) => {
-    if (impact === 'Low') return 'bg-green-500';
-    if (impact === 'Medium') return 'bg-yellow-500';
-    return 'bg-red-500';
+    if (impact === "Low") return "bg-green-500";
+    if (impact === "Medium") return "bg-yellow-500";
+    return "bg-red-500";
   };
 
   return (
     <div className="w-full max-w-6xl mx-auto mt-8">
       {/* Results Header */}
       <div className="text-center mb-8">
-        <h2 className="text-2xl mb-2 text-gray-900">
-          Best Stargazing Times
-        </h2>
-        <p className="text-lg text-gray-600">
-          📍 {data.location}
-        </p>
+        <h2 className="text-2xl mb-2 text-gray-900">Best Stargazing Times</h2>
+        <p className="text-lg text-gray-600">📍 {data.location}</p>
       </div>
 
       {/* Results Content */}
@@ -103,17 +109,20 @@ export default function InlineResults({ data, loading, error }: InlineResultsPro
             No Clear Skies
           </h3>
           <p className="text-yellow-700">
-            Weather conditions aren&apos;t ideal for stargazing in the next 72 hours. Check back later!
+            Weather conditions aren&apos;t ideal for stargazing in the next 72
+            hours. Check back later!
           </p>
         </div>
       ) : (
-        <div className={`${
-          data.windows.length === 1 
-            ? 'flex justify-center' 
-            : data.windows.length === 2 
-              ? 'flex flex-col md:flex-row justify-center gap-6' 
-              : 'grid gap-6 md:grid-cols-2 lg:grid-cols-3'
-        }`}>
+        <div
+          className={`${
+            data.windows.length === 1
+              ? "flex justify-center"
+              : data.windows.length === 2
+              ? "flex flex-col md:flex-row justify-center gap-6"
+              : "grid gap-6 md:grid-cols-2 lg:grid-cols-3"
+          }`}
+        >
           {data.windows.map((window, index) => {
             const cloudBadge = getCloudBadge(window.weather.cloud);
             const moonTag = getMoonTag(window.moon.impact);
@@ -121,8 +130,8 @@ export default function InlineResults({ data, loading, error }: InlineResultsPro
             return (
               <div
                 key={index}
-                className={`p-6 rounded-lg border-2 transition-all duration-300 hover:scale-105 bg-white/90 border-gray-300 hover:border-blue-400 backdrop-blur-sm shadow-lg ${
-                  data.windows.length <= 2 ? 'w-full max-w-sm' : ''
+                className={`p-6 rounded-lg border-2 transition-all duration-300 hover:scale-[1.01] bg-white/90 border-gray-300 hover:border-blue-400 backdrop-blur-sm shadow-lg ${
+                  data.windows.length <= 2 ? "w-full max-w-sm" : ""
                 }`}
               >
                 {/* Time Range Header */}
@@ -130,13 +139,14 @@ export default function InlineResults({ data, loading, error }: InlineResultsPro
                   <h3 className="text-lg font-bold mb-2 text-gray-900">
                     {window.start} - {window.end}
                   </h3>
-                  <span 
+                  <span
                     className={`inline-block px-3 py-1 text-sm font-bold text-white rounded ${cloudBadge.color}`}
                   >
                     {cloudBadge.text} ({window.weather.cloud}%)
                   </span>
                   <p className="text-xs text-gray-500 mt-2 italic">
-                    Based on sky coverage: 0-15% = No Coverage, 16-35% = Low, 36-60% = Medium, 60%+ = High
+                    Based on sky coverage: 0-15% = No Coverage, 16-35% = Low,
+                    36-60% = Medium, 60%+ = High
                   </p>
                 </div>
 
@@ -165,7 +175,9 @@ export default function InlineResults({ data, loading, error }: InlineResultsPro
                     🌙 Moon
                   </h4>
                   <div className="text-center mb-2">
-                    <span className={`px-2 py-1 text-xs font-bold text-white rounded ${moonTag}`}>
+                    <span
+                      className={`px-2 py-1 text-xs font-bold text-white rounded ${moonTag}`}
+                    >
                       {window.moon.impact} Impact
                     </span>
                   </div>
@@ -196,9 +208,7 @@ export default function InlineResults({ data, loading, error }: InlineResultsPro
                       ))}
                     </div>
                   ) : (
-                    <p className="text-xs italic text-gray-500">
-                      None visible
-                    </p>
+                    <p className="text-xs italic text-gray-500">None visible</p>
                   )}
                 </div>
 
@@ -219,9 +229,7 @@ export default function InlineResults({ data, loading, error }: InlineResultsPro
                       ))}
                     </div>
                   ) : (
-                    <p className="text-xs italic text-gray-500">
-                      None visible
-                    </p>
+                    <p className="text-xs italic text-gray-500">None visible</p>
                   )}
                 </div>
               </div>
