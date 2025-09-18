@@ -35,7 +35,29 @@ export default function InlineResults({
   loading,
   error,
 }: InlineResultsProps) {
-  const { formatTemperature } = useWeather();
+  const { formatTemperature, formatTime } = useWeather();
+
+  // Helper function to format time range from ISO timestamps
+  const formatTimeRange = (startIso: string, endIso: string): string => {
+    try {
+      const startDate = new Date(startIso);
+      const endDate = new Date(endIso);
+      
+      // Format start time with date
+      const startFormatted = startDate.toLocaleDateString("en-US", { 
+        month: "short", 
+        day: "numeric" 
+      }) + ", " + formatTime(startDate);
+      
+      // Format end time (just time)
+      const endFormatted = formatTime(endDate);
+      
+      return `${startFormatted} - ${endFormatted}`;
+    } catch (error) {
+      console.error("Error formatting time range:", error);
+      return "Invalid Date";
+    }
+  };
 
   if (loading) {
     return (
@@ -137,7 +159,7 @@ export default function InlineResults({
                 {/* Time Range Header */}
                 <div className="text-center mb-4 pb-4 border-b border-gray-300">
                   <h3 className="text-lg font-bold mb-2 text-gray-900">
-                    {window.start} - {window.end}
+                    {formatTimeRange(window.start, window.end)}
                   </h3>
                   <span
                     className={`inline-block px-3 py-1 text-sm font-bold text-white rounded ${cloudBadge.color}`}

@@ -654,9 +654,9 @@ export async function POST(request: NextRequest) {
         impact: getMoonImpact(Math.max(0, Math.min(100, (skyData as any).moon?.illumination || 0)), ((skyData as any).moon?.altitude || 0) > 0)
       };
       
-      // Format time strings
-      const startStr = DateTime.fromJSDate(window.startTime).toFormat('MMM d, h:mm a');
-      const endStr = DateTime.fromJSDate(window.endTime).toFormat('h:mm a');
+      // Return ISO timestamp strings for frontend formatting
+      const startStr = window.startTime.toISOString();
+      const endStr = window.endTime.toISOString();
       
       timeWindows.push({
         start: startStr,
