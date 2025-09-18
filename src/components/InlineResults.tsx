@@ -188,6 +188,9 @@ export default function InlineResults({
                     <div className="text-xs text-gray-600">
                       {window.moon.illum}% illuminated
                     </div>
+                    <div className="text-xs text-gray-500 mt-1 italic">
+                      Calculated via Astronomy Engine using sun-moon-earth positions
+                    </div>
                   </div>
                 </div>
 
