@@ -5,7 +5,6 @@ import { useWeather } from '@/contexts/WeatherContext';
 import CurrentWeather from '@/components/CurrentWeather';
 import ToggleSwitch from '@/components/ToggleSwitch';
 import InlineResults from '@/components/InlineResults';
-import LandingPage from '@/components/LandingPage';
 import Image from 'next/image';
 
 interface StargazingData {
@@ -20,7 +19,6 @@ interface StargazingData {
 
 export default function Home() {
   const { temperatureUnit, timeFormat, toggleTemperatureUnit, toggleTimeFormat } = useWeather();
-  const [showLandingPage, setShowLandingPage] = useState(true);
   const [location, setLocation] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -98,10 +96,6 @@ export default function Home() {
     }
   };
 
-  const handleLaunch = () => {
-    setShowLandingPage(false);
-  };
-
   return (
     <div 
       className="relative min-h-screen"
@@ -109,14 +103,7 @@ export default function Home() {
         backgroundColor: '#ffffff'
       }}
     >
-      {/* Show landing page as overlay when active */}
-      {showLandingPage && (
-        <div className="fixed inset-0 z-50">
-          <LandingPage onLaunch={handleLaunch} />
-        </div>
-      )}
-
-      {/* Main App Content - Always rendered underneath */}
+      {/* Main App Content */}
       {/* Current Weather Display - Top Left */}
       <CurrentWeather weatherData={currentWeatherData || undefined} />
 
