@@ -34,7 +34,7 @@ export default function CurrentWeather({ weatherData }: CurrentWeatherProps) {
   };
 
   return (
-    <div className="fixed top-4 sm:top-6 left-4 sm:left-6 z-50">
+    <div className="absolute top-2 sm:top-4 left-2 sm:left-4 z-10">
       <div className="text-black">
         {/* URL Link */}
         <div className="text-xs sm:text-sm md:text-base font-bold mb-1" style={{ 
@@ -44,7 +44,7 @@ export default function CurrentWeather({ weatherData }: CurrentWeatherProps) {
           https://moongazers.prameet.space/
         </div>
         
-        {/* Date, Time, and Temperature on same line */}
+        {/* Date and Time on same line */}
         <div className="text-xs sm:text-sm md:text-base font-bold mb-2" style={{ 
           color: '#000000',
           fontFamily: "'Kosugi Maru', cursive"
