@@ -226,19 +226,22 @@ export default function Home() {
             </div>
 
             {/* Side Toggles - pushed far to the right */}
-            <div className="flex flex-row lg:flex-col gap-4 lg:gap-6 lg:mr-auto lg:ml-24">
+            <div className="flex flex-col gap-4 lg:mr-auto lg:ml-24">
               <ToggleSwitch
                 leftLabel="Celsius"
                 rightLabel="Fahrenheit"
                 isRightSelected={temperatureUnit === 'fahrenheit'}
                 onToggle={toggleTemperatureUnit}
               />
-              <ToggleSwitch
-                leftLabel="12-hr⠀"
-                rightLabel="24-hr"
-                isRightSelected={timeFormat === '24hr'}
-                onToggle={toggleTimeFormat}
-              />
+              <div className="w-full">
+                <ToggleSwitch
+                  leftLabel="12-hr"
+                  rightLabel="24-hr"
+                  isRightSelected={timeFormat === '24hr'}
+                  onToggle={toggleTimeFormat}
+                  className="[&>span:first-child]:w-12 [&>span:first-child]:text-left"
+                />
+              </div>
             </div>
           </div>
 
