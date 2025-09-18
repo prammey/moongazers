@@ -603,11 +603,14 @@ export async function POST(request: NextRequest) {
       const temperature = hourlyData.temperature_2m[i] || 70;
       const windSpeed = hourlyData.wind_speed_10m[i] || 5;
       
-      // Determine if it's night time (simplified - using hour)
+      // Determine if it's optimal stargazing time (9 PM to 4:30 AM only)
+      // Moon and stars are not visible during daylight hours after 4:30 AM
+      // Time window: 21:00-04:30 for best astronomical visibility
       const hour = time.getHours();
-      const isNight = hour >= 21 || hour <= 6;
+      const minute = time.getMinutes();
+      const isOptimalTime = hour >= 21 || (hour < 4) || (hour === 4 && minute <= 30);
       
-      if (isNight) {
+      if (isOptimalTime) {
         const score = scoreTimeSlot(cloudCover, 0, false); // Simplified for now
         
         timeSlots.push({
@@ -616,7 +619,7 @@ export async function POST(request: NextRequest) {
           temperature,
           windSpeed,
           score,
-          isNight
+          isNight: isOptimalTime
         });
       }
     }
