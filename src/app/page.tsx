@@ -174,7 +174,7 @@ export default function Home() {
             Welcome, Moongazer!
           </h1>
           <p className="text-sm sm:text-base md:text-lg max-w-xs sm:max-w-sm md:max-w-lg mx-auto mt-8 sm:mt-10 md:mt-12 text-gray-700">
-            Need help stargazing? Just enter your zip code below, and we will tell you the best times to go observe the sky and what you can see in the next 7 days.
+            Need help stargazing? Just enter your zip code below, and we will tell you the best times to go observe the sky and what you can see in the next 3 days.
           </p>
         </div>
 
@@ -227,18 +227,22 @@ export default function Home() {
 
             {/* Side Toggles - pushed far to the right */}
             <div className="flex flex-row lg:flex-col gap-4 lg:gap-6 lg:mr-auto lg:ml-24">
-              <ToggleSwitch
-                leftLabel="Celsius"
-                rightLabel="Fahrenheit"
-                isRightSelected={temperatureUnit === 'fahrenheit'}
-                onToggle={toggleTemperatureUnit}
-              />
-              <ToggleSwitch
-                leftLabel="12-hr⠀"
-                rightLabel="24-hr"
-                isRightSelected={timeFormat === '24hr'}
-                onToggle={toggleTimeFormat}
-              />
+              <div className="w-52 flex justify-center">
+                <ToggleSwitch
+                  leftLabel="Celsius"
+                  rightLabel="Fahrenheit"
+                  isRightSelected={temperatureUnit === 'fahrenheit'}
+                  onToggle={toggleTemperatureUnit}
+                />
+              </div>
+              <div className="w-52 flex justify-center">
+                <ToggleSwitch
+                  leftLabel="12-hr"
+                  rightLabel="24-hr"
+                  isRightSelected={timeFormat === '24hr'}
+                  onToggle={toggleTimeFormat}
+                />
+              </div>
             </div>
           </div>
 

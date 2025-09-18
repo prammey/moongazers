@@ -56,7 +56,7 @@ export default function CurrentWeather({ weatherData }: CurrentWeatherProps) {
         {weatherData && (
           <>
             <div className="text-xs sm:text-sm font-medium mb-1">
-              {formatTemperature(weatherData.temperature)}
+              {formatTemperature(weatherData.temperature, 'celsius')}
             </div>
           </>
         )}

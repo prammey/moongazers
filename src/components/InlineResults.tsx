@@ -148,7 +148,7 @@ export default function InlineResults({ data, loading, error }: InlineResultsPro
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Temp:</span>
                     <span className="font-semibold text-gray-900">
-                      {formatTemperature(window.weather.temp)}
+                      {formatTemperature(window.weather.temp, 'celsius')}
                     </span>
                   </div>
                   <div className="flex justify-between text-sm">

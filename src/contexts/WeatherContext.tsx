@@ -18,7 +18,7 @@ interface WeatherContextType {
 const WeatherContext = createContext<WeatherContextType | undefined>(undefined);
 
 export function WeatherProvider({ children }: { children: React.ReactNode }) {
-  const [temperatureUnit, setTemperatureUnit] = useState<TemperatureUnit>('fahrenheit');
+  const [temperatureUnit, setTemperatureUnit] = useState<TemperatureUnit>('celsius');
   const [timeFormat, setTimeFormat] = useState<TimeFormat>('12hr');
 
   // Load preferences from localStorage on mount
@@ -26,11 +26,11 @@ export function WeatherProvider({ children }: { children: React.ReactNode }) {
     const savedTempUnit = localStorage.getItem('temperatureUnit') as TemperatureUnit;
     const savedTimeFormat = localStorage.getItem('timeFormat') as TimeFormat;
     
-    // Always default to Fahrenheit if no saved preference
+    // Always default to Celsius if no saved preference
     if (savedTempUnit && (savedTempUnit === 'celsius' || savedTempUnit === 'fahrenheit')) {
       setTemperatureUnit(savedTempUnit);
     } else {
-      setTemperatureUnit('fahrenheit'); // Ensure Fahrenheit is always the default
+      setTemperatureUnit('celsius'); // Ensure Celsius is always the default
     }
     
     if (savedTimeFormat) {
