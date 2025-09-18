@@ -152,6 +152,8 @@ npm run lint     # ESLint checking
 
 This project is licensed under the MIT License.
 
+#
+
 ## Acknowledgments
 
 - **Astrospheric**: Primary weather and sky data provider
