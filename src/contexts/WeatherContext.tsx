@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect } from "react";
 
-type TemperatureUnit = 'celsius' | 'fahrenheit';
-type TimeFormat = '12hr' | '24hr';
+type TemperatureUnit = "celsius" | "fahrenheit";
+type TimeFormat = "12hr" | "24hr";
 
 interface WeatherContextType {
   temperatureUnit: TemperatureUnit;
@@ -32,7 +32,7 @@ export function WeatherProvider({ children }: { children: React.ReactNode }) {
     } else {
       setTemperatureUnit('celsius'); // Ensure Celsius is always the default
     }
-    
+
     if (savedTimeFormat) {
       setTimeFormat(savedTimeFormat);
     }
@@ -40,65 +40,75 @@ export function WeatherProvider({ children }: { children: React.ReactNode }) {
 
   // Save preferences to localStorage when they change
   useEffect(() => {
-    localStorage.setItem('temperatureUnit', temperatureUnit);
+    localStorage.setItem("temperatureUnit", temperatureUnit);
   }, [temperatureUnit]);
 
   useEffect(() => {
-    localStorage.setItem('timeFormat', timeFormat);
+    localStorage.setItem("timeFormat", timeFormat);
   }, [timeFormat]);
 
   const toggleTemperatureUnit = () => {
-    setTemperatureUnit(prev => prev === 'celsius' ? 'fahrenheit' : 'celsius');
+    setTemperatureUnit((prev) =>
+      prev === "celsius" ? "fahrenheit" : "celsius"
+    );
   };
 
   const toggleTimeFormat = () => {
-    setTimeFormat(prev => prev === '12hr' ? '24hr' : '12hr');
+    setTimeFormat((prev) => (prev === "12hr" ? "24hr" : "12hr"));
   };
 
-  const convertTemperature = (temp: number, fromUnit: TemperatureUnit = 'fahrenheit'): number => {
+  const convertTemperature = (
+    temp: number,
+    fromUnit: TemperatureUnit = "fahrenheit"
+  ): number => {
     if (temperatureUnit === fromUnit) return Math.round(temp);
-    
-    if (fromUnit === 'fahrenheit' && temperatureUnit === 'celsius') {
-      return Math.round((temp - 32) * (5/9));
-    } else if (fromUnit === 'celsius' && temperatureUnit === 'fahrenheit') {
-      return Math.round((temp * 9/5) + 32);
+
+    if (fromUnit === "fahrenheit" && temperatureUnit === "celsius") {
+      return Math.round((temp - 32) * (5 / 9));
+    } else if (fromUnit === "celsius" && temperatureUnit === "fahrenheit") {
+      return Math.round((temp * 9) / 5 + 32);
     }
-    
+
     return Math.round(temp);
   };
 
   const formatTime = (date: Date): string => {
-    if (timeFormat === '12hr') {
-      return date.toLocaleTimeString('en-US', {
-        hour: 'numeric',
-        minute: '2-digit',
-        hour12: true
+    if (timeFormat === "12hr") {
+      return date.toLocaleTimeString("en-US", {
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true,
       });
     } else {
-      return date.toLocaleTimeString('en-US', {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false
+      return date.toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
       });
     }
   };
 
-  const formatTemperature = (temp: number, fromUnit: TemperatureUnit = 'fahrenheit'): string => {
+  const formatTemperature = (
+    temp: number,
+    fromUnit: TemperatureUnit = "celsius"
+  ): string => {
     const convertedTemp = convertTemperature(temp, fromUnit);
-    const unit = temperatureUnit === 'celsius' ? '°C' : '°F';
+    const unit = temperatureUnit === "celsius" ? "°C" : "°F";
     return `${convertedTemp}${unit}`;
   };
 
   return (
-    <WeatherContext.Provider value={{
-      temperatureUnit,
-      timeFormat,
-      toggleTemperatureUnit,
-      toggleTimeFormat,
-      convertTemperature,
-      formatTime,
-      formatTemperature
-    }}>
+    <WeatherContext.Provider
+      value={{
+        temperatureUnit,
+        timeFormat,
+        toggleTemperatureUnit,
+        toggleTimeFormat,
+        convertTemperature,
+        formatTime,
+        formatTemperature,
+      }}
+    >
       {children}
     </WeatherContext.Provider>
   );
@@ -107,7 +117,7 @@ export function WeatherProvider({ children }: { children: React.ReactNode }) {
 export function useWeather() {
   const context = useContext(WeatherContext);
   if (context === undefined) {
-    throw new Error('useWeather must be used within a WeatherProvider');
+    throw new Error("useWeather must be used within a WeatherProvider");
   }
   return context;
 }
