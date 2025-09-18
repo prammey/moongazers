@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { WeatherProvider } from "@/contexts/WeatherContext";
+import { Analytics } from '@vercel/analytics/next';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://moongazers.prameet.space'),
@@ -53,6 +54,7 @@ export default function RootLayout({
         <WeatherProvider>
           {children}
         </WeatherProvider>
+        <Analytics />
       </body>
     </html>
   );
