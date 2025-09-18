@@ -31,9 +31,10 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
-/* Kosugi Maru helper class */
+/* Helper class for special font styling */
 .kosugi-maru {
-  font-family: 'Kosugi Maru', sans-serif;
+  font-family: 'Comic Sans MS', cursive, sans-serif;
+  font-weight: 400;
 }
 
 /* Custom scrollbar styles for the documentation modal */

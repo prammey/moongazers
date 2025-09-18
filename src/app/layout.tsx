@@ -1,15 +1,9 @@
 import type { Metadata } from "next";
-import { Kosugi_Maru } from "next/font/google";
 import "./globals.css";
 import { WeatherProvider } from "@/contexts/WeatherContext";
 
-const kosugiMaru = Kosugi_Maru({
-  weight: "400",
-  subsets: ["latin"],
-  variable: "--font-kosugi-maru",
-});
-
 export const metadata: Metadata = {
+  metadataBase: new URL('https://moongazers.prameet.space'),
   title: "Moongazers - Best Stargazing Times",
   description: "Find the best stargazing times in your area with weather conditions and moon phases",
   openGraph: {
@@ -41,10 +35,6 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <link
-          href="https://fonts.googleapis.com/css2?family=Kosugi+Maru:wght@400&display=swap"
-          rel="stylesheet"
-        />
         {/* Favicon and Open Graph image for social sharing */}
         <link rel="icon" href="/moonX.png" />
         <meta property="og:title" content="Moongazers - Best Stargazing Times" />

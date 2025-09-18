@@ -128,7 +128,7 @@ export default function Home() {
               type="button"
               onClick={() => setShowDocDialog(true)}
               className="text-xs sm:text-sm md:text-base bg-white border border-gray-300 px-3 py-1 rounded-md shadow-sm hover:shadow-md focus:outline-none transition-shadow kosugi-maru text-black text-bold cursor-pointer"
-              style={{ fontFamily: "'Kosugi Maru', sans-serif" }}
+              style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}
             >
               Doc
             </button>
