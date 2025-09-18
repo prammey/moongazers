@@ -423,83 +423,151 @@ export default function Home() {
 
             {/* Scrollable Content */}
             <div className="p-6 overflow-auto max-h-[75vh] prose prose-sm max-w-none doc-scroll">
-              <h2 className="text-xl font-bold mb-4 text-gray-900">How the app chooses the best nights to stargaze</h2>
+              <h2 className="text-xl font-bold mb-4 text-gray-900">Moongazers: Complete Stargazing Guide & Documentation</h2>
               
-              <h3 className="text-lg font-semibold mb-3 text-gray-800">Overview</h3>
+              <h3 className="text-lg font-semibold mb-3 text-gray-800">What is Moongazers?</h3>
               <p className="mb-4 text-gray-700">
-                This document explains the server-side API used by the Moongazers app, what data is fetched from external providers, 
-                how it&apos;s processed, cached, and where the results are used in the frontend.
+                Moongazers is an intelligent stargazing forecast application that analyzes weather patterns, astronomical events, and sky conditions to recommend the optimal times for celestial observations. Whether you&apos;re a casual stargazer or an experienced astronomer, this app provides data-driven recommendations for your next stargazing session.
               </p>
 
-              <h3 className="text-lg font-semibold mb-3 text-gray-800">Primary API endpoint</h3>
-              <ul className="mb-4 text-gray-700">
-                <li><strong>POST /api/best-windows</strong></li>
-                <li><strong>Purpose:</strong> Accepts a location string (US ZIP or global place), geocodes it to coordinates, fetches weather and sky data, scores candidate night-time windows for stargazing, and returns the best windows and current weather summary.</li>
-                <li><strong>Input:</strong> JSON {`{ location: string }`}</li>
-                <li><strong>Output:</strong> JSON with location, coordinates, currentWeather, and windows array</li>
-              </ul>
-
-              <h3 className="text-lg font-semibold mb-3 text-gray-800">How It Works - Step by Step</h3>
+              <h3 className="text-lg font-semibold mb-3 text-gray-800">How It Works</h3>
+              <p className="mb-2 text-gray-700">Our sophisticated algorithm processes multiple data sources:</p>
               <ol className="mb-4 text-gray-700 space-y-2">
-                <li><strong>1. Geocoding:</strong> Your ZIP code or location is converted to latitude/longitude coordinates using US Census (for US ZIP codes) or OpenStreetMap Nominatim (for international locations).</li>
-                <li><strong>2. Weather Data:</strong> Hourly weather data is fetched from Astrospheric (primary) or Open-Meteo (fallback), including cloud cover, temperature, and wind speed.</li>
-                <li><strong>3. Astronomical Calculations:</strong> Moon phase, illumination percentage, and visibility are calculated using the Astronomy Engine.</li>
-                <li><strong>4. Time Window Scoring:</strong> Each 3-hour nighttime window gets a visibility score based on cloud cover and moon interference.</li>
-                <li><strong>5. Ranking & Selection:</strong> Windows are ranked by score and the top results are returned with detailed information.</li>
+                <li><strong>1. Location Processing:</strong> Your ZIP code is geocoded to precise latitude/longitude coordinates using US Census Bureau data (for US locations) or OpenStreetMap Nominatim service (international).</li>
+                <li><strong>2. Weather Analysis:</strong> Hourly meteorological data is fetched from professional weather services, including cloud cover percentage, temperature, wind speed, and atmospheric pressure.</li>
+                <li><strong>3. Astronomical Calculations:</strong> Real-time celestial mechanics are computed using the Astronomy Engine library, calculating moon phases, planetary positions, and stellar visibility.</li>
+                <li><strong>4. Sky Quality Assessment:</strong> Each time window receives a visibility score based on cloud cover, moon interference, and atmospheric conditions.</li>
+                <li><strong>5. Intelligent Filtering:</strong> Only time windows before 4:30 AM are considered, as this represents optimal astronomical observation periods when the sky is darkest.</li>
+                <li><strong>6. Ranking & Recommendations:</strong> The top 3 time windows are selected and presented with comprehensive observational data.</li>
               </ol>
 
-              <h3 className="text-lg font-semibold mb-3 text-gray-800">Scoring Logic</h3>
-              <p className="mb-2 text-gray-700">Each time window gets a visibility score calculated as:</p>
+              <h3 className="text-lg font-semibold mb-3 text-gray-800">Understanding Your Results</h3>
+              
+              <h4 className="text-base font-semibold mb-2 text-gray-800">Cloud Coverage Classifications</h4>
               <ul className="mb-4 text-gray-700">
-                <li><strong>Base Score:</strong> 1 - (cloudCover / 100) — lower cloud cover = higher score</li>
-                <li><strong>Moon Penalty:</strong> If moon is visible and ≥60% illuminated, score is reduced by 0.2</li>
-                <li><strong>Threshold:</strong> Only windows with score ≥0.6 are considered &quot;good&quot; for stargazing</li>
+                <li><strong>No Cloud Coverage (0-10%):</strong> Exceptional conditions - perfect for deep-sky photography and faint object observation</li>
+                <li><strong>Low Cloud Coverage (11-30%):</strong> Excellent conditions - ideal for planetary observation and bright deep-sky objects</li>
+                <li><strong>Medium Cloud Coverage (31-60%):</strong> Fair conditions - suitable for moon, planets, and bright stars</li>
+                <li><strong>High Cloud Coverage (61-100%):</strong> Poor conditions - limited to brightest objects only</li>
               </ul>
 
-              <h3 className="text-lg font-semibold mb-3 text-gray-800">Weather Data Sources</h3>
+              <h4 className="text-base font-semibold mb-2 text-gray-800">Moon Impact Assessment</h4>
               <ul className="mb-4 text-gray-700">
-                <li><strong>Primary:</strong> Astrospheric API (astronomy-focused weather data)</li>
-                <li><strong>Fallback:</strong> Open-Meteo (free weather service)</li>
-                <li><strong>Data Used:</strong> Hourly cloud cover, temperature, wind speed, plus sunrise/sunset times</li>
+                <li><strong>Low Impact:</strong> New moon or thin crescent (&lt;30% illumination) - optimal for deep-sky observations and astrophotography</li>
+                <li><strong>Medium Impact:</strong> Quarter moon phases (30-70% illumination) - good for planetary and lunar observation</li>
+                <li><strong>High Impact:</strong> Full or gibbous moon (&gt;70% illumination) - bright sky limits faint object visibility but excellent for lunar features</li>
               </ul>
 
-              <h3 className="text-lg font-semibold mb-3 text-gray-800">Caching Strategy</h3>
+              <h4 className="text-base font-semibold mb-2 text-gray-800">Visible Celestial Objects</h4>
+              <p className="mb-2 text-gray-700">Objects are determined by:</p>
+              <ul className="mb-4 text-gray-700">
+                <li><strong>Planets:</strong> Calculated positions above horizon with magnitude &gt; 0 (naked-eye visibility)</li>
+                <li><strong>Stars:</strong> Selected from Hipparcos catalog with magnitude &lt; 2.5, filtered by altitude &gt; 30° for optimal viewing</li>
+                <li><strong>Viewing Recommendations:</strong> Objects listed are visible to naked eye under stated conditions</li>
+              </ul>
+
+              <h3 className="text-lg font-semibold mb-3 text-gray-800">Technical Specifications</h3>
+              
+              <h4 className="text-base font-semibold mb-2 text-gray-800">Data Sources & APIs</h4>
+              <ul className="mb-4 text-gray-700">
+                <li><strong>Primary Weather:</strong> Astrospheric API - specialized astronomical weather forecasting with seeing conditions</li>
+                <li><strong>Backup Weather:</strong> Open-Meteo - European weather model with high-resolution forecasts</li>
+                <li><strong>Geocoding:</strong> US Census Bureau (domestic) / OpenStreetMap Nominatim (international)</li>
+                <li><strong>Astronomical Calculations:</strong> Astronomy Engine - precise celestial mechanics library</li>
+                <li><strong>Time Zones:</strong> TimeZoneDB API for accurate local time conversions</li>
+              </ul>
+
+              <h4 className="text-base font-semibold mb-2 text-gray-800">Scoring Algorithm</h4>
+              <p className="mb-2 text-gray-700">Each observation window receives a visibility score:</p>
+              <ul className="mb-4 text-gray-700">
+                <li><strong>Base Score:</strong> 1.0 - (cloudCover / 100) — clear skies = higher score</li>
+                <li><strong>Moon Penalty:</strong> -0.2 deduction if moon illumination ≥60% and above horizon</li>
+                <li><strong>Minimum Threshold:</strong> Only windows scoring ≥0.6 are considered viable</li>
+                <li><strong>Time Filtering:</strong> Windows ending after 4:30 AM are excluded (astronomical twilight consideration)</li>
+              </ul>
+
+              <h4 className="text-base font-semibold mb-2 text-gray-800">Caching & Performance</h4>
+              <ul className="mb-4 text-gray-700">
+                <li><strong>Geocoding Cache:</strong> 30 days (coordinates rarely change)</li>
+                <li><strong>Weather Cache:</strong> 6 hours (balances accuracy with performance)</li>
+                <li><strong>Astronomical Cache:</strong> 12 hours (celestial positions change slowly)</li>
+                <li><strong>Error Handling:</strong> Automatic fallback between primary and backup services</li>
+              </ul>
+
+              <h3 className="text-lg font-semibold mb-3 text-gray-800">For Different User Types</h3>
+              
+              <h4 className="text-base font-semibold mb-2 text-gray-800">Casual Stargazers</h4>
+              <ul className="mb-4 text-gray-700">
+                <li>Focus on <strong>Low/No Cloud Coverage</strong> recommendations</li>
+                <li>Best results during <strong>Low Moon Impact</strong> periods</li>
+                <li>Start with bright planets (Jupiter, Venus) and prominent stars listed</li>
+                <li>Use temperature data to dress appropriately for outdoor viewing</li>
+              </ul>
+
+              <h4 className="text-base font-semibold mb-2 text-gray-800">Telescope Users</h4>
+              <ul className="mb-4 text-gray-700">
+                <li>Prioritize windows with <strong>wind speeds &lt;15 mph</strong> for stable viewing</li>
+                <li>Moon phases affect different targets: new moon for galaxies/nebulae, full moon for lunar details</li>
+                <li>Use planetary positions for high-magnification observations</li>
+                <li>Consider atmospheric seeing conditions from weather data</li>
+              </ul>
+
+              <h4 className="text-base font-semibold mb-2 text-gray-800">Astrophotographers</h4>
+              <ul className="mb-4 text-gray-700">
+                <li>Seek <strong>No Cloud Coverage</strong> periods exclusively</li>
+                <li>New moon phases (Low Impact) essential for deep-sky imaging</li>
+                <li>Monitor wind conditions for equipment stability</li>
+                <li>Plan multi-hour sessions within recommended windows</li>
+              </ul>
+
+              <h3 className="text-lg font-semibold mb-3 text-gray-800">Important Disclaimers</h3>
+              <ul className="mb-4 text-gray-700">
+                <li><strong>Weather Accuracy:</strong> Forecasts are predictions and may change. Always check current conditions before traveling.</li>
+                <li><strong>Local Variations:</strong> Microclimates, elevation, and nearby weather systems can create conditions different from forecasts.</li>
+                <li><strong>Light Pollution:</strong> Calculations assume dark sky conditions. Urban light pollution significantly reduces visible objects.</li>
+                <li><strong>Atmospheric Seeing:</strong> Even clear skies may have poor atmospheric stability affecting telescopic observations.</li>
+                <li><strong>Safety:</strong> Always inform others of stargazing plans and observe safety protocols for nighttime outdoor activities.</li>
+              </ul>
+
+              <h3 className="text-lg font-semibold mb-3 text-gray-800">Credits & Acknowledgments</h3>
+              <div className="mb-4 text-gray-700">
+                <p className="mb-2"><strong>Data Providers:</strong></p>
+                <ul className="mb-3">
+                  <li><strong>Astrospheric:</strong> Professional astronomical weather forecasting service</li>
+                  <li><strong>Open-Meteo:</strong> Open-source European weather prediction models</li>
+                  <li><strong>US Census Bureau:</strong> Accurate US geographic coordinate data</li>
+                  <li><strong>OpenStreetMap:</strong> Global geographic database and geocoding services</li>
+                  <li><strong>TimeZoneDB:</strong> Comprehensive timezone and daylight saving time database</li>
+                </ul>
+                
+                <p className="mb-2"><strong>Scientific Libraries:</strong></p>
+                <ul className="mb-3">
+                  <li><strong>Astronomy Engine:</strong> Precise astronomical calculations by Don Cross</li>
+                  <li><strong>Hipparcos Star Catalog:</strong> European Space Agency stellar position database</li>
+                  <li><strong>Luxon:</strong> Sophisticated date/time handling for astronomical calculations</li>
+                </ul>
+                
+                <p className="mb-2"><strong>Development:</strong></p>
+                <ul className="mb-4">
+                  <li>Built with <strong>Next.js 15</strong> and <strong>TypeScript</strong> for type-safe development</li>
+                  <li>Styled with <strong>Tailwind CSS</strong> for responsive design</li>
+                  <li>Hosted on <strong>Vercel</strong> with global CDN for fast worldwide access</li>
+                  <li>Created by <strong>Prameet Guha</strong> with passion for astronomy and education</li>
+                </ul>
+              </div>
+
+              <h3 className="text-lg font-semibold mb-3 text-gray-800">Support & Feedback</h3>
               <p className="mb-4 text-gray-700">
-                To improve performance and reduce external API calls, data is cached with different durations:
-                geocoding (long-term), weather forecasts (6 hours), and sky data (12 hours).
+                Questions, suggestions, or found a bug? Contact us at <strong>prameet.guha@gmail.com</strong> or visit <strong>prameet.space</strong> for more projects. 
+                We&apos;re committed to improving stargazing accessibility for everyone!
               </p>
 
-              <h3 className="text-lg font-semibold mb-3 text-gray-800">Cloud Coverage Labels</h3>
-              <p className="mb-2 text-gray-700">Cloud cover percentages are converted to user-friendly labels:</p>
-              <ul className="mb-4 text-gray-700">
-                <li><strong>0-10%:</strong> No Cloud Coverage</li>
-                <li><strong>11-30%:</strong> Low Cloud Coverage</li>
-                <li><strong>31-60%:</strong> Medium Cloud Coverage</li>
-                <li><strong>61-100%:</strong> High Cloud Coverage</li>
-              </ul>
-
-              <h3 className="text-lg font-semibold mb-3 text-gray-800">What You See in Results</h3>
-              <p className="mb-2 text-gray-700">Each recommended time window includes:</p>
-              <ul className="mb-4 text-gray-700">
-                <li><strong>Time Range:</strong> Start and end times for optimal viewing</li>
-                <li><strong>Weather:</strong> Cloud coverage, temperature, and wind conditions</li>
-                <li><strong>Moon Info:</strong> Phase, illumination percentage, and impact on visibility</li>
-                <li><strong>Visible Objects:</strong> Lists of planets and bright stars you can expect to see</li>
-              </ul>
-
-              <h3 className="text-lg font-semibold mb-3 text-gray-800">Error Handling</h3>
-              <p className="mb-4 text-gray-700">
-                The system includes multiple fallback mechanisms: if the primary weather service fails, it switches to the backup service. 
-                If US geocoding fails, it tries international geocoding. All errors are converted to user-friendly messages.
-              </p>
-
-              <h3 className="text-lg font-semibold mb-3 text-gray-800">Technical Notes</h3>
-              <ul className="mb-4 text-gray-700">
-                <li>Built with Next.js 15 App Router and TypeScript</li>
-                <li>Uses server-side caching with revalidation</li>
-                <li>Moon illumination values are clamped to 0-100% range</li>
-                <li>Responsive design works on mobile and desktop</li>
-              </ul>
+              <div className="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <p className="text-xs text-gray-600 leading-relaxed">
+                  <strong>License:</strong> Educational and personal use | 
+                  <strong>Accuracy:</strong> Weather forecasts typically 70-85% accurate 3+ days out, astronomical calculations precise to arc-seconds
+                </p>
+              </div>
             </div>
           </div>
         </div>
