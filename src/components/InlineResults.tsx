@@ -262,6 +262,13 @@ export default function InlineResults({
           })}
         </div>
       )}
+      
+      {/* Disclaimer */}
+      <div className="mt-8 text-sm border-t border-gray-300 pt-5 px-4 bg-gray-50 py-4 rounded">
+        <p className="text-gray-700 max-w-3xl mx-auto">
+          Forecast data from Astrospheric and Open-Meteo; transformed for astronomy use. Results are provided &ldquo;as is&rdquo; and may be inaccurate or outdated. This tool is educational and not for operational or commercial use. Not affiliated with or endorsed by Astrospheric or Open-Meteo.
+        </p>
+      </div>
     </div>
   );
 }

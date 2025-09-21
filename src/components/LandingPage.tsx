@@ -78,13 +78,9 @@ export default function LandingPage({ onLaunch, isLaunching = false }: LandingPa
           >
             Launch MoonGazers App
           </button>
-        </div>
-
-        {/* Subtle footer decoration */}
-        <div className="flex justify-center items-center gap-2 text-gray-400 text-sm">
-          <span>✦</span>
-          <span>Perfect nights await</span>
-          <span>✦</span>
+          <p className="mt-3 text-xs text-gray-500">
+            Note: Forecasts are approximate and may vary with local weather and light pollution.
+          </p>
         </div>
       </div>
 
