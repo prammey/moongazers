@@ -6,6 +6,7 @@ import CurrentWeather from '@/components/CurrentWeather';
 import ToggleSwitch from '@/components/ToggleSwitch';
 import InlineResults from '@/components/InlineResults';
 import LandingPage from '@/components/LandingPage';
+import AdminDashboard from '@/components/AdminDashboard';
 import Image from 'next/image';
 
 interface StargazingData {
@@ -21,6 +22,7 @@ interface StargazingData {
 export default function Home() {
   const { temperatureUnit, timeFormat, toggleTemperatureUnit, toggleTimeFormat } = useWeather();
   const [showLandingPage, setShowLandingPage] = useState(true);
+  const [showAdminDashboard, setShowAdminDashboard] = useState(false);
   const [isLaunchingApp, setIsLaunchingApp] = useState(false);
   const [location, setLocation] = useState('');
   const [loading, setLoading] = useState(false);
@@ -33,6 +35,20 @@ export default function Home() {
   } | null>(null);
   const [showContactDialog, setShowContactDialog] = useState(false);
   const [showDocDialog, setShowDocDialog] = useState(false);
+  
+  // Handle admin access with keyboard shortcut (Ctrl+Shift+A)
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.ctrlKey && event.shiftKey && event.key === 'A') {
+        event.preventDefault();
+        setShowAdminDashboard(true);
+        setShowLandingPage(false);
+      }
+    };
+    
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, []);
   
   // Handle Escape key for Doc modal
   useEffect(() => {
@@ -50,15 +66,30 @@ export default function Home() {
   
   // Handle launching the main app from landing page
   const handleLaunchApp = () => {
-    console.log('🚀 Starting app launch animation');
     setIsLaunchingApp(true);
-    // Wait for animation to complete before hiding landing page
+    // Wait for slow, visible slide-up animation to complete before hiding landing page
     setTimeout(() => {
-      console.log('✅ Animation complete, hiding landing page');
       setShowLandingPage(false);
       setIsLaunchingApp(false);
-    }, 2700); // 2700ms gives a small buffer after the 2500ms animation
+    }, 2500); // Increased time for slow, visible slide-up animation
   };
+
+  // Prevent body scroll when landing page is active, but allow it during animation
+  useEffect(() => {
+    if (showLandingPage && !isLaunchingApp) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      // Allow scroll when launching or when landing page is closed
+      document.body.style.overflow = '';
+      // Force a small reflow to ensure scrollbars appear immediately
+      void document.body.offsetHeight;
+    }
+    
+    // Cleanup on unmount
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [showLandingPage, isLaunchingApp]);
   
   // Removed country selection functionality for simpler input
 
@@ -110,11 +141,22 @@ export default function Home() {
     }
   };
 
+  // Handle admin dashboard navigation
+  const handleBackToMain = () => {
+    setShowAdminDashboard(false);
+    setShowLandingPage(true);
+  };
+
+  // Show admin dashboard if requested
+  if (showAdminDashboard) {
+    return <AdminDashboard onBackToMain={handleBackToMain} />;
+  }
+
   return (
-    <div style={{ backgroundColor: '#ffffff', minHeight: '100vh', position: 'relative' }}>
+    <div style={{ backgroundColor: '#ffffff', position: 'relative' }}>
       {/* Main App - Always rendered but behind landing page when needed */}
       <div 
-        className="relative min-h-screen"
+        className="relative"
         style={{ 
           backgroundColor: '#ffffff'
         }}
@@ -344,7 +386,7 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Landing Page Overlay - positioned above main app when visible */}
+        {/* Landing Page Overlay - slides up to reveal main app */}
         {showLandingPage && (
           <div className="fixed inset-0 z-50">
             <LandingPage onLaunch={handleLaunchApp} isLaunching={isLaunchingApp} />

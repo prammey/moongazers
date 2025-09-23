@@ -1,0 +1,192 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Research {
+  id               String   @id @default(cuid())
+  title            String
+  date             String   // Can be single date or date range
+  shortDescription String?  // Optional
+  content          String   // Markdown content
+  color            String   @default("#3b82f6") // Default blue color
+  link             String?  // Optional external link
+  linkText         String?  // Optional link text
+  order            Int      @default(0) // For ordering posts
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime? @updatedAt
+
+  @@map("research")
+}
+
+// Sources to scrape for space news/events
+model NewsSource {
+  id           String   @id @default(cuid())
+  name         String
+  url          String   @unique
+  active       Boolean  @default(true)
+  lastSyncedAt DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  items NewsItem[]
+
+  @@map("news_sources")
+}
+
+// News and events items
+model NewsItem {
+  id           String   @id @default(cuid())
+  title        String
+  summary      String?
+  content      String? // markdown
+  imageUrl     String?
+  sourceUrl    String   @unique
+  sourceName   String
+  publishedAt  DateTime
+  type         String   @default("news") // "news" | "event"
+  published    Boolean  @default(true)
+  tags         String[]
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // relation back to source (optional)
+  sourceId     String?
+  source       NewsSource? @relation(fields: [sourceId], references: [id], onDelete: SetNull)
+
+  @@index([published, publishedAt])
+  @@map("news_items")
+}
+
+model About {
+  id          String   @id @default(cuid())
+  content     String   // Markdown content for about page
+  profileImage String? // Cloudinary URL for profile image
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("about")
+}
+
+model SocialLink {
+  id        String   @id @default(cuid())
+  platform  String   // e.g., "twitter", "github", "linkedin"
+  url       String
+  icon      String   // Lucide icon name
+  color     String   @default("#3b82f6") // Platform color
+  order     Int      @default(0) // For ordering links
+  isVisible Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("social_links")
+}
+
+model User {
+  id       String @id @default(cuid())
+  username String @unique
+  password String // In production, this should be hashed
+  name     String @default("Prameet")
+  
+  @@map("users")
+}
+
+model Page {
+  id               Int       @id @default(autoincrement())
+  slug             String    @unique // e.g., "competitions", "astronomy-club"
+  title            String
+  background_color String    @default("#1a4d3a") // Default dark green
+  text_color       String    @default("#ffffff") // Default white
+  created_at       DateTime  @default(now())
+  updated_at       DateTime?  @updatedAt
+  blocks           Block[]
+
+  @@map("pages")
+}
+
+model Block {
+  id             Int      @id @default(autoincrement())
+  page_id        Int
+  block_type     String   // "heading", "paragraph", "image", "image-text"
+  content        String?
+  image_url      String?
+  image_alt      String?
+  image_caption  String?
+  image_position String   @default("center") // "left", "center", "right"
+  layout         String   @default("image-left") // "image-left", "image-right"
+  font_size      String   @default("base")
+  font_weight    String   @default("normal")
+  text_align     String   @default("left")
+  margin_top     String   @default("md")
+  margin_bottom  String   @default("md")
+  custom_css     String?
+  position_order Int      @default(0)
+  created_at     DateTime @default(now())
+  updated_at     DateTime? @updatedAt
+
+  page Page @relation(fields: [page_id], references: [id], onDelete: Cascade)
+
+  @@index([page_id, position_order])
+  @@map("page_blocks")
+}
+
+model Blog {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  excerpt     String?
+  content     String   // markdown
+  coverImage  String?
+  published   Boolean  @default(false)
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("blogs")
+}
+
+model Subscription {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  subscribedAt DateTime @default(now())
+
+  @@map("subscriptions")
+}
+
+// Full-screen launch dialogs that appear on specific pages
+model LaunchDialog {
+  id           String   @id @default(cuid())
+  title        String
+  description  String   // markdown
+  screenshotUrl String?
+  page         String   // e.g., "/telescope"
+  buttonText   String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([page, createdAt])
+  @@map("launch_dialogs")
+}
+
+// Landing page content management
+model LandingPage {
+  id          String   @id @default(cuid())
+  title       String   @default("MoonGazers – Find the Best Stargazing Nights")
+  description String   @default("When I first got interested in stargazing, I kept running into the same problem: the weather app told me if it would rain, but not if the sky would actually be good for astronomy. Moon brightness, wind, and timing all matter. That's why I built MoonGazers—a tool that helps anyone plan the perfect night under the stars.")
+  imageUrl    String   @default("/launch.png") // Cloudinary URL or local path
+  imageAlt    String   @default("MoonGazers App Preview - Weather, moon, planets, and stars cards")
+  buttonText  String   @default("Launch MoonGazers App")
+  footerText  String   @default("Note: Forecasts are approximate and may vary with local weather and light pollution.")
+  isActive    Boolean  @default(true) // Only one can be active at a time
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("landing_pages")
+}
