@@ -1,162 +1,112 @@
-# 🌙 Moongazers
+# 🌙 MoonGazers
 
-A Next.js 15 web application that helps users find the best moongazing and stargazing times in their area for the next 72 hours.
+[![Next.js](https://img.shields.io/badge/Next.js-15-black?logo=next.js)](https://nextjs.org/) 
+[![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=white)](https://react.dev/) 
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?logo=typescript)](https://www.typescriptlang.org/) 
+[![Tailwind CSS](https://img.shields.io/badge/TailwindCSS-3-38B2AC?logo=tailwind-css)](https://tailwindcss.com/) 
+[![MIT License](https://img.shields.io/badge/license-MIT-green)](LICENSE) 
+[![Live Demo](https://img.shields.io/badge/demo-online-brightgreen)](https://moongazers.prameet.space/)
 
+MoonGazers is a web app that helps anyone — from beginners to astronomy clubs — find the **best 90-minute windows for stargazing**.  
+Instead of overwhelming charts, it translates forecast and sky data into a single, simple recommendation.  
 
-## Features
+---
 
-- **Location-based forecasting**: Enter a US ZIP code or city name to get personalized stargazing recommendations
-- **Weather-aware scoring**: Uses cloud cover, temperature, and wind data to score viewing conditions
-- **Astronomical data**: Shows visible planets, bright stars, and moon phase information
-- **Optimized time windows**: Groups the best viewing times into 90-minute blocks
-- **Responsive design**: Beautiful Tailwind CSS interface with custom color theme (#fff2cc)
+## ✨ Features
+- **Location-aware**: Enter your ZIP code or city for local conditions.  
+- **Best Viewing Windows**: Groups adjacent good hours into 90-minute blocks.  
+- **At-a-Glance Sky**: Cloud cover, temperature, wind, moon phase, and visible planets/stars.  
+- **Simple Output**: A clear answer to *“When should I go outside?”*  
+- **Responsive UI**: Mobile-friendly design built with Tailwind CSS.  
 
-## Tech Stack
+---
 
-- **Frontend**: Next.js 15 (App Router), React, TypeScript, Tailwind CSS
-- **Backend**: Next.js API Routes with server-side caching
-- **APIs**: 
-  - Primary: Astrospheric API (weather + sky data)
-  - Fallback: Open-Meteo (weather) + Astronomy Engine (sky calculations)
-  - Geocoding: US Census Geocoder (free)
-  - Timezone: TimeZoneDB
-- **Astronomy**: Astronomy Engine library for celestial calculations
-- **Data**: Bright stars catalog (CSV) for star visibility
+## 🛠 Tech Stack
+- **Frontend**: Next.js 15 (App Router), React, TypeScript, Tailwind CSS  
+- **Backend**: Next.js API Routes (TypeScript) with server-side caching  
+- **Data**: Weather forecasts + astronomical calculations (moon, planets, bright stars)  
+- **Resilience**: Fallback pipeline if a primary upstream fails  
 
-## Getting Started
+---
+
+## 🔍 How It Works
+1. Input ZIP code or city  
+2. API fetches forecast + sky data  
+3. Each hour is **scored**:  
+   - Clear skies = higher score  
+   - Bright moon = penalty  
+   - Only nighttime hours count  
+4. Good hours merged into **90-minute observing windows**  
+5. Returns JSON → rendered in UI  
+
+*(Diagram idea: “Location → Forecast + Sky → Scoring → 90-min Blocks → Best Times”)*  
+
+---
+
+## 🚀 Getting Started
 
 ### Prerequisites
-
-- Node.js 18+ 
-- npm or yarn
+- Node.js 18+  
+- npm or yarn  
 
 ### Installation
-
-1. Clone the repository:
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/prammey/moongazers.git
 cd moongazers
-```
-
-2. Install dependencies:
-```bash
 npm install
-```
 
-3. Set up environment variables:
-Create a `.env.local` file with:
-```env
-ASTROSPHERIC_KEY=<your key>
-TIMEZONEDB_KEY=<your key>
-```
 
-4. Run the development server:
-```bash
-npm run dev
-```
+## Create .env.local:
 
-5. Open [http://localhost:3000](http://localhost:3000) in your browser.
-
-## Usage
-
-1. Enter a US ZIP code or city name (e.g., "60540" or "Naperville, IL")
-2. Click "Find Best Times" to get your personalized stargazing forecast
-3. View up to 3 optimal viewing windows with:
-   - Time ranges and cloud conditions
-   - Weather details (temperature, wind)
-   - Moon phase and impact on viewing
-   - Visible planets and bright stars
-
-## API Endpoints
-
-### POST /api/best-windows
-
-Returns the best moongazing windows for a given location.
-
-**Request Body:**
-```json
-{
-  "location": "60540"
-}
-```
-
-**Response:**
-```json
-{
-  "location": "Naperville, IL",
-  "windows": [
-    {
-      "start": "Aug 9, 9:15 PM",
-      "end": "Aug 9, 11:00 PM", 
-      "weather": { "cloud": 12, "temp": 72, "wind": 3 },
-      "moon": { "phase": "Waning Crescent", "illum": 18, "impact": "Low" },
-      "planets": ["Saturn", "Jupiter"],
-      "stars": ["Vega", "Deneb", "Arcturus"]
-    }
-  ]
-}
-```
-
-## Scoring Algorithm
-
-The app scores viewing conditions based on:
-- **Cloud cover**: Primary factor (lower is better)
-- **Moon interference**: Penalty for bright moon (>60% illumination) above horizon
-- **Time filtering**: Only considers nighttime hours (sunset+30min to sunrise-30min)
-- **Window grouping**: Combines adjacent good hours into 90+ minute blocks
-
-## Caching Strategy
-
-- **Geocoding**: 30 days (locations don't change)
-- **Weather forecast**: 6 hours (reasonable freshness)
-- **Sky data**: 12 hours (celestial positions change slowly)
-
-## Fallback System
-
-If the primary Astrospheric API fails (timeout >5s or error):
-1. Falls back to Open-Meteo for weather data
-2. Uses Astronomy Engine for celestial calculations
-3. Provides same data structure and user experience
-
-## Development
-
-### Project Structure
+ASTROSPHERIC_KEY=...
+TIMEZONEDB_KEY=...
 
 ```
-src/
-├── app/
-│   ├── api/best-windows/route.ts    # Main API endpoint
-│   ├── page.tsx                     # Frontend React component
-│   └── globals.css                  # Tailwind styles
-├── types/index.ts                   # TypeScript interfaces
-└── data/bright_stars.csv            # Star catalog data
-```
 
-### Build Commands
+## 🧮 Scoring Model
 
-```bash
-npm run dev      # Development server
-npm run build    # Production build
-npm run start    # Production server
-npm run lint     # ESLint checking
-```
+Cloud cover: Lower is better
+Moonlight: Penalty when bright & above horizon
+Night hours only: After sunset, before sunrise
+Window grouping: Merge good hours into 90-minute blocks
 
-## Contributing
+## 🧱 Caching & Fallback
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Run tests and linting
-5. Submit a pull request
+Cache TTLs: geocoding ~30 days; forecasts ~6 hours; sky data ~12 hours
+Fallback: If the primary upstream times out or errors, a backup path ensures the same JSON response shape
 
-## License
+## 🔒 Security Notes
 
-This project is licensed under the MIT License.
+API keys are required but must stay in .env.local (never in source).
+Only server code should reference keys.
+Validate user input (ZIP/city), apply timeouts, and rate-limit requests.
+Add security headers in next.config.ts for production.
 
-## Acknowledgments
+## 📜 License
 
-- **Astrospheric**: Primary weather and sky data provider
-- **Open-Meteo**: Free weather API for fallback
-- **Astronomy Engine**: Celestial calculations library
-- **US Census Bureau**: Free geocoding service
-- **TimeZoneDB**: Timezone lookup service
+MIT License — feel free to use, fork, and build on this project.
+
+## 🙏 Credits
+
+MoonGazers would not be possible without these data sources and tools:
+
+# Astrospheric API
+ — astronomy-focused forecast data
+
+# Open-Meteo
+ — global weather forecast API
+
+# TimeZoneDB
+ — timezone conversions for location-based forecasts
+
+# Astronomical data — derived from star catalogs and sky calculation libraries
+
+# Frameworks/Tools — Next.js, React, Tailwind CSS
+
+Special thanks to the astronomy community for inspiring this project.
+
+👤 Author
+
+Prameet Guha — high school student passionate about astronomy + computer science.
+🌐 Portfolio: prameet.space
+🚀 Live App: moongazers.prameet.space
