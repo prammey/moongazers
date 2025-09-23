@@ -46,8 +46,8 @@ npm install
 3. Set up environment variables:
 Create a `.env.local` file with:
 ```env
-ASTROSPHERIC_KEY=42168ACC7EB4ECD3593C7754E92491C74C499E81F94FFCFB3C3087EA326A8C44524C0FDC
-TIMEZONEDB_KEY=7NHWECCR4KQ2
+ASTROSPHERIC_KEY=<your key>
+TIMEZONEDB_KEY=<your key>
 ```
 
 4. Run the development server:
