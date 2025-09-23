@@ -90,18 +90,10 @@ MIT License — feel free to use, fork, and build on this project.
 
 MoonGazers would not be possible without these data sources and tools:
 
-# Astrospheric API
- — astronomy-focused forecast data
+- Astrospheric API 
+- Open-Meteo
+- TimeZoneDB
 
-# Open-Meteo
- — global weather forecast API
-
-# TimeZoneDB
- — timezone conversions for location-based forecasts
-
-# Astronomical data — derived from star catalogs and sky calculation libraries
-
-# Frameworks/Tools — Next.js, React, Tailwind CSS
 
 Special thanks to the astronomy community for inspiring this project.
 
