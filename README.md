@@ -2,6 +2,7 @@
 
 A Next.js 15 web application that helps users find the best moongazing and stargazing times in their area for the next 72 hours.
 
+
 ## Features
 
 - **Location-based forecasting**: Enter a US ZIP code or city name to get personalized stargazing recommendations
@@ -151,8 +152,6 @@ npm run lint     # ESLint checking
 ## License
 
 This project is licensed under the MIT License.
-
-#
 
 ## Acknowledgments
 
