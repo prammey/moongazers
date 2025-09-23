@@ -97,7 +97,7 @@ MoonGazers would not be possible without these data sources and tools:
 
 Special thanks to the astronomy community for inspiring this project.
 
-👤 Author
+## 👤 Author
 
 Prameet Guha — high school student passionate about astronomy + computer science.
 🌐 Portfolio: prameet.space
