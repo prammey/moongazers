@@ -1,12 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useWeather } from '@/contexts/WeatherContext';
 import CurrentWeather from '@/components/CurrentWeather';
 import ToggleSwitch from '@/components/ToggleSwitch';
 import InlineResults from '@/components/InlineResults';
 import LandingPage from '@/components/LandingPage';
-import AdminDashboard from '@/components/AdminDashboard';
 import Image from 'next/image';
 import ReactMarkdown from 'react-markdown';
 
@@ -22,8 +22,8 @@ interface StargazingData {
 
 export default function Home() {
   const { temperatureUnit, timeFormat, toggleTemperatureUnit, toggleTimeFormat } = useWeather();
+  const router = useRouter();
   const [showLandingPage, setShowLandingPage] = useState(true);
-  const [showAdminDashboard, setShowAdminDashboard] = useState(false);
   const [isLaunchingApp, setIsLaunchingApp] = useState(false);
   const [location, setLocation] = useState('');
   const [loading, setLoading] = useState(false);
@@ -46,14 +46,13 @@ export default function Home() {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.ctrlKey && event.shiftKey && event.key === 'A') {
         event.preventDefault();
-        setShowAdminDashboard(true);
-        setShowLandingPage(false);
+        router.push('/admin');
       }
     };
     
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  }, [router]);
   
   // Handle Escape key for Doc modal
   useEffect(() => {
@@ -158,17 +157,6 @@ export default function Home() {
       setLoading(false);
     }
   };
-
-  // Handle admin dashboard navigation
-  const handleBackToMain = () => {
-    setShowAdminDashboard(false);
-    setShowLandingPage(true);
-  };
-
-  // Show admin dashboard if requested
-  if (showAdminDashboard) {
-    return <AdminDashboard onBackToMain={handleBackToMain} />;
-  }
 
   return (
     <div style={{ backgroundColor: '#ffffff', position: 'relative' }}>
