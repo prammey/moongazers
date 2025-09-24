@@ -1,47 +1,12 @@
-import { PrismaClient } from '@prisma/client';
-import bcryptjs from 'bcryptjs';
+// This script is deprecated - Admin users should be created directly via SQL
+// Example SQL query:
+// INSERT INTO users (id, username, password, name) 
+// VALUES ('<unique-id>', '<your-username>', '<your-password>', '<your-name>');
 
-const prisma = new PrismaClient();
-
-async function createAdminUser() {
-  try {
-    // Hash the password
-    const hashedPassword = await bcryptjs.hash('admin123', 12);
-
-    // Check if admin user already exists
-    const existingUser = await prisma.user.findUnique({
-      where: { username: 'admin' }
-    });
-
-    if (existingUser) {
-      console.log('Admin user already exists');
-      return;
-    }
-
-    // Create admin user
-    const adminUser = await prisma.user.create({
-      data: {
-        username: 'admin',
-        password: hashedPassword,
-        name: 'MoonGazers Admin'
-      }
-    });
-
-    console.log('Admin user created successfully:', {
-      id: adminUser.id,
-      username: adminUser.username,
-      name: adminUser.name
-    });
-
-    console.log('\nAdmin credentials:');
-    console.log('Username: admin');
-    console.log('Password: admin123');
-
-  } catch (error) {
-    console.error('Error creating admin user:', error);
-  } finally {
-    await prisma.$disconnect();
-  }
-}
-
-createAdminUser();
+console.log('⚠️  This script is deprecated.');
+console.log('📝 Create admin users directly in your database using SQL:');
+console.log('');
+console.log('   INSERT INTO users (id, username, password, name)');
+console.log('   VALUES (\'<unique-id>\', \'<your-username>\', \'<your-password>\', \'<your-name>\');');
+console.log('');
+console.log('✅ The authentication system will read from the database automatically.');

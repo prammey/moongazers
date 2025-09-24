@@ -1,55 +1,14 @@
-import { PrismaClient } from '@prisma/client';
-import bcryptjs from 'bcryptjs';
+// This script is deprecated - Admin users should be managed directly via SQL
+// Example SQL queries:
 
-const prisma = new PrismaClient();
-
-async function fixAdminUser() {
-  try {
-    console.log('Checking current users...');
-    
-    // Get all users
-    const users = await prisma.user.findMany();
-    console.log('Current users:', users);
-
-    // Delete existing admin user if exists
-    await prisma.user.deleteMany({
-      where: { username: 'admin' }
-    });
-
-    console.log('Deleted existing admin user');
-
-    // Hash the password properly
-    const hashedPassword = await bcryptjs.hash('admin123', 12);
-    console.log('Password hash created');
-
-    // Create new admin user
-    const adminUser = await prisma.user.create({
-      data: {
-        username: 'admin',
-        password: hashedPassword,
-        name: 'MoonGazers Admin'
-      }
-    });
-
-    console.log('✅ Admin user created successfully:', {
-      id: adminUser.id,
-      username: adminUser.username,
-      name: adminUser.name
-    });
-
-    console.log('\n🔑 Admin credentials:');
-    console.log('Username: admin');
-    console.log('Password: admin123');
-
-    // Test the password hash
-    const isValid = await bcryptjs.compare('admin123', hashedPassword);
-    console.log('\n🧪 Password hash test:', isValid ? '✅ Valid' : '❌ Invalid');
-
-  } catch (error) {
-    console.error('❌ Error:', error);
-  } finally {
-    await prisma.$disconnect();
-  }
-}
-
-fixAdminUser();
+console.log('⚠️  This script is deprecated.');
+console.log('📝 Manage admin users directly in your database using SQL:');
+console.log('');
+console.log('🗑️  Delete existing admin:');
+console.log('   DELETE FROM users WHERE username = \'<your-username>\';');
+console.log('');
+console.log('➕ Create new admin:');
+console.log('   INSERT INTO users (id, username, password, name)');
+console.log('   VALUES (\'<unique-id>\', \'<your-username>\', \'<your-password>\', \'<your-name>\');');
+console.log('');
+console.log('✅ The authentication system will read from the database automatically.');
