@@ -8,6 +8,7 @@ import InlineResults from '@/components/InlineResults';
 import LandingPage from '@/components/LandingPage';
 import AdminDashboard from '@/components/AdminDashboard';
 import Image from 'next/image';
+import ReactMarkdown from 'react-markdown';
 
 interface StargazingData {
   location: string;
@@ -35,6 +36,10 @@ export default function Home() {
   } | null>(null);
   const [showContactDialog, setShowContactDialog] = useState(false);
   const [showDocDialog, setShowDocDialog] = useState(false);
+  const [documentation, setDocumentation] = useState<{
+    title: string;
+    content: string;
+  } | null>(null);
   
   // Handle admin access with keyboard shortcut (Ctrl+Shift+A)
   useEffect(() => {
@@ -72,6 +77,19 @@ export default function Home() {
       setShowLandingPage(false);
       setIsLaunchingApp(false);
     }, 2500); // Increased time for slow, visible slide-up animation
+  };
+
+  // Fetch documentation from API
+  const fetchDocumentation = async () => {
+    try {
+      const response = await fetch('/api/admin/documentation');
+      if (response.ok) {
+        const data = await response.json();
+        setDocumentation(data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch documentation:', error);
+    }
   };
 
   // Prevent body scroll when landing page is active, but allow it during animation
@@ -168,7 +186,10 @@ export default function Home() {
         <div className="absolute top-2 right-4 sm:top-3 sm:right-6 lg:top-4 lg:right-8 flex items-center gap-3">
             <button
               type="button"
-              onClick={() => setShowDocDialog(true)}
+              onClick={() => {
+                setShowDocDialog(true);
+                fetchDocumentation();
+              }}
               className="text-xs sm:text-sm md:text-base bg-white border border-gray-300 px-3 py-1 rounded-md shadow-sm hover:shadow-md focus:outline-none transition-shadow kosugi-maru text-black text-bold cursor-pointer"
               style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}
             >
@@ -477,130 +498,35 @@ export default function Home() {
                    scrollbarWidth: 'thin',
                    scrollbarColor: '#4B5563 #F3F4F6',
                  }}>
-              <h2 className="text-2xl font-bold mb-6 text-black border-b pb-3">MoonGazers Documentation</h2>
-              
-              <div className="prose prose-slate max-w-none">
-                <section className="mb-8">
-                  <h3 className="text-xl font-semibold mb-3 text-black">What is MoonGazers?</h3>
-                  <p className="text-black mb-4 leading-relaxed">
-                    MoonGazers is an astronomical forecasting application that helps you find the best times for stargazing in your area over the next 72 hours. It analyzes weather patterns, cloud cover, moon phases, and celestial positions to recommend optimal viewing windows.
-                  </p>
-                  <p className="text-black mb-4 leading-relaxed">
-                    Unlike standard weather apps that only tell you if it will rain, MoonGazers evaluates all the factors that matter for astronomy: cloud coverage, moon brightness and position, temperature, wind conditions, and visibility of celestial objects.
-                  </p>
-                </section>
-
-                <section className="mb-8">
-                  <h3 className="text-xl font-semibold mb-3 text-black">How to Use</h3>
-                  <ol className="list-decimal pl-5 text-black space-y-3">
-                    <li>Enter a valid ZIP code (US) or location name in the input field (e.g., &ldquo;10001&rdquo; for New York, &ldquo;Chicago, IL&rdquo;, or &ldquo;London, UK&rdquo;)</li>
-                    <li>Click the submit button (arrow) or press Enter to submit your location</li>
-                    <li>View the recommended stargazing windows, sorted from best to acceptable conditions</li>
-                    <li>Each window shows a time range when conditions are expected to be favorable</li>
-                    <li>Toggle between Fahrenheit/Celsius using the temperature toggle switch</li>
-                    <li>Toggle between 12-hour and 24-hour time formats using the time format toggle switch</li>
-                  </ol>
-                  
-                  <div className="bg-gray-100 border-l-4 border-gray-400 p-4 my-4">
-                    <h4 className="text-black font-semibold mb-2">Pro Tips:</h4>
-                    <ul className="list-disc pl-5 text-black space-y-2">
-                      <li>The app works best with specific location inputs</li>
-                      <li>If no results appear, try a nearby location or check back later</li>
-                      <li>For international locations, include the country name (e.g., &ldquo;Paris, France&rdquo;)</li>
-                    </ul>
+              {documentation ? (
+                <>
+                  <h2 className="text-2xl font-bold mb-6 text-black border-b pb-3">{documentation.title}</h2>
+                  <div className="prose prose-slate max-w-none text-black">
+                    <ReactMarkdown
+                      components={{
+                        h1: ({children}) => <h1 className="text-3xl font-bold mb-6 text-black">{children}</h1>,
+                        h2: ({children}) => <h2 className="text-2xl font-bold mb-4 text-black">{children}</h2>,
+                        h3: ({children}) => <h3 className="text-xl font-semibold mb-3 text-black">{children}</h3>,
+                        h4: ({children}) => <h4 className="text-lg font-medium mb-2 text-black">{children}</h4>,
+                        p: ({children}) => <p className="text-black mb-4 leading-relaxed">{children}</p>,
+                        ul: ({children}) => <ul className="list-disc pl-5 text-black space-y-2 mb-4">{children}</ul>,
+                        ol: ({children}) => <ol className="list-decimal pl-5 text-black space-y-3 mb-4">{children}</ol>,
+                        li: ({children}) => <li className="text-black">{children}</li>,
+                        strong: ({children}) => <strong className="font-semibold text-black">{children}</strong>,
+                        blockquote: ({children}) => <div className="bg-gray-100 border-l-4 border-gray-400 p-4 my-4">{children}</div>,
+                        code: ({children}) => <code className="bg-gray-100 px-2 py-1 rounded text-sm">{children}</code>,
+                        pre: ({children}) => <pre className="bg-gray-50 border border-gray-200 rounded p-4 overflow-x-auto">{children}</pre>,
+                      }}
+                    >
+                      {documentation.content}
+                    </ReactMarkdown>
                   </div>
-                </section>
-
-                <section className="mb-8">
-                  <h3 className="text-xl font-semibold mb-3 text-black">Understanding the Results</h3>
-                  
-                  <h4 className="text-lg font-medium mt-4 mb-2 text-black">Weather Information</h4>
-                  <ul className="list-disc pl-5 text-black space-y-2">
-                    <li><strong>Temperature:</strong> Average temperature during the viewing window (shown in your preferred unit)</li>
-                    <li><strong>Cloud Cover:</strong> Percentage of sky covered by clouds (lower is better for stargazing)</li>
-                    <ul className="list-circle pl-5 text-black mt-1">
-                      <li>No Cloud Coverage: 0-15% (Excellent visibility)</li>
-                      <li>Low Cloud Coverage: 16-35% (Good visibility)</li>
-                      <li>Medium Cloud Coverage: 36-60% (Fair visibility)</li>
-                      <li>High Cloud Coverage: &gt;60% (Poor visibility)</li>
-                    </ul>
-                    <li><strong>Wind Speed:</strong> Average wind in km/h during the window (lower values provide more stable viewing)</li>
-                  </ul>
-                  
-                  <h4 className="text-lg font-medium mt-4 mb-2 text-black">Moon Information</h4>
-                  <ul className="list-disc pl-5 text-black space-y-2">
-                    <li><strong>Moon Phase:</strong> Current lunar phase (New Moon, Waxing Crescent, First Quarter, etc.)</li>
-                    <li><strong>Illumination:</strong> Percentage of the moon&apos;s visible disk that is illuminated (0% is new moon, 100% is full moon)</li>
-                    <li><strong>Impact on Viewing:</strong> How the moon affects stargazing conditions</li>
-                    <ul className="list-circle pl-5 text-black mt-1">
-                      <li>Low Impact: Moon is dim or below horizon (ideal for deep-sky objects)</li>
-                      <li>Medium Impact: Moderate moonlight (still good for brighter objects)</li>
-                      <li>High Impact: Bright moonlight may wash out fainter objects</li>
-                    </ul>
-                  </ul>
-                  
-                  <h4 className="text-lg font-medium mt-4 mb-2 text-black">Celestial Objects</h4>
-                  <ul className="list-disc pl-5 text-black space-y-2">
-                    <li><strong>Planets:</strong> Lists planets visible during the viewing window</li>
-                    <li><strong>Bright Stars:</strong> Notable stars and star clusters visible during the time window</li>
-                  </ul>
-                </section>
-
-                <section className="mb-8">
-                  <h3 className="text-xl font-semibold mb-3 text-black">How It Works</h3>
-                  <p className="text-black mb-3 leading-relaxed">
-                    MoonGazers combines data from multiple sources and applies a sophisticated algorithm to identify the best stargazing opportunities:
-                  </p>
-                  
-                  <ol className="list-decimal pl-5 text-black space-y-3">
-                    <li><strong>Location Processing:</strong> Your location is geocoded to precise coordinates using either the US Census Geocoder (for US ZIP codes) or OpenStreetMap&apos;s Nominatim service (for international locations).</li>
-                    <li><strong>Weather Analysis:</strong> Using Astrospheric&apos;s specialized astronomy weather data (with Open-Meteo as a fallback), the app retrieves hourly forecasts for cloud cover, temperature, and wind speed.</li>
-                    <li><strong>Astronomy Calculations:</strong> The Astronomy Engine library calculates precise moon phases, illumination percentages, and the positions of planets and bright stars for your location.</li>
-                    <li><strong>Scoring Algorithm:</strong> Each hourly slot gets scored based primarily on cloud cover, with additional factors for moon interference and celestial visibility.</li>
-                    <li><strong>Window Grouping:</strong> Adjacent &ldquo;good&rdquo; time slots are grouped into viewing windows of at least 90 minutes, then ranked and filtered to show only the best opportunities.</li>
-                  </ol>
-                  
-                  <div className="bg-gray-50 border border-gray-200 rounded p-4 mt-4">
-                    <h4 className="text-black font-semibold mb-2">Scoring Details:</h4>
-                    <ul className="list-disc pl-5 text-black space-y-2">
-                      <li>Base score = 1 - (cloudCover / 100)</li>
-                      <li>Moon penalty: -0.2 if moon is visible and illumination ≥ 60%</li>
-                      <li>Only slots with score ≥ 0.6 are considered &ldquo;good&rdquo;</li>
-                      <li>Windows are sorted by average score (descending)</li>
-                    </ul>
-                  </div>
-                </section>
-
-                <section className="mb-8">
-                  <h3 className="text-xl font-semibold mb-3 text-black">Data Sources & Disclaimers</h3>
-                  
-                  <h4 className="text-lg font-medium mt-4 mb-2 text-black">Data Attribution</h4>
-                  <p className="text-black mb-3 leading-relaxed">
-                    Forecast data comes from Astrospheric and Open-Meteo; transformed for astronomy use. Star catalog data is derived from astronomical databases of bright stars visible to the naked eye under good viewing conditions.
-                  </p>
-                  
-                  <h4 className="text-lg font-medium mt-4 mb-2 text-black">Legal Disclaimers</h4>
-                  <div className="bg-gray-100 border border-gray-300 rounded-md p-4">
-                    <ul className="list-disc pl-5 text-black space-y-3">
-                      <li><strong>Accuracy:</strong> Results are provided &ldquo;as is&rdquo; and may be inaccurate or outdated. Weather predictions are inherently uncertain and actual conditions may vary significantly from forecasts.</li>
-                      <li><strong>Purpose:</strong> This tool is for educational and informational purposes only and not for operational, commercial, professional, or critical decision-making.</li>
-                      <li><strong>Liability:</strong> The creators and operators of MoonGazers assume no responsibility or liability for any errors or omissions in the content provided. The information contained is provided without warranties of any kind.</li>
-                      <li><strong>Affiliation:</strong> Not affiliated with or endorsed by Astrospheric, Open-Meteo, US Census Bureau, OpenStreetMap, or any other data providers mentioned.</li>
-                      <li><strong>Local Conditions:</strong> Light pollution, local weather patterns, horizon obstructions, and other factors not accounted for in our models may significantly impact actual viewing conditions.</li>
-                      <li><strong>Usage:</strong> By using this application, you acknowledge that you do so at your own discretion and risk.</li>
-                    </ul>
-                  </div>
-                  
-                  <h4 className="text-lg font-medium mt-4 mb-2 text-black">Privacy Information</h4>
-                  <p className="text-black mb-3 leading-relaxed">
-                    Location data entered is used solely for providing forecasts and is not stored permanently. We use minimal cookies necessary for app functionality. No personal information is collected or shared with third parties.
-                  </p>
-                  
-                  <p className="text-black mt-4 leading-relaxed">
-                    Built with Next.js 15, React, TypeScript, and Tailwind CSS. For questions or concerns about this application, please use the Contact information provided.
-                  </p>
-                </section>
-              </div>
+                </>
+              ) : (
+                <div className="text-center py-8">
+                  <p className="text-black">Loading documentation...</p>
+                </div>
+              )}
             </div>
             
             {/* Add custom scrollbar styles */}

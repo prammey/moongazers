@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
         imageUrl: finalImageUrl,
         imageAlt: imageAlt || 'Landing page image',
         buttonText,
-        footerText: footerText || 'Note: Forecasts are approximate and may vary with local weather and light pollution.',
+        footerText: footerText || undefined,
         isActive: true
       }
     });
@@ -143,7 +143,7 @@ export async function PUT(request: NextRequest) {
         imageUrl: finalImageUrl,
         imageAlt: imageAlt || existingLandingPage.imageAlt,
         buttonText,
-        footerText: footerText || existingLandingPage.footerText || 'Note: Forecasts are approximate and may vary with local weather and light pollution.',
+        footerText: footerText !== undefined ? footerText : existingLandingPage.footerText,
         updatedAt: new Date()
       }
     });

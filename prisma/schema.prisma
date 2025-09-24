@@ -183,10 +183,22 @@ model LandingPage {
   imageUrl    String   @default("/launch.png") // Cloudinary URL or local path
   imageAlt    String   @default("MoonGazers App Preview - Weather, moon, planets, and stars cards")
   buttonText  String   @default("Launch MoonGazers App")
-  footerText  String   @default("Note: Forecasts are approximate and may vary with local weather and light pollution.")
+  footerText  String?  // Optional footer text
   isActive    Boolean  @default(true) // Only one can be active at a time
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   @@map("landing_pages")
+}
+
+// Documentation content management
+model Documentation {
+  id        String   @id @default(cuid())
+  title     String   @default("MoonGazers Documentation")
+  content   String   // Markdown content for the documentation
+  isActive  Boolean  @default(true) // Only one can be active at a time
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("documentation")
 }

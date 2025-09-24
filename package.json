@@ -12,6 +12,8 @@
     "@prisma/client": "^6.16.2",
     "@types/bcryptjs": "^2.4.6",
     "@types/multer": "^2.0.0",
+    "@uiw/react-markdown-preview": "^5.1.5",
+    "@uiw/react-md-editor": "^4.0.8",
     "@vercel/analytics": "^1.5.0",
     "astronomy-engine": "^2.1.19",
     "bcryptjs": "^3.0.2",
@@ -22,7 +24,8 @@
     "papaparse": "^5.5.3",
     "prisma": "^6.16.2",
     "react": "19.1.0",
-    "react-dom": "19.1.0"
+    "react-dom": "19.1.0",
+    "react-markdown": "^10.1.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

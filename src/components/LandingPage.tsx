@@ -10,7 +10,7 @@ interface LandingPageData {
   imageUrl: string;
   imageAlt: string;
   buttonText: string;
-  footerText: string;
+  footerText?: string; // Optional footer text
   isActive: boolean;
 }
 
@@ -34,7 +34,7 @@ export default function LandingPage({ onLaunch, isLaunching = false }: LandingPa
         imageUrl: "/launch.png",
         imageAlt: "MoonGazers App Preview - Weather, moon, planets, and stars cards",
         buttonText: "Launch MoonGazers App",
-        footerText: "Note: Forecasts are approximate and may vary with local weather and light pollution.",
+        footerText: "", // No default footer text
         isActive: true
       };
       
@@ -206,9 +206,11 @@ export default function LandingPage({ onLaunch, isLaunching = false }: LandingPa
               >
                 {isLaunching ? 'Launching...' : landingData.buttonText}
               </button>
-              <p className="mt-3 text-xs text-gray-500">
-                {landingData.footerText}
-              </p>
+              {landingData.footerText && (
+                <p className="mt-3 text-xs text-gray-500">
+                  {landingData.footerText}
+                </p>
+              )}
             </section>
           </div>
         </div>

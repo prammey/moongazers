@@ -18,7 +18,7 @@ export async function GET() {
           imageUrl: "/launch.png",
           imageAlt: "MoonGazers App Preview - Weather, moon, planets, and stars cards",
           buttonText: "Launch MoonGazers App",
-          footerText: "Note: Forecasts are approximate and may vary with local weather and light pollution.",
+          // footerText intentionally omitted - will be undefined/null
           isActive: true
         }
       });
