@@ -10,7 +10,7 @@
 MoonGazers is a web app that helps anyone, from beginners to astronomy clubs to find the **best 90-minute windows for stargazing**.  
 Instead of overwhelming charts, it translates forecast and sky data into a single, simple recommendation.  
 
----
+--
 
 ## ✨ Features
 - **Location-aware**: Enter your ZIP code or city for local conditions.  
