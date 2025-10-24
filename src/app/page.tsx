@@ -26,6 +26,7 @@ export default function Home() {
   const [showLandingPage, setShowLandingPage] = useState(true);
   const [isLaunchingApp, setIsLaunchingApp] = useState(false);
   const [location, setLocation] = useState('');
+  const [country, setCountry] = useState<'USA' | 'Canada'>('USA');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [stargazingData, setStargazingData] = useState<StargazingData | null>(null);
@@ -107,8 +108,6 @@ export default function Home() {
       document.body.style.overflow = '';
     };
   }, [showLandingPage, isLaunchingApp]);
-  
-  // Removed country selection functionality for simpler input
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -121,7 +120,10 @@ export default function Home() {
       const response = await fetch('/api/best-windows', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ location: location.trim() }),
+        body: JSON.stringify({ 
+          location: location.trim(),
+          country: country 
+        }),
       });
 
       if (!response.ok) {
@@ -143,13 +145,15 @@ export default function Home() {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'An error occurred';
       
-      // Check if the error is related to ZIP code validation
+      // Check if the error is related to ZIP/postal code validation
       if (errorMessage.toLowerCase().includes('location not found') || 
           errorMessage.toLowerCase().includes('not found') ||
           errorMessage.toLowerCase().includes('invalid') ||
           errorMessage.toLowerCase().includes('zip') ||
           errorMessage.toLowerCase().includes('postal')) {
-        setError('Please check the provided ZIP code. Make sure it\'s a valid US ZIP code (e.g., 10001 or 90210).');
+        const codeType = country === 'USA' ? 'ZIP code' : 'postal code';
+        const example = country === 'USA' ? '10001 or 90210' : 'M5H 2N2 or V6B 1A1';
+        setError(`Please check the provided ${codeType}. Make sure it's a valid ${country} ${codeType} (e.g., ${example}).`);
       } else {
         setError(errorMessage);
       }
@@ -239,13 +243,25 @@ export default function Home() {
                       borderColor: '#000000',
                       boxShadow: '0 8px 16px -4px rgba(0, 0, 0, 0.2), 0 4px 8px -2px rgba(0, 0, 0, 0.12)'
                     }}>
+                      {/* Country Selector */}
+                      <select
+                        value={country}
+                        onChange={(e) => setCountry(e.target.value as 'USA' | 'Canada')}
+                        className="p-3 text-sm sm:text-base bg-transparent text-gray-900 focus:outline-none border-r border-gray-300 rounded-l-lg cursor-pointer"
+                        disabled={loading}
+                        style={{ minWidth: '60px' }}
+                      >
+                        <option value="USA">US</option>
+                        <option value="Canada">CA</option>
+                      </select>
+
                       {/* ZIP Code Input */}
                       <input
                         type="text"
                         value={location}
                         onChange={(e) => setLocation(e.target.value)}
-                        placeholder="Enter your US ZIP code..."
-                        className="flex-1 p-3 text-sm sm:text-base bg-transparent text-gray-900 placeholder-gray-500 focus:outline-none min-w-0 rounded-l-lg"
+                        placeholder={country === 'USA' ? 'Enter ZIP code...' : 'Enter postal code...'}
+                        className="flex-1 p-3 text-sm sm:text-base bg-transparent text-gray-900 placeholder-gray-500 focus:outline-none min-w-0"
                         disabled={loading}
                       />
 
