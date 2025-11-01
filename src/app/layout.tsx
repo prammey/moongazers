@@ -38,6 +38,10 @@ export default function RootLayout({
       <head>
         {/* Favicon and Open Graph image for social sharing */}
         <link rel="icon" href="/moonX.png" />
+        {/* Google Fonts - Kosugi Maru */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link href="https://fonts.googleapis.com/css2?family=Kosugi+Maru&display=swap" rel="stylesheet" />
         <meta property="og:title" content="Moongazers - Best Stargazing Times" />
         <meta property="og:description" content="Find the best stargazing times in your area with weather conditions and moon phases" />
         <meta property="og:image" content="/moonX.png" />
