@@ -202,3 +202,13 @@ model Documentation {
 
   @@map("documentation")
 }
+
+// Site configuration
+model SiteConfig {
+  id                    String   @id @default(cuid())
+  showLandingPage       Boolean  @default(true) // Toggle landing page on/off
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@map("site_config")
+}

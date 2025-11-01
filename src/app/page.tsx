@@ -24,6 +24,7 @@ export default function Home() {
   const { temperatureUnit, timeFormat, toggleTemperatureUnit, toggleTimeFormat } = useWeather();
   const router = useRouter();
   const [showLandingPage, setShowLandingPage] = useState(true);
+  const [landingPageEnabled, setLandingPageEnabled] = useState(true);
   const [isLaunchingApp, setIsLaunchingApp] = useState(false);
   const [location, setLocation] = useState('');
   const [country, setCountry] = useState<'USA' | 'Canada'>('USA');
@@ -41,6 +42,23 @@ export default function Home() {
     title: string;
     content: string;
   } | null>(null);
+  
+  // Fetch site configuration on mount
+  useEffect(() => {
+    const fetchSiteConfig = async () => {
+      try {
+        const response = await fetch('/api/site-config');
+        if (response.ok) {
+          const config = await response.json();
+          setLandingPageEnabled(config.showLandingPage);
+          setShowLandingPage(config.showLandingPage);
+        }
+      } catch (error) {
+        console.error('Failed to fetch site config:', error);
+      }
+    };
+    fetchSiteConfig();
+  }, []);
   
   // Handle admin access with keyboard shortcut (Ctrl+Shift+A)
   useEffect(() => {
@@ -412,7 +430,7 @@ export default function Home() {
         </div>
 
         {/* Landing Page Overlay - slides up to reveal main app */}
-        {showLandingPage && (
+        {showLandingPage && landingPageEnabled && (
           <div className="fixed inset-0 z-50">
             <LandingPage onLaunch={handleLaunchApp} isLaunching={isLaunchingApp} />
           </div>

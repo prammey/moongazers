@@ -50,6 +50,7 @@ export default function AdminDashboard({ onBackToMain }: AdminDashboardProps) {
   const [showDocForm, setShowDocForm] = useState(false);
   const [docContent, setDocContent] = useState('');
   const [docTitle, setDocTitle] = useState('');
+  const [showLandingPageEnabled, setShowLandingPageEnabled] = useState(true);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -118,6 +119,50 @@ export default function AdminDashboard({ onBackToMain }: AdminDashboardProps) {
       setError('Failed to fetch documentation');
     }
   }, []);
+
+  const fetchSiteConfig = useCallback(async () => {
+    try {
+      const response = await fetch('/api/admin/site-config', {
+        headers: {
+          'Authorization': `Bearer ${adminToken}`,
+        },
+      });
+
+      if (response.ok) {
+        const config = await response.json();
+        setShowLandingPageEnabled(config.showLandingPage ?? true);
+      }
+    } catch (error) {
+      console.error('Failed to fetch site config:', error);
+    }
+  }, [adminToken]);
+
+  const toggleLandingPage = async () => {
+    try {
+      const newValue = !showLandingPageEnabled;
+      const response = await fetch('/api/admin/site-config', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${adminToken}`,
+        },
+        body: JSON.stringify({
+          showLandingPage: newValue
+        }),
+      });
+
+      if (response.ok) {
+        setShowLandingPageEnabled(newValue);
+        setSuccess(`Landing page ${newValue ? 'enabled' : 'disabled'} successfully!`);
+        setTimeout(() => setSuccess(''), 3000);
+      } else {
+        setError('Failed to update landing page setting');
+      }
+    } catch (error) {
+      console.error('Failed to toggle landing page:', error);
+      setError('Failed to update landing page setting');
+    }
+  };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -267,8 +312,9 @@ export default function AdminDashboard({ onBackToMain }: AdminDashboardProps) {
     if (isAuthenticated && adminToken) {
       fetchLandingPage();
       fetchDocumentation();
+      fetchSiteConfig();
     }
-  }, [isAuthenticated, adminToken, fetchLandingPage, fetchDocumentation]);
+  }, [isAuthenticated, adminToken, fetchLandingPage, fetchDocumentation, fetchSiteConfig]);
 
   if (!isAuthenticated) {
     return (
@@ -362,6 +408,32 @@ export default function AdminDashboard({ onBackToMain }: AdminDashboardProps) {
               style={{ backgroundColor: '#ffffff' }}
             >
               Edit Documentation
+            </button>
+          </div>
+        </div>
+
+        {/* Landing Page Toggle */}
+        <div className="mb-6 p-6 bg-white border border-gray-300 rounded-lg">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-semibold text-black mb-2">Landing Page Visibility</h2>
+              <p className="text-sm text-gray-600">
+                {showLandingPageEnabled 
+                  ? 'Landing page is currently enabled. New visitors will see the landing page first.' 
+                  : 'Landing page is currently disabled. Users will go directly to the main app.'}
+              </p>
+            </div>
+            <button
+              onClick={toggleLandingPage}
+              className={`relative inline-flex items-center h-8 w-16 rounded-full transition-colors ${
+                showLandingPageEnabled ? 'bg-green-500' : 'bg-gray-300'
+              }`}
+            >
+              <span
+                className={`inline-block w-6 h-6 transform rounded-full bg-white transition-transform ${
+                  showLandingPageEnabled ? 'translate-x-9' : 'translate-x-1'
+                }`}
+              />
             </button>
           </div>
         </div>

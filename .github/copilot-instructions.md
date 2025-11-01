@@ -1,124 +1,48 @@
-# Moongazers - Stargazing Forecast App
+# Copilot instructions — MoonGazers
 
-## Architecture Overview
-**Next.js 15 App Router** with Prisma + PostgreSQL (Neon). Two-part system: (1) **Public stargazing forecast** with astronomical calculations, (2) **Admin CMS** at `/admin` for managing landing page and documentation.
+This file gives targeted, actionable guidance for AI coding agents working in this repository.
 
-Core forecast flow: ZIP → Geocode → Weather/astronomy data → Score viewing windows → Return top 3 recommendations.
+1) Big picture
+- Next.js 15 App Router app with two concerns: public forecast UI and an Admin CMS at `/admin`.
+- Forecast pipeline lives in `src/app/api/best-windows/route.ts` (geocode → weather → sky → scoring). Key data: `data/bright_stars.csv` and Astronomy Engine.
 
-## Application Structure
+2) Where to make feature edits
+- Public UI: `src/app/page.tsx`, `src/components/InlineResults.tsx`, `src/components/CurrentWeather.tsx`.
+- Admin UI: `src/app/admin/page.tsx` + `src/components/AdminDashboard.tsx` (markdown editor dynamically imported).
+- Server logic: `src/app/api/*` (public vs `src/app/api/admin/*` for authenticated admin endpoints).
 
-### Public App (`src/app/page.tsx`)
-- **Landing page first**: Shows `LandingPage` component with launch button (fetches from `/api/landing-page`)
-- **Main app**: ZIP input, toggles (°F/°C, 12hr/24hr), results display with `InlineResults`
-- **WeatherContext** (`src/contexts/WeatherContext.tsx`): localStorage-persisted user preferences (defaults to Fahrenheit)
-- **Admin shortcut**: `Ctrl+Shift+A` redirects to `/admin` (via `useRouter`)
+3) Authentication & admin flows to respect
+- Admin login endpoint: `src/app/api/admin/auth/route.ts`. On success it returns `token: process.env.ADMIN_SECRET`.
+- Admin APIs validate by comparing client token to `process.env.ADMIN_SECRET` (set in Vercel or local `.env`).
+- Admin users are stored in `users` table (see `prisma/schema.prisma`). Admin users are created via direct SQL in Neon (no runtime scripts).
 
-### Admin Dashboard (`/admin`, `src/app/admin/page.tsx`)
-- **Authentication**: Database-driven via `/api/admin/auth` (Prisma `User` model)
-  - Login returns `ADMIN_SECRET` token (stored in client state)
-  - All admin API calls validate token against `process.env.ADMIN_SECRET`
-- **Landing Page Editor**: WYSIWYG with Cloudinary image uploads (`/api/admin/landing-page`)
-- **Documentation Editor**: Markdown editor (`@uiw/react-md-editor`) for public docs (`/api/admin/documentation`)
-- **Dynamic imports**: MDEditor uses `dynamic(() => import(...), { ssr: false })` to avoid SSR issues
+4) Build / dev / deploy specifics (exact commands)
+- Local dev (fast): `npm run dev` (uses Turbopack in package.json).
+- Production build: `npm run build` (run with Turbopack). Recommended Vercel build command when using Prisma migrations:
+  - `npx prisma migrate deploy && npm run build`
+- Prisma: generate & migrations
+  - Inspect `prisma/schema.prisma` and run `npx prisma migrate dev` locally during development.
+  - For production, run `npx prisma migrate deploy` against the Neon DB before deploying or make it part of the Vercel build command.
 
-### Database Layer (Prisma + Neon PostgreSQL)
-**Schema models** (`prisma/schema.prisma`):
-- `User`: Admin authentication (username/password, supports both plain text and bcrypt hashed)
-- `LandingPage`: Landing page content (title, description, imageUrl, buttonText, optional footerText)
-- `Documentation`: Markdown documentation (title, content)
-- `Research`, `NewsSource`, `NewsItem`, `About`, `SocialLink`: Content models (future features)
+5) Environment variables required (set in Vercel)
+- `DATABASE_URL`, `ADMIN_SECRET`, `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`, `ASTROSPHERIC_KEY`, `TIMEZONEDB_KEY`, `NEXT_PUBLIC_BASE_URL`.
 
-**Admin creation**: Direct SQL via Neon dashboard (no programmatic scripts):
-```sql
-INSERT INTO users (id, username, password, name)
-VALUES ('unique-id', 'your-username', 'your-password', 'Your Name');
-```
+6) Project conventions & important patterns
+- Use TailwindCSS v4 and minimal white theme. Keep styles inline for a few components (consistent with existing code).
+- Dynamic import for heavy client-only libraries: Admin markdown editor uses `dynamic(..., { ssr: false })` in `AdminDashboard.tsx`.
+- API caching: `unstable_cache` used in `best-windows` route. Keep cache timeoffs when editing forecasting logic.
+- Passwords: Prisma `User.password` may be plain or bcrypt hash; `auth/route.ts` checks both formats.
 
-## API Routes
+7) Quick code examples
+- Return an admin token (auth route): `return NextResponse.json({ success: true, token: process.env.ADMIN_SECRET, user: { id: user.id } })`.
+- POST to best-windows: client sends `{ location, country }` to `/api/best-windows`.
 
-### Public APIs
-- **`/api/best-windows`**: Main forecast API
-  - Pipeline: Geocoding → Weather → Sky data → Time window scoring
-  - Caching: `unstable_cache` (Geocoding 30d, Weather 6h, Sky 12h)
-  - Failover: Astrospheric → Open-Meteo + Astronomy Engine
-- **`/api/landing-page`**: GET landing page data (public, no auth)
+8) Testing & debugging tips
+- If you see `relation "users" does not exist`, run Prisma migrations against Neon: `npx prisma migrate deploy`.
+- For connection issues, verify `DATABASE_URL` and use `npx prisma studio` to inspect data.
 
-### Admin APIs (all require `ADMIN_SECRET` token)
-- **`/api/admin/auth`**: POST login (returns token if credentials valid)
-- **`/api/admin/landing-page`**: GET/PUT landing page content
-- **`/api/admin/documentation`**: GET/PUT documentation content
+9) When in doubt
+- Read `prisma/schema.prisma` for the data shape.
+- Check `src/app/api` routes for server-side entry points.
 
-## Development Patterns
-
-### Styling
-- **Tailwind CSS 4**: Minimal white theme (#ffffff), Helvetica Neue font
-- **Icons**: Unicode symbols (⚠, ✕, ☽, ✦) instead of emojis
-- **Shadows**: `textShadow: '2px 2px 4px rgba(0, 0, 0, 0.3)'` for headings
-
-### TypeScript
-- **Strict typing** via `src/types/index.ts`
-- **Type guards**: `hasHourlyData`, `hasNestedData` for API validation
-- **Moon illumination clamping**: `Math.max(0, Math.min(100, value))`
-
-### Error Handling
-```typescript
-// ZIP code validation
-if (errorMessage.includes('location not found') || errorMessage.includes('zip')) {
-  setError('Please check the provided ZIP code. Valid US ZIP code (e.g., 10001).');
-}
-```
-
-## Critical Workflows
-
-### Development
-```bash
-npm run dev          # Turbopack development server
-npm run build        # Production build (Turbopack)
-npx prisma studio    # Database GUI
-npx prisma migrate dev  # Run migrations locally
-```
-
-### Deployment (Vercel)
-1. **Database setup**: Run `npx prisma migrate deploy` in Neon to create tables
-2. **Create admin user**: SQL insert in Neon dashboard (see schema above)
-3. **Environment variables** (set in Vercel):
-   - `DATABASE_URL` (Neon pooled connection)
-   - `ADMIN_SECRET` (auth token, e.g., `moongazers-admin-secret-2024`)
-   - `CLOUDINARY_*` (image uploads)
-   - `ASTROSPHERIC_KEY`, `TIMEZONEDB_KEY` (forecast APIs)
-4. **Build command**: `npx prisma migrate deploy && npm run build`
-
-### Admin User Management
-**NO programmatic scripts** (all deprecated). Use Neon SQL editor:
-```sql
--- Check users
-SELECT * FROM users;
-
--- Create admin
-INSERT INTO users (id, username, password, name)
-VALUES ('admin-id', 'admin', 'password123', 'Admin Name');
-
--- Delete admin
-DELETE FROM users WHERE username = 'admin';
-```
-
-## Key Files
-- `src/app/api/best-windows/route.ts`: Forecast pipeline with caching/fallbacks
-- `src/app/admin/page.tsx`: Admin dashboard route
-- `src/components/AdminDashboard.tsx`: Admin UI with markdown editor (674 lines)
-- `src/components/LandingPage.tsx`: Landing page with default data + API fetch
-- `prisma/schema.prisma`: Database schema (all models)
-- `data/bright_stars.csv`: Star catalog for visibility calculations
-
-## External APIs
-- **Astrospheric**: Primary weather + sky data (requires key)
-- **Open-Meteo**: Free weather fallback
-- **Cloudinary**: Image uploads (cloud_name, api_key, api_secret)
-- **US Census**: ZIP geocoding (US only, no auth)
-- **TimeZoneDB**: Timezone lookup (requires key)
-- **Astronomy Engine**: Client-side celestial calculations
-
-## Security Notes
-- **No hardcoded credentials**: All removed from codebase
-- **Token-based admin auth**: `ADMIN_SECRET` env var validates all admin API calls
-- **Password flexibility**: Database supports both plain text and bcrypt (for migration)
+If any section is unclear or you want the agent to enforce extra rules (lint, arrange tests, or auto-run migrations), tell me which rules to add and I will merge them into this file.
