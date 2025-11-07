@@ -164,6 +164,43 @@ export default function AdminDashboard({ onBackToMain }: AdminDashboardProps) {
     }
   };
 
+  const handleResetToDefault = async () => {
+    if (!landingPage?.id) {
+      setError('No custom landing page to reset');
+      return;
+    }
+
+    if (!confirm('Are you sure you want to reset to the default landing page? This will delete your custom landing page. This action cannot be undone.')) {
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+
+    try {
+      const response = await fetch(`/api/admin/landing-page?id=${landingPage.id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${adminToken}`,
+        },
+      });
+
+      if (response.ok) {
+        setSuccess('Reset to default landing page successfully!');
+        setTimeout(() => setSuccess(''), 3000);
+        setLandingPage(null);
+        fetchLandingPage();
+      } else {
+        const result = await response.json();
+        setError(result.error || 'Failed to reset to default landing page');
+      }
+    } catch (error) {
+      console.error('Error resetting to default:', error);
+      setError('Failed to reset to default landing page');
+    }
+    setLoading(false);
+  };
+
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -400,8 +437,17 @@ export default function AdminDashboard({ onBackToMain }: AdminDashboardProps) {
               className="px-6 py-2 text-black border border-gray-300 transition-all duration-300 hover:opacity-70"
               style={{ backgroundColor: '#ffffff' }}
             >
-              Edit Landing Page
+              {landingPage ? 'Edit Landing Page' : 'Create Landing Page'}
             </button>
+            {landingPage && (
+              <button
+                onClick={handleResetToDefault}
+                disabled={loading}
+                className="px-6 py-2 text-white bg-orange-600 border border-orange-700 transition-all duration-300 hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Reset to Default
+              </button>
+            )}
             <button
               onClick={() => setShowDocForm(true)}
               className="px-6 py-2 text-black border border-gray-300 transition-all duration-300 hover:opacity-70"

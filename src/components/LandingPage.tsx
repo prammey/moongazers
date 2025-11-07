@@ -26,7 +26,23 @@ export default function LandingPage({ onLaunch, isLaunching = false }: LandingPa
 
   useEffect(() => {
     const fetchLandingData = async () => {
-      // Set default data immediately to prevent loading delay
+      try {
+        // First try to fetch custom data from API
+        const response = await fetch('/api/landing-page');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.data) {
+            // Custom landing page exists, use it
+            setLandingData(data.data);
+            setLoading(false);
+            return;
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch landing page data:', error);
+      }
+
+      // Only show default if no custom landing page exists
       const defaultData = {
         id: 'default',
         title: "MoonGazers – Find the Best Stargazing Nights",
@@ -34,26 +50,12 @@ export default function LandingPage({ onLaunch, isLaunching = false }: LandingPa
         imageUrl: "/launch.png",
         imageAlt: "MoonGazers App Preview - Weather, moon, planets, and stars cards",
         buttonText: "Launch MoonGazers App",
-        footerText: "", // No default footer text
+        footerText: "",
         isActive: true
       };
       
       setLandingData(defaultData);
       setLoading(false);
-
-      // Then try to fetch real data in background
-      try {
-        const response = await fetch('/api/landing-page');
-        if (response.ok) {
-          const data = await response.json();
-          if (data.data) {
-            setLandingData(data.data);
-          }
-        }
-      } catch (error) {
-        console.error('Failed to fetch landing page data:', error);
-        // Keep default data if fetch fails
-      }
     };
 
     fetchLandingData();

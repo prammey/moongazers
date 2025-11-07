@@ -240,11 +240,56 @@ export default function Home() {
 
             {/* Welcome Text */}
             <div className="text-center mb-16 sm:mb-20 md:mb-24">
-              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl mb-8 sm:mb-10 md:mb-12" style={{ 
-                color: '#000000',
+              <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl mb-8 sm:mb-10 md:mb-12" style={{ 
                 textShadow: '0 4px 8px rgba(0, 0, 0, 0.3), 0 8px 16px rgba(0, 0, 0, 0.15), 0 12px 24px rgba(0, 0, 0, 0.1)'
               }}>
-                Welcome, Moongazer!
+                <span style={{ 
+                  background: 'linear-gradient(90deg, #2563eb 0%, #9333ea 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
+                  fontWeight: 'bold'
+                }}>
+                  Welcome,
+                </span>{' '}
+                <span style={{ 
+                  background: 'linear-gradient(90deg, #2563eb 0%, #9333ea 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
+                  fontWeight: 'bold',
+                  position: 'relative',
+                  display: 'inline-block',
+                  paddingBottom: '12px'
+                }}>
+                  Moongazer!
+                  {/* <svg 
+                    style={{
+                      position: 'absolute',
+                      bottom: '0',
+                      left: '0',
+                      width: '100%',
+                      height: '10px',
+                      overflow: 'visible'
+                    }}
+                    viewBox="0 0 200 10"
+                    preserveAspectRatio="none"
+                  >
+                    <defs>
+                      <linearGradient id="underlineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" style={{ stopColor: '#1454f2', stopOpacity: 0.7 }} />
+                        <stop offset="100%" style={{ stopColor: '#8a25f8', stopOpacity: 0.7 }} />
+                      </linearGradient>
+                    </defs>
+                    <path 
+                      d="M 0 8 Q 100 0, 200 8" 
+                      stroke="url(#underlineGradient)" 
+                      strokeWidth="3" 
+                      fill="none"
+                      strokeLinecap="round"
+                    />
+                  </svg> */}
+                </span>
               </h1>
               <p className="text-sm sm:text-base md:text-lg max-w-xs sm:max-w-sm md:max-w-lg mx-auto mt-8 sm:mt-10 md:mt-12 text-gray-700">
                 Need help stargazing? Just enter your zip code below, and we will tell you the best times to go observe the sky and what you can see in the next 3 days.
