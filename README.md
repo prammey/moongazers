@@ -8,7 +8,7 @@
 [![Live Demo](https://img.shields.io/badge/demo-online-brightgreen)](https://moongazers.prameet.space/)
 
 MoonGazers is a web app that helps anyone, from beginners to astronomy clubs, to find the **best 90-minute windows for stargazing**.  
-Instead of overwhelming charts, it translates forecast and sky data into a single, simple recommendation.  
+Instead of overwhelming charts it translates forecast and sky data into a single, simple recommendation.  
 
 ---
 
