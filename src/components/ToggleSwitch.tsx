@@ -22,7 +22,7 @@ export default function ToggleSwitch({
           !isRightSelected ? 'text-gray-500' : 'text-gray-500'
         }`}
         style={{ 
-          color: !isRightSelected ? '#27a4da' : '#6b7280'
+          color: !isRightSelected ? '#2563eb' : '#6b7280'
         }}
       >
         {leftLabel}
@@ -32,8 +32,8 @@ export default function ToggleSwitch({
         onClick={onToggle}
         className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2`}
         style={{
-          backgroundColor: isRightSelected ? '#27a4da' : '#e5e7eb',
-          boxShadow: `0 0 0 2px ${isRightSelected ? '#27a4da' : 'transparent'}`
+          backgroundColor: isRightSelected ? '#2563eb' : '#e5e7eb',
+          boxShadow: `0 0 0 2px ${isRightSelected ? '#2563eb' : 'transparent'}`
         }}
       >
         <span
@@ -48,7 +48,7 @@ export default function ToggleSwitch({
           isRightSelected ? 'text-gray-500' : 'text-gray-500'
         }`}
         style={{ 
-          color: isRightSelected ? '#27a4da' : '#6b7280'
+          color: isRightSelected ? '#2563eb' : '#6b7280'
         }}
       >
         {rightLabel}

@@ -15,9 +15,12 @@ interface CurrentWeatherProps {
 
 export default function CurrentWeather({ weatherData }: CurrentWeatherProps) {
   const { formatTime, formatTemperature } = useWeather();
-  const [currentTime, setCurrentTime] = useState(new Date());
+  // Start empty and fill in after mount: the server's clock never matches the
+  // browser's, which caused a React hydration error (#418)
+  const [currentTime, setCurrentTime] = useState<Date | null>(null);
 
   useEffect(() => {
+    setCurrentTime(new Date());
     const timer = setInterval(() => {
       setCurrentTime(new Date());
     }, 1000);
@@ -49,7 +52,8 @@ export default function CurrentWeather({ weatherData }: CurrentWeatherProps) {
           color: '#000000',
           fontFamily: "'Kosugi Maru', sans-serif"
         }}>
-          {formatDate(currentTime)} {formatTime(currentTime)} {weatherData && (
+          {currentTime ? `${formatDate(currentTime)} ${formatTime(currentTime)}` : "\u00a0"}{" "}
+          {weatherData && (
             <>
               <span style={{ textShadow: '2px 2px 4px rgba(0, 0, 0, 0.3)' }}>☁️</span> {formatTemperature(weatherData.temperature, 'celsius')}
             </>

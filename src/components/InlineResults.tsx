@@ -121,6 +121,10 @@ export default function InlineResults({
       <div className="text-center mb-8">
         <h2 className="text-2xl mb-2 text-gray-900">Best Stargazing Times</h2>
         <p className="text-lg text-gray-600">📍 {data.location}</p>
+        <p className="text-xs text-gray-500 mt-3">
+          Cloud cover: 0–15% none · 16–35% low · 36–60% medium · 60%+ high.
+          Moon data calculated with Astronomy Engine.
+        </p>
       </div>
 
       {/* Results Content */}
@@ -152,12 +156,12 @@ export default function InlineResults({
             return (
               <div
                 key={index}
-                className={`p-6 rounded-lg border-2 transition-all duration-300 hover:scale-[1.01] bg-white/90 border-gray-300 hover:border-blue-400 backdrop-blur-sm shadow-lg ${
+                className={`p-5 sm:p-6 rounded-xl border border-gray-200 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:border-violet-300 bg-white shadow-md ${
                   data.windows.length <= 2 ? "w-full max-w-sm" : ""
                 }`}
               >
                 {/* Time Range Header */}
-                <div className="text-center mb-4 pb-4 border-b border-gray-300">
+                <div className="text-center mb-4 pb-4 border-b border-gray-200">
                   <h3 className="text-lg font-bold mb-2 text-gray-900">
                     {formatTimeRange(window.start, window.end)}
                   </h3>
@@ -166,14 +170,10 @@ export default function InlineResults({
                   >
                     {cloudBadge.text} ({window.weather.cloud}%)
                   </span>
-                  <p className="text-xs text-gray-500 mt-2 italic">
-                    Based on sky coverage: 0-15% = No Coverage, 16-35% = Low,
-                    36-60% = Medium, 60%+ = High
-                  </p>
                 </div>
 
                 {/* Weather Section */}
-                <div className="mb-4 p-3 rounded border bg-gray-50 border-gray-200">
+                <div className="mb-3 p-3 rounded-lg bg-gray-50">
                   <h4 className="text-sm font-bold mb-2 text-gray-900">
                     🌡️ Weather
                   </h4>
@@ -192,7 +192,7 @@ export default function InlineResults({
                 </div>
 
                 {/* Moon Section */}
-                <div className="mb-4 p-3 rounded border bg-gray-50 border-gray-200">
+                <div className="mb-3 p-3 rounded-lg bg-gray-50">
                   <h4 className="text-sm font-bold mb-2 text-gray-900">
                     🌙 Moon
                   </h4>
@@ -210,14 +210,11 @@ export default function InlineResults({
                     <div className="text-xs text-gray-600">
                       {window.moon.illum}% illuminated
                     </div>
-                    <div className="text-xs text-gray-500 mt-1 italic">
-                      Calculated via Astronomy Engine using sun-moon-earth positions
-                    </div>
                   </div>
                 </div>
 
                 {/* Planets Section */}
-                <div className="mb-4 p-3 rounded border bg-gray-50 border-gray-200">
+                <div className="mb-3 p-3 rounded-lg bg-gray-50">
                   <h4 className="text-sm font-bold mb-2 text-gray-900">
                     🪐 Planets
                   </h4>
@@ -238,7 +235,7 @@ export default function InlineResults({
                 </div>
 
                 {/* Stars Section */}
-                <div className="p-3 rounded border bg-gray-50 border-gray-200">
+                <div className="p-3 rounded-lg bg-gray-50">
                   <h4 className="text-sm font-bold mb-2 text-gray-900">
                     ⭐ Stars
                   </h4>
@@ -264,8 +261,8 @@ export default function InlineResults({
       )}
       
       {/* Disclaimer */}
-      <div className="mt-8 text-sm border-t border-gray-300 pt-5 px-4 bg-gray-50 py-4 rounded">
-        <p className="text-gray-700 max-w-3xl mx-auto">
+      <div className="mt-10 text-xs sm:text-sm px-4 py-4 rounded-lg bg-gray-50 border border-gray-100">
+        <p className="text-gray-600 max-w-3xl mx-auto text-center leading-relaxed">
           Forecast data from Astrospheric and Open-Meteo; transformed for astronomy use. Results are provided &ldquo;as is&rdquo; and may be inaccurate or outdated. This tool is educational and not for operational or commercial use. Not affiliated with or endorsed by Astrospheric or Open-Meteo.
         </p>
       </div>

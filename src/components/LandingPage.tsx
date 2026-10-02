@@ -151,7 +151,7 @@ export default function LandingPage({ onLaunch, isLaunching = false }: LandingPa
             
             {/* Title */}
             <header>
-              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl mb-6 sm:mb-8" style={{ 
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight mb-4 sm:mb-6" style={{ 
                 color: '#000000',
                 fontFamily: 'Helvetica Neue, Arial, sans-serif'
               }}>
@@ -161,7 +161,7 @@ export default function LandingPage({ onLaunch, isLaunching = false }: LandingPa
 
             {/* Description */}
             <section className="mb-8 sm:mb-10 max-w-2xl mx-auto">
-              <p className="text-sm sm:text-base md:text-lg text-gray-700 leading-relaxed" style={{
+              <p className="text-base md:text-lg text-gray-600 leading-relaxed" style={{
                 fontFamily: 'Helvetica Neue, Arial, sans-serif'
               }}>
                 {landingData.description}
@@ -196,12 +196,10 @@ export default function LandingPage({ onLaunch, isLaunching = false }: LandingPa
               <button
                 onClick={handleLaunch}
                 disabled={isLaunching}
-                className={`px-6 py-3 sm:px-8 sm:py-4 text-base sm:text-lg text-black border-2 transition-all duration-300 focus:outline-none ${
-                  isLaunching ? 'opacity-60 cursor-not-allowed' : 'hover:opacity-70 cursor-pointer'
+                className={`px-6 py-3 sm:px-8 sm:py-4 text-base sm:text-lg text-black bg-white border-2 border-black rounded-md shadow-[4px_4px_0_0_#000] transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 ${
+                  isLaunching ? 'opacity-60 cursor-not-allowed' : 'hover:bg-black hover:text-white hover:shadow-[2px_2px_0_0_#7c3aed] active:translate-y-px cursor-pointer'
                 }`}
                 style={{
-                  backgroundColor: '#ffffff',
-                  borderColor: '#000000',
                   fontFamily: 'Helvetica Neue, Arial, sans-serif',
                   fontWeight: '500'
                 }}

@@ -217,7 +217,7 @@ export default function Home() {
           {/* Main Content */}
           <div className="flex flex-col min-h-screen pt-2 sm:pt-3 md:pt-4 px-4 sm:px-6 lg:px-8">
             {/* Top Section with Moon aligned to weather info */}
-            <div className="w-full mb-16 sm:mb-20 md:mb-24">
+            <div className="w-full pt-16 sm:pt-0 mb-10 sm:mb-14 md:mb-16">
               {/* Moon Image - positioned higher and fixed size */}
               <div className="flex justify-center">
                 <div className="relative group">
@@ -226,7 +226,7 @@ export default function Home() {
                   alt="Moon"
                   width={128}
                   height={128}
-                  className="w-32 h-32 object-contain cursor-pointer hover:scale-105 transition-transform"
+                  className="w-24 h-24 sm:w-32 sm:h-32 object-contain cursor-pointer hover:scale-105 transition-transform"
                   />
                   {/* Tooltip */}
                   <div className="absolute top-full right-0 mt-2 px-3 py-1 bg-white border border-gray-300 text-gray-800 text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap shadow-lg">
@@ -239,68 +239,31 @@ export default function Home() {
             </div>
 
             {/* Welcome Text */}
-            <div className="text-center mb-16 sm:mb-20 md:mb-24">
-              <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl mb-8 sm:mb-10 md:mb-12" style={{ 
-                textShadow: '0 4px 8px rgba(0, 0, 0, 0.3), 0 8px 16px rgba(0, 0, 0, 0.15), 0 12px 24px rgba(0, 0, 0, 0.1)'
-              }}>
-                <span style={{ 
-                  background: 'linear-gradient(90deg, #2563eb 0%, #9333ea 100%)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text',
-                  fontWeight: 'bold'
-                }}>
-                  Welcome,
-                </span>{' '}
-                <span style={{ 
-                  background: 'linear-gradient(90deg, #2563eb 0%, #9333ea 100%)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text',
-                  fontWeight: 'bold',
-                  position: 'relative',
-                  display: 'inline-block',
-                  paddingBottom: '12px'
-                }}>
-                  Moongazer!
-                  {/* <svg 
-                    style={{
-                      position: 'absolute',
-                      bottom: '0',
-                      left: '0',
-                      width: '100%',
-                      height: '10px',
-                      overflow: 'visible'
-                    }}
-                    viewBox="0 0 200 10"
-                    preserveAspectRatio="none"
-                  >
-                    <defs>
-                      <linearGradient id="underlineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                        <stop offset="0%" style={{ stopColor: '#1454f2', stopOpacity: 0.7 }} />
-                        <stop offset="100%" style={{ stopColor: '#8a25f8', stopOpacity: 0.7 }} />
-                      </linearGradient>
-                    </defs>
-                    <path 
-                      d="M 0 8 Q 100 0, 200 8" 
-                      stroke="url(#underlineGradient)" 
-                      strokeWidth="3" 
-                      fill="none"
-                      strokeLinecap="round"
-                    />
-                  </svg> */}
+            <div className="text-center mb-12 sm:mb-16">
+              <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold leading-tight tracking-tight">
+                <span
+                  className="inline-block pb-2"
+                  style={{
+                    background: 'linear-gradient(90deg, #2563eb 0%, #7c3aed 55%, #9333ea 100%)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text',
+                    filter: 'drop-shadow(0 6px 18px rgba(124, 58, 237, 0.28))',
+                  }}
+                >
+                  Welcome, Moongazer!
                 </span>
               </h1>
-              <p className="text-sm sm:text-base md:text-lg max-w-xs sm:max-w-sm md:max-w-lg mx-auto mt-8 sm:mt-10 md:mt-12 text-gray-700">
-                Need help stargazing? Just enter your zip code below, and we will tell you the best times to go observe the sky and what you can see in the next 3 days.
+              <p className="text-base md:text-lg max-w-sm md:max-w-xl mx-auto mt-6 sm:mt-8 text-gray-600 leading-relaxed">
+                Need help stargazing? Enter your ZIP or postal code below, and we&apos;ll tell you the best times to observe the sky, and what you can see, over the next 3 days.
               </p>
             </div>
 
             {/* Search Form with Side Toggles */}
-            <div className="w-full max-w-8xl mb-16 sm:mb-20 md:mb-24">
-              <div className="flex flex-col lg:flex-row items-center lg:justify-between gap-8 sm:gap-12 lg:gap-48">
+            <div className="w-full mb-14 sm:mb-16 md:mb-20">
+              <div className="flex flex-col lg:flex-row items-center justify-center gap-8 lg:gap-16">
                 {/* Main Input Form - centered */}
-                <div className="w-full max-w-60 sm:max-w-72 lg:max-w-80 lg:ml-auto">
+                <div className="w-full max-w-72 sm:max-w-80">
                   <form onSubmit={handleSubmit}>
                     <div className="flex items-center bg-white rounded-lg border-2" style={{
                       borderColor: '#000000',
@@ -338,7 +301,7 @@ export default function Home() {
                             : 'hover:opacity-70 hover:scale-110'
                         } focus:outline-none`}
                         style={{
-                          color: loading || !location.trim() ? '#9ca3af' : '#27a4da'
+                          color: loading || !location.trim() ? '#9ca3af' : '#2563eb'
                         }}
                       >
                         {loading ? (
@@ -356,7 +319,7 @@ export default function Home() {
                 </div>
 
                 {/* Side Toggles - pushed far to the right */}
-                <div className="flex flex-col gap-4 lg:mr-auto lg:ml-24">
+                <div className="flex flex-col gap-4">
                   <ToggleSwitch
                     leftLabel="Celsius"
                     rightLabel="Fahrenheit"
@@ -388,7 +351,7 @@ export default function Home() {
             {/* Results Section - Always show heading when we have data, error, or loading */}
             {(stargazingData || error || loading) && (
               <div className="w-full mb-12 px-4 sm:px-6 lg:px-8">
-                <h2 className="text-xl sm:text-2xl md:text-3xl text-center mb-8 sm:mb-10 md:mb-12" style={{ color: '#000000', textShadow: '2px 2px 4px rgba(0, 0, 0, 0.3)' }}>
+                <h2 className="text-xl sm:text-2xl md:text-3xl text-center mb-8 sm:mb-10 md:mb-12" style={{ color: '#111827' }}>
                   Here are the best days to go out and stargaze...
                 </h2>
                 
@@ -409,17 +372,17 @@ export default function Home() {
             {/* Default State - Only show when no data, no error, and not loading */}
             {(!stargazingData && !error && !loading) && (
               <div className="w-full px-4 sm:px-6 lg:px-8">
-                <h2 className="text-xl sm:text-2xl md:text-3xl text-center mb-8 sm:mb-10 md:mb-12" style={{ color: '#000000', textShadow: '2px 2px 4px rgba(0, 0, 0, 0.3)' }}>
+                <h2 className="text-xl sm:text-2xl md:text-3xl text-center mb-8 sm:mb-10 md:mb-12" style={{ color: '#111827' }}>
                   Here are the best days to go out and stargaze...
                 </h2>
-                <div className="text-center py-12 text-gray-600">
+                <div className="text-center py-10 text-gray-500">
                   [ waiting for zip code... ]
                 </div>
               </div>
             )}
 
             {/* Footer */}
-            <footer className="w-full mt-16 py-8 px-4 sm:px-6 lg:px-8" style={{ fontFamily: 'Helvetica Neue, Arial, sans-serif' }}>
+            <footer className="w-full mt-auto pt-16 pb-10 px-4 sm:px-6 lg:px-8" style={{ fontFamily: 'Helvetica Neue, Arial, sans-serif' }}>
               <div className="max-w-2xl mx-auto text-center">
                 <p className="text-gray-600 text-sm mb-6">
                   Hi! I&apos;m Prameet. Thank you for visiting my website. Other links:
@@ -440,7 +403,7 @@ export default function Home() {
                     rel="noopener noreferrer"
                     className="flex items-center gap-2 px-4 py-2 border-2 border-gray-800 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
                   >
-                    <h1>🌍</h1>
+                    <span aria-hidden="true">🌍</span>
                     <span>My Portfolio</span>
                   </a>
                   
@@ -460,13 +423,10 @@ export default function Home() {
                 </p>
                 
                 <div className="mt-8 pt-6 border-t border-gray-200">
-                  <p className="text-gray-500 text-xs leading-relaxed mb-2">
+                  <p className="text-gray-500 text-xs leading-relaxed">
                     <strong>Disclaimer:</strong> Data provided by Astrospheric API and Open-Meteo. 
                     Moon illumination values are approximate; conditions may vary depending on local light pollution. 
                     Built with Next.js, Tailwind CSS, NeonDB, and Vercel Cron.
-                  </p>
-                  <p className="text-gray-500 text-xs leading-relaxed">
-                    Note: Conditions may vary depending on local weather and light pollution.
                   </p>
                 </div>
               </div>
@@ -484,6 +444,11 @@ export default function Home() {
       {/* Contact Dialog */}
       {showContactDialog && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/30 backdrop-blur-[2px]"
+            onClick={() => setShowContactDialog(false)}
+          />
           {/* Modal */}
           <div 
             className="bg-white rounded-lg border-2 border-gray-800 w-full max-w-sm relative"
