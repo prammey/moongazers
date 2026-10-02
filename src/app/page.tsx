@@ -23,8 +23,12 @@ interface StargazingData {
 export default function Home() {
   const { temperatureUnit, timeFormat, toggleTemperatureUnit, toggleTimeFormat } = useWeather();
   const router = useRouter();
-  const [showLandingPage, setShowLandingPage] = useState(true);
-  const [landingPageEnabled, setLandingPageEnabled] = useState(true);
+  // Landing page starts hidden and only appears if the admin setting says so;
+  // starting it visible made it flash on every load even when switched off.
+  // The app stays invisible until the setting loads so neither view flashes.
+  const [showLandingPage, setShowLandingPage] = useState(false);
+  const [landingPageEnabled, setLandingPageEnabled] = useState(false);
+  const [siteConfigLoaded, setSiteConfigLoaded] = useState(false);
   const [isLaunchingApp, setIsLaunchingApp] = useState(false);
   const [location, setLocation] = useState('');
   const [country, setCountry] = useState<'USA' | 'Canada'>('USA');
@@ -55,6 +59,8 @@ export default function Home() {
         }
       } catch (error) {
         console.error('Failed to fetch site config:', error);
+      } finally {
+        setSiteConfigLoaded(true);
       }
     };
     fetchSiteConfig();
@@ -184,7 +190,7 @@ export default function Home() {
     <div style={{ backgroundColor: '#ffffff', position: 'relative' }}>
       {/* Main App - Always rendered but behind landing page when needed */}
       <div 
-        className="relative"
+        className={`relative transition-opacity duration-300 ${siteConfigLoaded ? 'opacity-100' : 'opacity-0'}`}
         style={{ 
           backgroundColor: '#ffffff'
         }}
