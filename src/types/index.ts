@@ -27,6 +27,8 @@ export interface CurrentWeatherData {
 
 export interface BestWindowsResponse {
   location: string;
+  // IANA time zone of the searched location, e.g. "America/Chicago"
+  timezone: string;
   windows: TimeWindow[];
   currentWeather?: CurrentWeatherData | null;
 }

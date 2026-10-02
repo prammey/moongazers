@@ -406,7 +406,8 @@ async function getOpenMeteoForecast(lat: number, lng: number): Promise<OpenMeteo
 
 // Fallback sky data using simplified calculations
 async function getFallbackSkyData(lat: number, lng: number, dateTime: string) {
-  const date = new Date(dateTime);
+  // dateTime is a UTC timestamp without the trailing "Z"; read it as UTC
+  const date = new Date(dateTime.endsWith('Z') ? dateTime : `${dateTime}Z`);
   
   // Get moon data using astronomy engine
   const moonPhase = astronomy.MoonPhase(date);
@@ -596,18 +597,32 @@ export async function POST(request: NextRequest) {
     } else {
       throw new Error('Invalid forecast data structure');
     }
+
+    // Open-Meteo (timezone=auto) returns wall-clock times in the location's
+    // own zone with no offset, e.g. "2026-10-04T21:00" = 9 PM in Naperville.
+    // Interpret them in that zone. `new Date()` read them in the server's zone
+    // (UTC on Vercel), which shifted every window by the location's UTC offset.
+    const forecastZone = (forecastData as Partial<OpenMeteoForecast>)?.timezone;
+    const locationZone =
+      forecastZone && DateTime.now().setZone(forecastZone).isValid ? forecastZone : timezone;
+    const now = DateTime.now().setZone(locationZone);
     
     for (let i = 0; i < hourlyData.time.length; i++) {
-      const time = new Date(hourlyData.time[i]);
+      const localTime = DateTime.fromISO(hourlyData.time[i], { zone: locationZone });
+      const time = localTime.toJSDate();
       const cloudCover = hourlyData.cloudcover[i] || 0;
       const temperature = hourlyData.temperature_2m[i] || 70;
       const windSpeed = hourlyData.wind_speed_10m[i] || 5;
+
+      // Skip hours that are already over (forecast starts at local midnight today)
+      if (localTime.plus({ hours: 1 }) <= now) continue;
       
       // Determine if it's optimal stargazing time (9 PM to 4:30 AM only)
       // Moon and stars are not visible during daylight hours after 4:30 AM
-      // Time window: 21:00-04:30 for best astronomical visibility
-      const hour = time.getHours();
-      const minute = time.getMinutes();
+      // Time window: 21:00-04:30 for best astronomical visibility, in the
+      // location's local time (not the server's)
+      const hour = localTime.hour;
+      const minute = localTime.minute;
       const isOptimalTime = hour >= 21 || (hour < 4) || (hour === 4 && minute <= 30);
       
       if (isOptimalTime) {
@@ -673,12 +688,11 @@ export async function POST(request: NextRequest) {
     }
     
     // Get current weather data
-    const currentTime = new Date();
     let currentWeather = null;
     
     if (hourlyData && hourlyData.time.length > 0) {
-      // Find the closest hour to current time
-      const currentHour = DateTime.fromJSDate(currentTime).toFormat('yyyy-MM-dd\'T\'HH:00');
+      // Find the current hour in the location's zone (forecast times are local there)
+      const currentHour = now.toFormat('yyyy-MM-dd\'T\'HH:00');
       const currentIndex = hourlyData.time.findIndex(time => time === currentHour);
       
       if (currentIndex >= 0) {
@@ -700,6 +714,7 @@ export async function POST(request: NextRequest) {
 
     const response: BestWindowsResponse = {
       location: formattedLocation,
+      timezone: locationZone,
       windows: timeWindows,
       currentWeather: currentWeather
     };

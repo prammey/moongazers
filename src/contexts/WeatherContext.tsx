@@ -11,7 +11,7 @@ interface WeatherContextType {
   toggleTemperatureUnit: () => void;
   toggleTimeFormat: () => void;
   convertTemperature: (temp: number, fromUnit?: TemperatureUnit) => number;
-  formatTime: (date: Date) => string;
+  formatTime: (date: Date, timeZone?: string) => string;
   formatTemperature: (temp: number, fromUnit?: TemperatureUnit) => string;
 }
 
@@ -72,18 +72,21 @@ export function WeatherProvider({ children }: { children: React.ReactNode }) {
     return Math.round(temp);
   };
 
-  const formatTime = (date: Date): string => {
+  // timeZone: IANA zone to show the time in; defaults to the viewer's zone
+  const formatTime = (date: Date, timeZone?: string): string => {
     if (timeFormat === "12hr") {
       return date.toLocaleTimeString("en-US", {
         hour: "numeric",
         minute: "2-digit",
         hour12: true,
+        timeZone,
       });
     } else {
       return date.toLocaleTimeString("en-US", {
         hour: "2-digit",
         minute: "2-digit",
         hour12: false,
+        timeZone,
       });
     }
   };

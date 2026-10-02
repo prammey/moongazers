@@ -21,6 +21,8 @@ interface StargazingWindow {
 
 interface StargazingData {
   location: string;
+  // IANA zone of the searched location, e.g. "America/Denver"
+  timezone?: string;
   windows: StargazingWindow[];
 }
 
@@ -37,26 +39,33 @@ export default function InlineResults({
 }: InlineResultsProps) {
   const { formatTemperature, formatTime } = useWeather();
 
-  // Helper function to format time range from ISO timestamps
-  const formatTimeRange = (startIso: string, endIso: string): string => {
-    try {
-      const startDate = new Date(startIso);
-      const endDate = new Date(endIso);
-      
-      // Format start time with date
-      const startFormatted = startDate.toLocaleDateString("en-US", { 
-        month: "short", 
-        day: "numeric" 
-      }) + ", " + formatTime(startDate);
-      
-      // Format end time (just time)
-      const endFormatted = formatTime(endDate);
-      
-      return `${startFormatted} - ${endFormatted}`;
-    } catch (error) {
-      console.error("Error formatting time range:", error);
-      return "Invalid Date";
-    }
+  // Windows are shown in the searched location's time zone (that's where
+  // you'll be stargazing); if the viewer is in a different zone, their own
+  // local time is shown underneath.
+  const viewerZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const locationZone = data?.timezone || viewerZone;
+
+  const formatNight = (iso: string, timeZone: string): string =>
+    new Date(iso).toLocaleDateString("en-US", {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+      timeZone,
+    });
+
+  const zoneLabel = (iso: string, timeZone: string): string =>
+    new Intl.DateTimeFormat("en-US", { timeZone, timeZoneName: "short" })
+      .formatToParts(new Date(iso))
+      .find((part) => part.type === "timeZoneName")?.value ?? "";
+
+  const formatTimeRange = (startIso: string, endIso: string, timeZone: string): string =>
+    `${formatTime(new Date(startIso), timeZone)} – ${formatTime(new Date(endIso), timeZone)} ${zoneLabel(startIso, timeZone)}`;
+
+  const formatViewerRange = (startIso: string, endIso: string): string | null => {
+    const local = `${formatNight(startIso, locationZone)} ${formatTimeRange(startIso, endIso, locationZone)}`;
+    const viewer = `${formatNight(startIso, viewerZone)} ${formatTimeRange(startIso, endIso, viewerZone)}`;
+    if (local === viewer) return null;
+    return `${formatNight(startIso, viewerZone)}, ${formatTimeRange(startIso, endIso, viewerZone)}`;
   };
 
   if (loading) {
@@ -121,6 +130,11 @@ export default function InlineResults({
       <div className="text-center mb-8">
         <h2 className="text-2xl mb-2 text-gray-900">Best Stargazing Times</h2>
         <p className="text-lg text-gray-600">📍 {data.location}</p>
+        {data.windows.length > 0 && (
+          <p className="text-sm text-gray-500 mt-1">
+            Times are local to this location ({zoneLabel(data.windows[0].start, locationZone)})
+          </p>
+        )}
         <p className="text-xs text-gray-500 mt-3">
           Cloud cover: 0–15% none · 16–35% low · 36–60% medium · 60%+ high.
           Moon data calculated with Astronomy Engine.
@@ -162,9 +176,18 @@ export default function InlineResults({
               >
                 {/* Time Range Header */}
                 <div className="text-center mb-4 pb-4 border-b border-gray-200">
-                  <h3 className="text-lg font-bold mb-2 text-gray-900">
-                    {formatTimeRange(window.start, window.end)}
+                  <h3 className="text-lg font-bold text-gray-900">
+                    {formatNight(window.start, locationZone)}
                   </h3>
+                  <p className="text-base font-semibold text-gray-800 mb-1">
+                    {formatTimeRange(window.start, window.end, locationZone)}
+                  </p>
+                  {formatViewerRange(window.start, window.end) && (
+                    <p className="text-xs text-gray-500 mb-2">
+                      Your time: {formatViewerRange(window.start, window.end)}
+                    </p>
+                  )}
+                  <div className="mb-2" />
                   <span
                     className={`inline-block px-3 py-1 text-sm font-bold text-white rounded ${cloudBadge.color}`}
                   >
