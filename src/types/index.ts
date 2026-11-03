@@ -43,40 +43,6 @@ export interface GeocodingResult {
   location: string;
 }
 
-// Astrospheric API types
-export interface AstrosphericForecastData {
-  data: {
-    hourly: {
-      time: string[];
-      cloudcover: number[];
-      temperature_2m: number[];
-      wind_speed_10m: number[];
-    };
-    daily: {
-      sunrise: string[];
-      sunset: string[];
-    };
-  };
-}
-
-export interface AstrosphericSkyObject {
-  name: string;
-  type: number; // 0 = star, 1 = planet
-  alt: number;
-  mag?: number;
-}
-
-export interface AstrosphericSkyData {
-  data: {
-    objects: AstrosphericSkyObject[];
-    moon: {
-      phase: string;
-      illumination: number;
-      altitude: number;
-    };
-  };
-}
-
 // Open-Meteo API types
 export interface OpenMeteoForecast {
   timezone: string;

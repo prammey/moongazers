@@ -17,14 +17,9 @@ import {
   MoonData
 } from '@/types';
 
-const ASTROSPHERIC_KEY = process.env.ASTROSPHERIC_KEY;
 const TIMEZONEDB_KEY = process.env.TIMEZONEDB_KEY;
 
 // Validate environment variables
-if (!ASTROSPHERIC_KEY) {
-  console.warn('[API] Warning: ASTROSPHERIC_KEY not found in environment variables');
-}
-
 if (!TIMEZONEDB_KEY) {
   console.warn('[API] Warning: TIMEZONEDB_KEY not found in environment variables');
 }
@@ -37,12 +32,7 @@ const getCachedGeocode = unstable_cache(
 );
 
 const getCachedForecast = unstable_cache(
-  async (lat: number, lng: number, provider: string) => {
-    if (provider === 'astrospheric') {
-      return await getAstrosphericForecast(lat, lng);
-    }
-    return await getOpenMeteoForecast(lat, lng);
-  },
+  async (lat: number, lng: number) => await getOpenMeteoForecast(lat, lng),
   ['forecast'],
   { revalidate: 60 * 60 * 6 } // 6 hours
 );
@@ -55,12 +45,7 @@ const getCachedTimezone = unstable_cache(
 );
 
 const getCachedSkyData = unstable_cache(
-  async (lat: number, lng: number, dateTime: string, timezone: string, provider: string) => {
-    if (provider === 'astrospheric') {
-      return await getAstrosphericSkyData(lat, lng, dateTime, timezone);
-    }
-    return await getFallbackSkyData(lat, lng, dateTime);
-  },
+  async (lat: number, lng: number, dateTime: string) => await getSkyData(lat, lng, dateTime),
   ['sky-v2'], // bumped: real moon/planet/star positions
   { revalidate: 60 * 60 * 12 } // 12 hours
 );
@@ -273,50 +258,7 @@ async function getTimezone(lat: number, lng: number): Promise<string> {
   return 'UTC';
 }
 
-// Astrospheric API calls
-async function getAstrosphericForecast(lat: number, lng: number) {
-  const url = `https://api.astrospheric.com/GetForecastData_V1?key=${ASTROSPHERIC_KEY}&lat=${lat}&lon=${lng}&hours=72`;
-  
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 5000);
-  
-  try {
-    const response = await fetch(url, { signal: controller.signal });
-    clearTimeout(timeoutId);
-    
-    if (!response.ok) {
-      throw new Error(`Astrospheric API error: ${response.status}`);
-    }
-    
-    return await response.json();
-  } catch (error) {
-    clearTimeout(timeoutId);
-    throw error;
-  }
-}
-
-async function getAstrosphericSkyData(lat: number, lng: number, dateTime: string, timezone: string) {
-  const url = `https://api.astrospheric.com/GetSky_V1?key=${ASTROSPHERIC_KEY}&lat=${lat}&lon=${lng}&date=${dateTime}&tz=${timezone}`;
-  
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 5000);
-  
-  try {
-    const response = await fetch(url, { signal: controller.signal });
-    clearTimeout(timeoutId);
-    
-    if (!response.ok) {
-      throw new Error(`Astrospheric Sky API error: ${response.status}`);
-    }
-    
-    return await response.json();
-  } catch (error) {
-    clearTimeout(timeoutId);
-    throw error;
-  }
-}
-
-// Open-Meteo fallback
+// Open-Meteo hourly forecast (the only forecast source)
 async function getOpenMeteoForecast(lat: number, lng: number): Promise<OpenMeteoForecast> {
   const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&hourly=cloudcover,temperature_2m,wind_speed_10m&daily=sunrise,sunset&timezone=auto&forecast_days=4`;
   
@@ -343,7 +285,7 @@ const NAKED_EYE_PLANETS = [
 const MIN_PLANET_ALTITUDE = 5;
 const MIN_STAR_ALTITUDE = 10;
 
-async function getFallbackSkyData(lat: number, lng: number, dateTime: string) {
+async function getSkyData(lat: number, lng: number, dateTime: string) {
   // dateTime is a UTC timestamp without the trailing "Z"; read it as UTC
   const date = new Date(dateTime.endsWith('Z') ? dateTime : `${dateTime}Z`);
   const observer = new astronomy.Observer(lat, lng, 0);
@@ -519,49 +461,22 @@ export async function POST(request: NextRequest) {
     const timezone = await getCachedTimezone(lat, lng);
     console.log(`[API] Timezone: ${timezone}`);
     
-    let provider = 'astrospheric';
-    let forecastData: OpenMeteoForecast | unknown;
-    
-    // Step 3: Try Astrospheric first (only when there's a key; without one
-    // it can only fail, after a wasted request)
+    // Step 3: Open-Meteo forecast
+    let forecastData: OpenMeteoForecast;
     try {
-      if (!ASTROSPHERIC_KEY) throw new Error('No ASTROSPHERIC_KEY');
-      console.log('[API] Attempting Astrospheric forecast...');
-      forecastData = await getCachedForecast(lat, lng, 'astrospheric');
-      console.log('[API] Astrospheric forecast successful');
-    } catch {
-      console.log('[API] Using Open-Meteo forecast');
-      provider = 'open-meteo';
-      try {
-        forecastData = await getCachedForecast(lat, lng, 'open-meteo');
-      } catch (error) {
-        console.error('[API] Open-Meteo failed:', error);
-        throw new UpstreamError('The weather service is not responding. Please try again in a minute.');
-      }
+      forecastData = await getCachedForecast(lat, lng);
+    } catch (error) {
+      console.error('[API] Open-Meteo failed:', error);
+      throw new UpstreamError('The weather service is not responding. Please try again in a minute.');
     }
     
     // Step 4: Process forecast data and score time slots
     const timeSlots: TimeSlot[] = [];
     
-    // Type guard for forecast data structure
-    const hasHourlyData = (data: unknown): data is { hourly: { time: string[], cloudcover: number[], temperature_2m: number[], wind_speed_10m: number[] } } => {
-      return typeof data === 'object' && data !== null && 'hourly' in data;
-    };
-    
-    const hasNestedData = (data: unknown): data is { data: { hourly: { time: string[], cloudcover: number[], temperature_2m: number[], wind_speed_10m: number[] } } } => {
-      return typeof data === 'object' && data !== null && 'data' in data && 
-             typeof (data as any).data === 'object' && (data as any).data !== null && 'hourly' in (data as any).data;
-    };
-    
-    let hourlyData: { time: string[], cloudcover: number[], temperature_2m: number[], wind_speed_10m: number[] };
-    
-    if (hasHourlyData(forecastData)) {
-      hourlyData = forecastData.hourly;
-    } else if (hasNestedData(forecastData)) {
-      hourlyData = forecastData.data.hourly;
-    } else {
+    if (typeof forecastData !== 'object' || forecastData === null || !('hourly' in forecastData)) {
       throw new Error('Invalid forecast data structure');
     }
+    const hourlyData = forecastData.hourly;
 
     // Open-Meteo (timezone=auto) returns wall-clock times in the location's
     // own zone with no offset, e.g. "2026-10-04T21:00" = 9 PM in Naperville.
@@ -615,13 +530,7 @@ export async function POST(request: NextRequest) {
       const midpoint = new Date((window.startTime.getTime() + window.endTime.getTime()) / 2);
       const dateTimeStr = midpoint.toISOString().slice(0, 19);
       
-      let skyData: unknown;
-      try {
-        skyData = await getCachedSkyData(lat, lng, dateTimeStr, timezone, provider);
-      } catch {
-        console.log('[API] Sky data failed, using fallback');
-        skyData = await getCachedSkyData(lat, lng, dateTimeStr, timezone, 'fallback');
-      }
+      const skyData: unknown = await getCachedSkyData(lat, lng, dateTimeStr);
       
       // Calculate average weather for the window
       const avgCloudCover = Math.round(window.slots.reduce((sum, s) => sum + s.cloudCover, 0) / window.slots.length);
