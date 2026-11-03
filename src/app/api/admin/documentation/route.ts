@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
+import { verifyAdminToken } from '../../../../lib/adminSession';
 
 const prisma = new PrismaClient();
 
@@ -84,8 +85,7 @@ Location data entered is used solely for providing forecasts and is not stored p
 Built with Next.js 15, React, TypeScript, and Tailwind CSS. For questions or concerns about this application, please use the Contact information provided.`;
 
 function isValidToken(token: string): boolean {
-  // In production, verify JWT token properly
-  return token === process.env.ADMIN_SECRET;
+  return verifyAdminToken(token);
 }
 
 // GET - Fetch current documentation

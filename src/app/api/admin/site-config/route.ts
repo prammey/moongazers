@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
+import { verifyAdminToken } from '../../../../lib/adminSession';
 
 const prisma = new PrismaClient();
 
@@ -9,7 +10,7 @@ function validateToken(request: NextRequest): boolean {
   if (!authHeader) return false;
   
   const token = authHeader.replace('Bearer ', '');
-  return token === process.env.ADMIN_SECRET;
+  return verifyAdminToken(token);
 }
 
 export async function GET(request: NextRequest) {

@@ -1,47 +1,55 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import bcryptjs from 'bcryptjs';
+import { createAdminToken } from '../../../../lib/adminSession';
 
 const prisma = new PrismaClient();
+
+function invalidCredentials() {
+  return NextResponse.json(
+    { success: false, error: 'Invalid credentials' },
+    { status: 401 }
+  );
+}
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { username, password } = body;
 
-    // Find user in database
+    if (typeof username !== 'string' || typeof password !== 'string') {
+      return invalidCredentials();
+    }
+
+    // Preferred: the admin login set in Vercel (see scripts/set-admin-password.mjs)
+    const envHash = process.env.ADMIN_PASSWORD_HASH;
+    if (envHash) {
+      const isValid =
+        username === process.env.ADMIN_USERNAME &&
+        (await bcryptjs.compare(password, envHash));
+      if (!isValid) return invalidCredentials();
+
+      return NextResponse.json({
+        success: true,
+        token: createAdminToken(username),
+        user: { username }
+      });
+    }
+
+    // Fallback: users table, bcrypt-hashed passwords only
     const user = await prisma.user.findUnique({
       where: { username }
     });
 
-    if (!user) {
-      return NextResponse.json(
-        { success: false, error: 'Invalid credentials' },
-        { status: 401 }
-      );
-    }
-
-    // Check if password is already hashed (starts with $2a$ or $2b$)
-    let isValidPassword = false;
-    
-    if (user.password.startsWith('$2a$') || user.password.startsWith('$2b$')) {
-      // Password is hashed, use bcrypt to compare
-      isValidPassword = await bcryptjs.compare(password, user.password);
-    } else {
-      // Password is plain text, compare directly
-      isValidPassword = password === user.password;
-    }
-
-    if (!isValidPassword) {
-      return NextResponse.json(
-        { success: false, error: 'Invalid credentials' },
-        { status: 401 }
-      );
+    const isHashed =
+      user?.password.startsWith('$2a$') || user?.password.startsWith('$2b$');
+    if (!user || !isHashed || !(await bcryptjs.compare(password, user.password))) {
+      return invalidCredentials();
     }
 
     return NextResponse.json({
       success: true,
-      token: process.env.ADMIN_SECRET,
+      token: createAdminToken(user.username),
       user: {
         id: user.id,
         username: user.username,

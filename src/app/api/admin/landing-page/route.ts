@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '../../../../lib/prisma';
 import { uploadToCloudinary, deleteFromCloudinary, extractPublicIdFromUrl } from '../../../../lib/cloudinary';
+import { verifyAdminToken } from '../../../../lib/adminSession';
 
-// Simple auth check - in production, use proper JWT/session management
 function isAuthenticated(request: NextRequest): boolean {
   const authHeader = request.headers.get('authorization');
   const token = authHeader?.split(' ')[1];
-  return token === process.env.ADMIN_SECRET;
+  return verifyAdminToken(token);
 }
 
 export async function GET(request: NextRequest) {
