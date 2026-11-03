@@ -183,7 +183,7 @@ export default function LandingPage({ onLaunch, isLaunching = false }: LandingPa
                       alt={landingData.imageAlt}
                       width={600}
                       height={450}
-                      className="w-full h-auto rounded-lg border border-gray-200 hover:opacity-90 transition-opacity duration-300"
+                      className="w-full h-auto rounded-lg border-2 border-black shadow-[6px_6px_0_0_#000] group-hover:shadow-[8px_8px_0_0_#000] group-hover:-translate-x-0.5 group-hover:-translate-y-0.5 transition-all duration-200"
                       priority
                     />
                   </button>
@@ -226,7 +226,7 @@ export default function LandingPage({ onLaunch, isLaunching = false }: LandingPa
             {/* Close Button */}
             <button
               onClick={handleModalClose}
-              className="absolute -top-12 right-0 text-black text-2xl hover:opacity-70 transition-opacity bg-white border border-gray-300 w-10 h-10 flex items-center justify-center"
+              className="absolute -top-12 right-0 text-black text-xl bg-white border-2 border-black rounded-md shadow-[3px_3px_0_0_#000] hover:bg-black hover:text-white transition-colors w-10 h-10 flex items-center justify-center cursor-pointer"
               style={{ fontFamily: 'Helvetica Neue, Arial, sans-serif' }}
               aria-label="Close modal"
             >
@@ -239,7 +239,7 @@ export default function LandingPage({ onLaunch, isLaunching = false }: LandingPa
               alt={`${landingData.imageAlt} - Full Size`}
               width={900}
               height={675}
-              className="w-full h-auto border border-gray-200"
+              className="w-full h-auto border-2 border-black rounded-lg"
               style={{
                 boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.4), 0 15px 25px -8px rgba(0, 0, 0, 0.3)',
                 maxHeight: '80vh',

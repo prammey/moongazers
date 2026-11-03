@@ -204,7 +204,7 @@ export default function Home() {
                 setShowDocDialog(true);
                 fetchDocumentation();
               }}
-              className="text-xs sm:text-sm md:text-base bg-white border border-gray-300 px-3 py-1 rounded-md shadow-sm hover:shadow-md focus:outline-none transition-shadow kosugi-maru text-black text-bold cursor-pointer"
+              className="text-xs sm:text-sm md:text-base bg-white border-2 border-black px-3 py-1 rounded-md shadow-[3px_3px_0_0_#000] hover:bg-black hover:text-white active:translate-x-px active:translate-y-px active:shadow-[1px_1px_0_0_#000] focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 transition-all kosugi-maru text-black cursor-pointer"
               style={{ fontFamily: "'Kosugi Maru', sans-serif" }}
             >
               Doc
@@ -269,16 +269,13 @@ export default function Home() {
                 {/* Main Input Form - centered */}
                 <div className="w-full max-w-72 sm:max-w-80">
                   <form onSubmit={handleSubmit}>
-                    <div className="flex items-center bg-white rounded-lg border-2 focus-within:ring-2 focus-within:ring-blue-600 focus-within:ring-offset-2" style={{
-                      borderColor: '#000000',
-                      boxShadow: '0 8px 16px -4px rgba(0, 0, 0, 0.2), 0 4px 8px -2px rgba(0, 0, 0, 0.12)'
-                    }}>
+                    <div className="flex items-center bg-white rounded-lg border-2 border-black shadow-[4px_4px_0_0_#000] focus-within:ring-2 focus-within:ring-blue-600 focus-within:ring-offset-2 transition-shadow">
                       {/* Country Selector */}
                       <select
                         aria-label="Country"
                         value={country}
                         onChange={(e) => setCountry(e.target.value as 'USA' | 'Canada')}
-                        className="p-3 text-sm sm:text-base bg-transparent text-gray-900 focus:outline-none border-r border-gray-300 rounded-l-lg cursor-pointer"
+                        className="p-3 text-sm sm:text-base bg-transparent text-gray-900 focus:outline-none border-r-2 border-black rounded-l-lg cursor-pointer"
                         disabled={loading}
                         style={{ minWidth: '60px' }}
                       >
@@ -349,14 +346,14 @@ export default function Home() {
 
             {/* Results Section - Always show heading when we have data, error, or loading */}
             {(stargazingData || error || loading) && (
-              <div className="w-full mb-12 px-4 sm:px-6 lg:px-8">
+              <div className="w-full mb-12 sm:px-6 lg:px-8">
                 <h2 className="text-xl sm:text-2xl md:text-3xl text-center mb-8 sm:mb-10 md:mb-12" style={{ color: '#111827' }}>
                   Here are the best days to go out and stargaze...
                 </h2>
                 
                 {loading ? (
-                  <div className="text-center py-12 text-gray-600">
-                    [ fetching... ]
+                  <div className="text-center py-12 text-gray-600 animate-pulse" role="status">
+                    [ fetching the sky... ]
                   </div>
                 ) : (
                   <InlineResults 
@@ -390,7 +387,7 @@ export default function Home() {
                 <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-6">
                   <button
                     onClick={() => setShowContactDialog(true)}
-                    className="flex items-center gap-2 px-4 py-2 border-2 border-gray-800 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer"
+                    className="flex items-center gap-2 px-4 py-2 border-2 border-black rounded-lg bg-white text-gray-900 shadow-[3px_3px_0_0_#000] hover:-translate-x-px hover:-translate-y-px hover:shadow-[4px_4px_0_0_#000] active:translate-x-px active:translate-y-px active:shadow-[1px_1px_0_0_#000] focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 transition-all cursor-pointer"
                   >
                     <Image src="/letter.png" alt="Contact" width={16} height={16} />
                     <span>Contact</span>
@@ -400,7 +397,7 @@ export default function Home() {
                     href="https://prameet.space"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-2 px-4 py-2 border-2 border-gray-800 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                    className="flex items-center gap-2 px-4 py-2 border-2 border-black rounded-lg bg-white text-gray-900 shadow-[3px_3px_0_0_#000] hover:-translate-x-px hover:-translate-y-px hover:shadow-[4px_4px_0_0_#000] active:translate-x-px active:translate-y-px active:shadow-[1px_1px_0_0_#000] focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 transition-all"
                   >
                     <span aria-hidden="true">🌍</span>
                     <span>My Portfolio</span>
@@ -410,7 +407,7 @@ export default function Home() {
                     href="https://buymeacoffee.com/prameet"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-2 px-4 py-2 border-2 border-gray-800 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                    className="flex items-center gap-2 px-4 py-2 border-2 border-black rounded-lg bg-white text-gray-900 shadow-[3px_3px_0_0_#000] hover:-translate-x-px hover:-translate-y-px hover:shadow-[4px_4px_0_0_#000] active:translate-x-px active:translate-y-px active:shadow-[1px_1px_0_0_#000] focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 transition-all"
                   >
                     <Image src="/coffee.png" alt="Buy me a coffee" width={16} height={16} />
                     <span>Buy me a coffee</span>
@@ -453,27 +450,23 @@ export default function Home() {
             role="dialog"
             aria-modal="true"
             aria-labelledby="contact-title"
-            className="bg-white rounded-lg border-2 border-gray-800 w-full max-w-sm relative"
-            style={{
-              boxShadow: '4px 4px 8px rgba(0, 0, 0, 0.15)'
-            }}
+            className="bg-white rounded-lg border-2 border-black w-full max-w-sm relative shadow-[6px_6px_0_0_#000]"
           >
             {/* Header */}
-            <div className="bg-white border-b-2 border-gray-800 px-3 py-2 rounded-t-lg flex justify-between items-center">
+            <div className="bg-white border-b-2 border-black px-4 py-2 rounded-t-lg flex justify-between items-center">
               <h2 id="contact-title" className="text-base font-bold text-black" style={{ fontFamily: 'Helvetica Neue, Arial, sans-serif' }}>Contact</h2>
               <button
                 onClick={() => setShowContactDialog(false)}
                 aria-label="Close contact"
                 autoFocus
-                className="w-8 h-8 bg-red-600 text-white flex items-center justify-center hover:bg-red-700 transition-colors text-lg font-bold"
-                style={{ borderRadius: '0' }}
+                className="w-8 h-8 bg-red-600 text-white border-2 border-black rounded-md flex items-center justify-center hover:bg-red-700 transition-colors text-lg font-bold cursor-pointer"
               >
                 ×
               </button>
             </div>
 
             {/* Content */}
-            <div className="p-4 space-y-3" style={{ fontFamily: 'Helvetica Neue, Arial, sans-serif' }}>
+            <div className="p-5 space-y-4" style={{ fontFamily: 'Helvetica Neue, Arial, sans-serif' }}>
               <div>
                 <p className="text-black font-semibold mb-1">Email:</p>
                 <a 
@@ -493,7 +486,7 @@ export default function Home() {
               <div className="flex justify-center pt-3">
                 <button
                   onClick={() => setShowContactDialog(false)}
-                  className="bg-blue-500 text-white px-6 py-1.5 rounded border-2 border-gray-800 hover:bg-blue-600 transition-colors font-semibold text-sm"
+                  className="bg-blue-600 text-white px-8 py-1.5 rounded-md border-2 border-black shadow-[3px_3px_0_0_#000] hover:bg-blue-700 active:translate-x-px active:translate-y-px active:shadow-[1px_1px_0_0_#000] transition-all font-semibold text-sm cursor-pointer"
                 >
                   OK
                 </button>
@@ -508,36 +501,35 @@ export default function Home() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           {/* Backdrop */}
           <div
-            className="absolute inset-0 bg-black/20"
+            className="absolute inset-0 bg-black/30 backdrop-blur-[2px]"
             onClick={() => setShowDocDialog(false)}
           />
 
           {/* Modal */}
-          <div role="dialog" aria-modal="true" aria-labelledby="doc-title" className="relative bg-white rounded-lg border border-gray-200 shadow-lg w-full max-w-4xl max-h-[85vh] overflow-hidden">
+          <div role="dialog" aria-modal="true" aria-labelledby="doc-title" className="relative bg-white rounded-lg border-2 border-black shadow-[6px_6px_0_0_#000] w-full max-w-4xl max-h-[85vh] overflow-hidden">
             {/* Header */}
-            <div className="flex items-center justify-between p-4 border-b border-gray-100" style={{ boxShadow: '0 6px 8px -6px rgba(0,0,0,0.25)' }}>
+            <div className="flex items-center justify-between px-4 py-3 border-b-2 border-black">
               <h3 id="doc-title" className="text-lg font-semibold text-gray-900">Documentation</h3>
               <button
                 type="button"
                 autoFocus
                 onClick={() => setShowDocDialog(false)}
                 aria-label="Close documentation"
-                className="w-9 h-9 flex items-center justify-center bg-red-600 text-white font-bold transition-shadow hover:bg-red-700 cursor-pointer"
-                style={{ borderRadius: '6px', boxShadow: '0 2px 6px rgba(0,0,0,0.15)' }}
+                className="w-9 h-9 flex items-center justify-center bg-red-600 text-white font-bold border-2 border-black rounded-md transition-colors hover:bg-red-700 cursor-pointer"
               >
                 <span style={{ lineHeight: 0 }}>✕</span>
               </button>
             </div>
 
             {/* Scrollable Content with custom scrollbar */}
-            <div className="p-6 overflow-auto max-h-[75vh] custom-scrollbar" 
+            <div className="p-5 sm:p-8 overflow-auto max-h-[calc(85vh-4rem)] custom-scrollbar" 
                  style={{ 
                    scrollbarWidth: 'thin',
                    scrollbarColor: '#4B5563 #F3F4F6',
                  }}>
               {documentation ? (
                 <>
-                  <h2 className="text-2xl font-bold mb-6 text-black border-b pb-3">{documentation.title}</h2>
+                  <h2 className="text-2xl font-bold mb-6 text-black border-b-2 border-black pb-3">{documentation.title}</h2>
                   <div className="prose prose-slate max-w-none text-black">
                     <ReactMarkdown
                       remarkPlugins={[remarkSoftBreaks]}
@@ -551,7 +543,7 @@ export default function Home() {
                         ol: ({children}) => <ol className="list-decimal pl-5 text-black space-y-3 mb-4">{children}</ol>,
                         li: ({children}) => <li className="text-black">{children}</li>,
                         strong: ({children}) => <strong className="font-semibold text-black">{children}</strong>,
-                        blockquote: ({children}) => <div className="bg-gray-100 border-l-4 border-gray-400 p-4 my-4">{children}</div>,
+                        blockquote: ({children}) => <div className="bg-gray-50 border-l-4 border-black px-4 pt-4 pb-0.5 my-4">{children}</div>,
                         code: ({children}) => <code className="bg-gray-100 px-2 py-1 rounded text-sm">{children}</code>,
                         pre: ({children}) => <pre className="bg-gray-50 border border-gray-200 rounded p-4 overflow-x-auto">{children}</pre>,
                       }}

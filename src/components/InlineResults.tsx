@@ -71,7 +71,7 @@ export default function InlineResults({
   if (loading) {
     return (
       <div className="w-full max-w-4xl mx-auto mt-8">
-        <div className="text-center py-12 rounded-lg border-2 bg-white/80 border-gray-300 text-gray-900 backdrop-blur-sm">
+        <div className="text-center py-12 rounded-xl border-2 bg-white border-black shadow-[6px_6px_0_0_#000] text-gray-900">
           <div className="text-2xl mb-4">🔍</div>
           <h3 className="text-xl font-bold mb-2 text-gray-900">
             Searching the cosmos...
@@ -88,14 +88,15 @@ export default function InlineResults({
     return (
       <div className="w-full max-w-4xl mx-auto mt-8">
         <div
-          className="text-center py-12 px-8 rounded-xl bg-white/90 border border-gray-200 text-gray-700 backdrop-blur-sm shadow-lg"
+          role="alert"
+          className="text-center py-10 px-6 sm:px-8 rounded-xl bg-white border-2 border-black shadow-[6px_6px_0_0_#000] text-gray-700 max-w-xl mx-auto"
           style={{ fontFamily: "Helvetica Neue, Arial, sans-serif" }}
         >
-          <div className="text-3xl mb-6 text-gray-400">✕</div>
+          <div className="w-12 h-12 mx-auto mb-5 flex items-center justify-center rounded-full border-2 border-black text-xl font-bold text-black" aria-hidden="true">!</div>
           <h3 className="text-xl font-semibold mb-4 text-gray-800">
             Unable to fetch stargazing data
           </h3>
-          <p className="text-gray-600 text-sm leading-relaxed max-w-md mx-auto">
+          <p className="text-gray-800 text-base leading-relaxed max-w-md mx-auto">
             {error}
           </p>
           <p className="text-gray-500 text-xs mt-4">
@@ -143,12 +144,12 @@ export default function InlineResults({
 
       {/* Results Content */}
       {data.windows.length === 0 ? (
-        <div className="text-center py-12 rounded-lg border-2 bg-yellow-50 border-yellow-300 backdrop-blur-sm">
-          <div className="text-2xl mb-4">☁️</div>
-          <h3 className="text-xl font-bold mb-2 text-yellow-800">
+        <div className="text-center py-12 px-6 rounded-xl border-2 bg-white border-black shadow-[6px_6px_0_0_#000] max-w-xl mx-auto">
+          <div className="text-3xl mb-4" aria-hidden="true">☁️</div>
+          <h3 className="text-xl font-bold mb-2 text-gray-900">
             No Clear Skies
           </h3>
-          <p className="text-yellow-700">
+          <p className="text-gray-700">
             Weather conditions aren&apos;t ideal for stargazing in the next 72
             hours. Check back later!
           </p>
@@ -159,8 +160,8 @@ export default function InlineResults({
             data.windows.length === 1
               ? "flex justify-center"
               : data.windows.length === 2
-              ? "flex flex-col md:flex-row justify-center gap-6"
-              : "grid gap-6 md:grid-cols-2 lg:grid-cols-3"
+              ? "flex flex-col items-center md:items-stretch md:flex-row justify-center gap-8"
+              : "grid gap-8 md:grid-cols-2 lg:grid-cols-3"
           }`}
         >
           {data.windows.map((window, index) => {
@@ -170,12 +171,12 @@ export default function InlineResults({
             return (
               <div
                 key={index}
-                className={`p-5 sm:p-6 rounded-xl border border-gray-200 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:border-violet-300 bg-white shadow-md ${
+                className={`p-5 sm:p-6 rounded-xl border-2 border-black bg-white shadow-[6px_6px_0_0_#000] transition-all duration-200 hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[8px_8px_0_0_#000] ${
                   data.windows.length <= 2 ? "w-full max-w-sm" : ""
                 }`}
               >
                 {/* Time Range Header */}
-                <div className="text-center mb-4 pb-4 border-b border-gray-200">
+                <div className="text-center mb-4 pb-4 border-b-2 border-black">
                   <h3 className="text-lg font-bold text-gray-900">
                     {formatNight(window.start, locationZone)}
                   </h3>
@@ -189,14 +190,14 @@ export default function InlineResults({
                   )}
                   <div className="mb-2" />
                   <span
-                    className={`inline-block px-3 py-1 text-sm font-bold text-white rounded ${cloudBadge.color}`}
+                    className={`inline-block px-3 py-1 text-sm font-bold text-white rounded-md border-2 border-black ${cloudBadge.color}`}
                   >
                     {cloudBadge.text} ({window.weather.cloud}%)
                   </span>
                 </div>
 
                 {/* Weather Section */}
-                <div className="mb-3 p-3 rounded-lg bg-gray-50">
+                <div className="mb-3 p-3 rounded-lg bg-gray-50 border border-gray-200">
                   <h4 className="text-sm font-bold mb-2 text-gray-900">
                     🌡️ Weather
                   </h4>
@@ -216,7 +217,7 @@ export default function InlineResults({
                 </div>
 
                 {/* Moon Section */}
-                <div className="mb-3 p-3 rounded-lg bg-gray-50">
+                <div className="mb-3 p-3 rounded-lg bg-gray-50 border border-gray-200">
                   <h4 className="text-sm font-bold mb-2 text-gray-900">
                     🌙 Moon
                   </h4>
@@ -238,7 +239,7 @@ export default function InlineResults({
                 </div>
 
                 {/* Planets Section */}
-                <div className="mb-3 p-3 rounded-lg bg-gray-50">
+                <div className="mb-3 p-3 rounded-lg bg-gray-50 border border-gray-200">
                   <h4 className="text-sm font-bold mb-2 text-gray-900">
                     🪐 Planets
                   </h4>
@@ -259,7 +260,7 @@ export default function InlineResults({
                 </div>
 
                 {/* Stars Section */}
-                <div className="p-3 rounded-lg bg-gray-50">
+                <div className="p-3 rounded-lg bg-gray-50 border border-gray-200">
                   <h4 className="text-sm font-bold mb-2 text-gray-900">
                     ⭐ Stars
                   </h4>
@@ -285,7 +286,7 @@ export default function InlineResults({
       )}
       
       {/* Disclaimer */}
-      <div className="mt-10 text-xs sm:text-sm px-4 py-4 rounded-lg bg-gray-50 border border-gray-100">
+      <div className="mt-12 text-xs px-4 py-4 rounded-lg bg-gray-50 border border-gray-200">
         <p className="text-gray-600 max-w-3xl mx-auto text-center leading-relaxed">
           Forecast data from Open-Meteo; transformed for astronomy use. Results are provided &ldquo;as is&rdquo; and may be inaccurate or outdated. This tool is educational and not for operational or commercial use. Not affiliated with or endorsed by Open-Meteo.
         </p>

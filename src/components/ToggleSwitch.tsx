@@ -34,15 +34,14 @@ export default function ToggleSwitch({
         aria-checked={isRightSelected}
         aria-label={`${leftLabel} or ${rightLabel}: ${isRightSelected ? rightLabel : leftLabel}`}
         onClick={onToggle}
-        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2`}
+        className="relative inline-flex h-6 w-11 shrink-0 items-center rounded-full border-2 border-black transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2"
         style={{
-          backgroundColor: isRightSelected ? '#2563eb' : '#e5e7eb',
-          boxShadow: `0 0 0 2px ${isRightSelected ? '#2563eb' : 'transparent'}`
+          backgroundColor: isRightSelected ? '#2563eb' : '#e5e7eb'
         }}
       >
         <span
-          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-            isRightSelected ? 'translate-x-6' : 'translate-x-1'
+          className={`inline-block h-4 w-4 transform rounded-full bg-white border border-black transition-transform ${
+            isRightSelected ? 'translate-x-[22px]' : 'translate-x-0.5'
           }`}
         />
       </button>

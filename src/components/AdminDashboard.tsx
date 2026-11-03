@@ -392,20 +392,20 @@ export default function AdminDashboard({ onBackToMain }: AdminDashboardProps) {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#ffffff' }}>
-        <div className="bg-white border border-gray-200 rounded-lg p-8 w-full max-w-md">
+      <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: '#ffffff' }}>
+        <div className="bg-white border-2 border-black rounded-xl shadow-[6px_6px_0_0_#000] p-6 sm:p-8 w-full max-w-md">
           <h1 className="text-2xl mb-6 text-center" style={{ color: '#000000' }}>
             Admin Login
           </h1>
 
           {error && (
-            <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-700 rounded">
+            <div className="mb-4 p-4 bg-red-50 border-2 border-red-700 text-red-800 rounded-md">
               {error}
             </div>
           )}
 
           {success && (
-            <div className="mb-4 p-4 bg-green-50 border border-green-200 text-green-700 rounded">
+            <div className="mb-4 p-4 bg-green-50 border-2 border-green-700 text-green-800 rounded-md">
               {success}
             </div>
           )}
@@ -419,7 +419,7 @@ export default function AdminDashboard({ onBackToMain }: AdminDashboardProps) {
                 type="text"
                 value={adminUsername}
                 onChange={(e) => setAdminUsername(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-black text-black"
+                className="w-full px-3 py-2 border-2 border-black rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-1 text-black"
                 required
               />
             </div>
@@ -432,7 +432,7 @@ export default function AdminDashboard({ onBackToMain }: AdminDashboardProps) {
                 type="password"
                 value={adminPassword}
                 onChange={(e) => setAdminPassword(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-black text-black"
+                className="w-full px-3 py-2 border-2 border-black rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-1 text-black"
                 required
               />
             </div>
@@ -440,8 +440,7 @@ export default function AdminDashboard({ onBackToMain }: AdminDashboardProps) {
             <button
               type="submit"
               disabled={loading}
-              className="w-full px-4 py-2 text-black border border-gray-300 transition-all duration-300 hover:opacity-70"
-              style={{ backgroundColor: '#ffffff' }}
+              className="w-full px-4 py-2 rounded-md text-black bg-white border-2 border-black shadow-[3px_3px_0_0_#000] hover:bg-black hover:text-white active:translate-x-px active:translate-y-px active:shadow-[1px_1px_0_0_#000] focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Logging in...' : 'Login'}
             </button>
@@ -450,8 +449,7 @@ export default function AdminDashboard({ onBackToMain }: AdminDashboardProps) {
           <div className="mt-6 text-center">
             <button
               onClick={onBackToMain}
-              className="px-4 py-2 text-black border border-gray-300 transition-all duration-300 hover:opacity-70"
-              style={{ backgroundColor: '#ffffff' }}
+              className="px-4 py-2 rounded-md text-black bg-white border-2 border-black shadow-[3px_3px_0_0_#000] hover:bg-black hover:text-white active:translate-x-px active:translate-y-px active:shadow-[1px_1px_0_0_#000] focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
               ← Back to MoonGazers
             </button>
@@ -472,8 +470,7 @@ export default function AdminDashboard({ onBackToMain }: AdminDashboardProps) {
             <button
               onClick={handleEdit}
               disabled={!landingLoaded}
-              className="px-6 py-2 text-black border border-gray-300 transition-all duration-300 hover:opacity-70 disabled:opacity-50 disabled:cursor-wait"
-              style={{ backgroundColor: '#ffffff' }}
+              className="px-6 py-2 rounded-md text-black bg-white border-2 border-black shadow-[3px_3px_0_0_#000] hover:bg-black hover:text-white active:translate-x-px active:translate-y-px active:shadow-[1px_1px_0_0_#000] focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {!landingLoaded ? 'Loading…' : landingPage ? 'Edit Landing Page' : 'Create Landing Page'}
             </button>
@@ -481,15 +478,14 @@ export default function AdminDashboard({ onBackToMain }: AdminDashboardProps) {
               <button
                 onClick={handleResetToDefault}
                 disabled={loading}
-                className="px-6 py-2 text-white bg-orange-600 border border-orange-700 transition-all duration-300 hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-6 py-2 rounded-md text-red-700 bg-white border-2 border-red-700 shadow-[3px_3px_0_0_#b91c1c] hover:bg-red-700 hover:text-white active:translate-x-px active:translate-y-px active:shadow-[1px_1px_0_0_#b91c1c] focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Reset to Default
               </button>
             )}
             <button
               onClick={openDocForm}
-              className="px-6 py-2 text-black border border-gray-300 transition-all duration-300 hover:opacity-70"
-              style={{ backgroundColor: '#ffffff' }}
+              className="px-6 py-2 rounded-md text-black bg-white border-2 border-black shadow-[3px_3px_0_0_#000] hover:bg-black hover:text-white active:translate-x-px active:translate-y-px active:shadow-[1px_1px_0_0_#000] focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Edit Documentation
             </button>
@@ -497,7 +493,7 @@ export default function AdminDashboard({ onBackToMain }: AdminDashboardProps) {
         </div>
 
         {/* Landing Page Toggle */}
-        <div className="mb-6 p-6 bg-white border border-gray-300 rounded-lg">
+        <div className="mb-6 p-5 sm:p-6 bg-white border-2 border-black rounded-xl shadow-[4px_4px_0_0_#000]">
           <div className="flex items-center justify-between gap-4">
             <div>
               <h2 id="landing-visibility" className="text-lg font-semibold text-black mb-2">Landing Page Visibility</h2>
@@ -514,13 +510,13 @@ export default function AdminDashboard({ onBackToMain }: AdminDashboardProps) {
               aria-labelledby="landing-visibility"
               onClick={toggleLandingPage}
               disabled={savingToggle}
-              className={`relative shrink-0 inline-flex items-center h-8 w-16 rounded-full transition-colors disabled:opacity-60 ${
+              className={`relative shrink-0 inline-flex items-center h-8 w-16 rounded-full border-2 border-black transition-colors cursor-pointer disabled:opacity-60 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 ${
                 showLandingPageEnabled ? 'bg-green-500' : 'bg-gray-300'
               }`}
             >
               <span
-                className={`inline-block w-6 h-6 transform rounded-full bg-white transition-transform ${
-                  showLandingPageEnabled ? 'translate-x-9' : 'translate-x-1'
+                className={`inline-block w-6 h-6 transform rounded-full bg-white border border-black transition-transform ${
+                  showLandingPageEnabled ? 'translate-x-8' : 'translate-x-1'
                 }`}
               />
             </button>
@@ -530,29 +526,28 @@ export default function AdminDashboard({ onBackToMain }: AdminDashboardProps) {
         <div className="mb-6 text-center">
           <button
             onClick={onBackToMain}
-            className="px-4 py-2 text-black border border-gray-300 transition-all duration-300 hover:opacity-70"
-            style={{ backgroundColor: '#ffffff' }}
+            className="px-4 py-2 rounded-md text-black bg-white border-2 border-black shadow-[3px_3px_0_0_#000] hover:bg-black hover:text-white active:translate-x-px active:translate-y-px active:shadow-[1px_1px_0_0_#000] focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
             ← Back to MoonGazers
           </button>
         </div>
 
         {error && (
-          <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-700 rounded">
+          <div className="mb-4 p-4 bg-red-50 border-2 border-red-700 text-red-800 rounded-md">
             {error}
           </div>
         )}
 
         {success && (
-          <div className="mb-4 p-4 bg-green-50 border border-green-200 text-green-700 rounded">
+          <div className="mb-4 p-4 bg-green-50 border-2 border-green-700 text-green-800 rounded-md">
             {success}
           </div>
         )}
 
         {/* Form Modal */}
         {showForm && (
-          <div className="fixed inset-0 bg-white bg-opacity-90 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-gray-300 shadow-lg">
+          <div className="fixed inset-0 bg-black/30 backdrop-blur-[2px] flex items-center justify-center z-50 p-3 sm:p-4">
+            <div className="bg-white rounded-xl p-4 sm:p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto border-2 border-black shadow-[6px_6px_0_0_#000]">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl" style={{ color: '#000000' }}>
                   {landingPage ? 'Edit Landing Page' : 'Create Landing Page'}
@@ -560,7 +555,7 @@ export default function AdminDashboard({ onBackToMain }: AdminDashboardProps) {
                 <button
                   onClick={resetForm}
                   aria-label="Close without saving"
-                  className="text-black hover:text-gray-600 text-2xl"
+                  className="w-9 h-9 flex items-center justify-center bg-red-600 text-white font-bold border-2 border-black rounded-md hover:bg-red-700 transition-colors cursor-pointer"
                 >
                   ✕
                 </button>
@@ -573,7 +568,7 @@ export default function AdminDashboard({ onBackToMain }: AdminDashboardProps) {
                     type="text"
                     value={formData.title}
                     onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-black text-black"
+                    className="w-full px-3 py-2 border-2 border-black rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-1 text-black"
                     required
                   />
                 </div>
@@ -583,7 +578,7 @@ export default function AdminDashboard({ onBackToMain }: AdminDashboardProps) {
                   <textarea
                     value={formData.description}
                     onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-black h-32 text-black"
+                    className="w-full px-3 py-2 border-2 border-black rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-1 h-32 text-black"
                     required
                   />
                 </div>
@@ -594,7 +589,7 @@ export default function AdminDashboard({ onBackToMain }: AdminDashboardProps) {
                     type="text"
                     value={formData.buttonText}
                     onChange={(e) => setFormData(prev => ({ ...prev, buttonText: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-black text-black"
+                    className="w-full px-3 py-2 border-2 border-black rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-1 text-black"
                     required
                   />
                 </div>
@@ -605,7 +600,7 @@ export default function AdminDashboard({ onBackToMain }: AdminDashboardProps) {
                     type="text"
                     value={formData.footerText}
                     onChange={(e) => setFormData(prev => ({ ...prev, footerText: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-black text-black"
+                    className="w-full px-3 py-2 border-2 border-black rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-1 text-black"
                     placeholder="Enter optional footer text (e.g., disclaimer, note, etc.)"
                   />
                 </div>
@@ -616,7 +611,7 @@ export default function AdminDashboard({ onBackToMain }: AdminDashboardProps) {
                     type="file"
                     accept="image/*"
                     onChange={handleImageUpload}
-                    className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-black text-black"
+                    className="w-full px-3 py-2 border-2 border-black rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-1 text-black"
                   />
                   {imagePreview && (
                     <div className="mt-2">
@@ -637,14 +632,14 @@ export default function AdminDashboard({ onBackToMain }: AdminDashboardProps) {
                     type="text"
                     value={formData.imageAlt}
                     onChange={(e) => setFormData(prev => ({ ...prev, imageAlt: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-black text-black"
+                    className="w-full px-3 py-2 border-2 border-black rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-1 text-black"
                     placeholder="Describe the image for accessibility"
                   />
                 </div>
 
                 {/* Next to the Save button so it's seen even after scrolling the form */}
                 {error && (
-                  <div role="alert" className="p-3 bg-red-50 border border-red-200 text-red-700 rounded">
+                  <div role="alert" className="p-3 bg-red-50 border-2 border-red-700 text-red-800 rounded-md">
                     {error}
                   </div>
                 )}
@@ -653,16 +648,14 @@ export default function AdminDashboard({ onBackToMain }: AdminDashboardProps) {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="px-6 py-2 text-black border border-gray-300 transition-all duration-300 hover:opacity-70"
-                    style={{ backgroundColor: '#ffffff' }}
+                    className="px-6 py-2 rounded-md text-black bg-white border-2 border-black shadow-[3px_3px_0_0_#000] hover:bg-black hover:text-white active:translate-x-px active:translate-y-px active:shadow-[1px_1px_0_0_#000] focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {loading ? 'Saving...' : landingPage ? 'Save changes' : 'Create'}
                   </button>
                   <button
                     type="button"
                     onClick={resetForm}
-                    className="px-6 py-2 text-black border border-gray-300 transition-all duration-300 hover:opacity-70"
-                    style={{ backgroundColor: '#ffffff' }}
+                    className="px-6 py-2 rounded-md text-black bg-white border-2 border-black shadow-[3px_3px_0_0_#000] hover:bg-black hover:text-white active:translate-x-px active:translate-y-px active:shadow-[1px_1px_0_0_#000] focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Cancel
                   </button>
@@ -674,8 +667,8 @@ export default function AdminDashboard({ onBackToMain }: AdminDashboardProps) {
 
         {/* Documentation Form Modal */}
         {showDocForm && (
-          <div className="fixed inset-0 bg-white bg-opacity-90 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto border border-gray-300 shadow-lg">
+          <div className="fixed inset-0 bg-black/30 backdrop-blur-[2px] flex items-center justify-center z-50 p-3 sm:p-4">
+            <div className="bg-white rounded-xl p-4 sm:p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto border-2 border-black shadow-[6px_6px_0_0_#000]">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl" style={{ color: '#000000' }}>
                   Edit Documentation
@@ -683,7 +676,7 @@ export default function AdminDashboard({ onBackToMain }: AdminDashboardProps) {
                 <button
                   onClick={() => { setShowDocForm(false); setError(''); }}
                   aria-label="Close without saving"
-                  className="text-black hover:text-gray-600 text-2xl"
+                  className="w-9 h-9 flex items-center justify-center bg-red-600 text-white font-bold border-2 border-black rounded-md hover:bg-red-700 transition-colors cursor-pointer"
                 >
                   ✕
                 </button>
@@ -696,7 +689,7 @@ export default function AdminDashboard({ onBackToMain }: AdminDashboardProps) {
                     type="text"
                     value={docTitle}
                     onChange={(e) => setDocTitle(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-black text-black"
+                    className="w-full px-3 py-2 border-2 border-black rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-1 text-black"
                     required
                   />
                 </div>
@@ -704,7 +697,7 @@ export default function AdminDashboard({ onBackToMain }: AdminDashboardProps) {
                 <div>
                   <label className="block text-sm font-medium mb-1" style={{ color: '#000000' }}>Content (Markdown)</label>
                   <p className="text-xs text-gray-600 mb-2">Press Enter once for a new line, twice for a new paragraph.</p>
-                  <div className="border border-gray-300 rounded" style={{ minHeight: '400px' }}>
+                  <div className="border-2 border-black rounded-md overflow-hidden" style={{ minHeight: '400px' }}>
                     <MDEditor
                       value={docContent}
                       onChange={(value) => setDocContent(value || '')}
@@ -718,7 +711,7 @@ export default function AdminDashboard({ onBackToMain }: AdminDashboardProps) {
 
                 {/* Next to the Save button so it's seen even after scrolling the form */}
                 {error && (
-                  <div role="alert" className="p-3 bg-red-50 border border-red-200 text-red-700 rounded">
+                  <div role="alert" className="p-3 bg-red-50 border-2 border-red-700 text-red-800 rounded-md">
                     {error}
                   </div>
                 )}
@@ -727,16 +720,14 @@ export default function AdminDashboard({ onBackToMain }: AdminDashboardProps) {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="px-6 py-2 text-black border border-gray-300 transition-all duration-300 hover:opacity-70"
-                    style={{ backgroundColor: '#ffffff' }}
+                    className="px-6 py-2 rounded-md text-black bg-white border-2 border-black shadow-[3px_3px_0_0_#000] hover:bg-black hover:text-white active:translate-x-px active:translate-y-px active:shadow-[1px_1px_0_0_#000] focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {loading ? 'Saving...' : 'Update Documentation'}
                   </button>
                   <button
                     type="button"
                     onClick={() => setShowDocForm(false)}
-                    className="px-6 py-2 text-black border border-gray-300 transition-all duration-300 hover:opacity-70"
-                    style={{ backgroundColor: '#ffffff' }}
+                    className="px-6 py-2 rounded-md text-black bg-white border-2 border-black shadow-[3px_3px_0_0_#000] hover:bg-black hover:text-white active:translate-x-px active:translate-y-px active:shadow-[1px_1px_0_0_#000] focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Cancel
                   </button>
@@ -759,7 +750,7 @@ export default function AdminDashboard({ onBackToMain }: AdminDashboardProps) {
               No landing page found. Click Edit Landing Page to create one!
             </div>
           ) : (
-            <div className="bg-white border border-gray-200 rounded-lg p-6">
+            <div className="bg-white border-2 border-black rounded-xl shadow-[4px_4px_0_0_#000] p-5 sm:p-6">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-2">
@@ -790,8 +781,7 @@ export default function AdminDashboard({ onBackToMain }: AdminDashboardProps) {
                 <div className="flex gap-2 ml-4">
                   <button
                     onClick={handleEdit}
-                    className="px-4 py-2 text-black border border-gray-300 transition-all duration-300 hover:opacity-70"
-                    style={{ backgroundColor: '#ffffff' }}
+                    className="px-4 py-2 rounded-md text-black bg-white border-2 border-black shadow-[3px_3px_0_0_#000] hover:bg-black hover:text-white active:translate-x-px active:translate-y-px active:shadow-[1px_1px_0_0_#000] focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Edit
                   </button>
@@ -812,7 +802,7 @@ export default function AdminDashboard({ onBackToMain }: AdminDashboardProps) {
               No documentation found. Click Edit Documentation to create one!
             </div>
           ) : (
-            <div className="bg-white border border-gray-200 rounded-lg p-6">
+            <div className="bg-white border-2 border-black rounded-xl shadow-[4px_4px_0_0_#000] p-5 sm:p-6">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-2">
@@ -826,7 +816,7 @@ export default function AdminDashboard({ onBackToMain }: AdminDashboardProps) {
                   <p className="text-sm text-gray-600 mb-4">
                     Content Length: {documentation.content.length} characters
                   </p>
-                  <div className="bg-gray-50 p-4 rounded max-h-40 overflow-y-auto">
+                  <div className="bg-gray-50 border border-gray-200 p-4 rounded-md max-h-40 overflow-y-auto">
                     <pre className="text-xs text-gray-700 whitespace-pre-wrap">
                       {documentation.content.substring(0, 500)}
                       {documentation.content.length > 500 && '...'}
@@ -836,8 +826,7 @@ export default function AdminDashboard({ onBackToMain }: AdminDashboardProps) {
                 <div className="flex gap-2 ml-4">
                   <button
                     onClick={openDocForm}
-                    className="px-4 py-2 text-black border border-gray-300 transition-all duration-300 hover:opacity-70"
-                    style={{ backgroundColor: '#ffffff' }}
+                    className="px-4 py-2 rounded-md text-black bg-white border-2 border-black shadow-[3px_3px_0_0_#000] hover:bg-black hover:text-white active:translate-x-px active:translate-y-px active:shadow-[1px_1px_0_0_#000] focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Edit
                   </button>
