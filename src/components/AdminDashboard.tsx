@@ -51,6 +51,8 @@ export default function AdminDashboard({ onBackToMain }: AdminDashboardProps) {
   const [docContent, setDocContent] = useState('');
   const [docTitle, setDocTitle] = useState('');
   const [showLandingPageEnabled, setShowLandingPageEnabled] = useState(true);
+  const [landingLoaded, setLandingLoaded] = useState(false);
+  const [savingToggle, setSavingToggle] = useState(false);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -100,6 +102,7 @@ export default function AdminDashboard({ onBackToMain }: AdminDashboardProps) {
       setError('Failed to fetch landing page');
     }
     setLoading(false);
+    setLandingLoaded(true);
   }, [adminToken]);
 
   const fetchDocumentation = useCallback(async () => {
@@ -138,6 +141,8 @@ export default function AdminDashboard({ onBackToMain }: AdminDashboardProps) {
   }, [adminToken]);
 
   const toggleLandingPage = async () => {
+    setError('');
+    setSavingToggle(true);
     try {
       const newValue = !showLandingPageEnabled;
       const response = await fetch('/api/admin/site-config', {
@@ -162,6 +167,7 @@ export default function AdminDashboard({ onBackToMain }: AdminDashboardProps) {
       console.error('Failed to toggle landing page:', error);
       setError('Failed to update landing page setting');
     }
+    setSavingToggle(false);
   };
 
   const handleResetToDefault = async () => {
@@ -205,10 +211,14 @@ export default function AdminDashboard({ onBackToMain }: AdminDashboardProps) {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 5 * 1024 * 1024) { // 5MB limit
-      setError('Image size must be less than 5MB');
+    // Vercel rejects request bodies over 4.5 MB, and sending the image as
+    // base64 makes it a third bigger, so 3 MB is the real limit
+    if (file.size > 3 * 1024 * 1024) {
+      setError('Image must be smaller than 3 MB.');
+      e.target.value = '';
       return;
     }
+    setError('');
 
     const reader = new FileReader();
     reader.onloadend = () => {
@@ -242,7 +252,8 @@ export default function AdminDashboard({ onBackToMain }: AdminDashboardProps) {
         setSuccess('Authentication successful!');
         setTimeout(() => setSuccess(''), 3000);
       } else {
-        setError('Invalid credentials');
+        const result = await response.json().catch(() => ({}));
+        setError(response.status === 401 ? 'Wrong username or password.' : result.error || 'Login failed. Please try again.');
       }
     } catch (error) {
       console.error('Authentication failed:', error);
@@ -251,8 +262,19 @@ export default function AdminDashboard({ onBackToMain }: AdminDashboardProps) {
     setLoading(false);
   };
 
+  // Opening an editor always starts from what's saved (Escape closes without saving)
   const handleEdit = () => {
+    resetForm();
     setShowForm(true);
+  };
+
+  const openDocForm = () => {
+    if (documentation) {
+      setDocTitle(documentation.title);
+      setDocContent(documentation.content);
+    }
+    setError('');
+    setShowDocForm(true);
   };
 
   const resetForm = () => {
@@ -268,6 +290,7 @@ export default function AdminDashboard({ onBackToMain }: AdminDashboardProps) {
       });
       setImagePreview(landingPage.imageUrl);
     }
+    setError('');
     setShowForm(false);
   };
 
@@ -300,7 +323,7 @@ export default function AdminDashboard({ onBackToMain }: AdminDashboardProps) {
         fetchLandingPage();
         setShowForm(false);
       } else {
-        const result = await response.json();
+        const result = await response.json().catch(() => ({}));
         setError(result.error || `Failed to ${landingPage ? 'update' : 'create'} landing page`);
       }
     } catch (error) {
@@ -335,7 +358,7 @@ export default function AdminDashboard({ onBackToMain }: AdminDashboardProps) {
         setDocumentation(result);
         setShowDocForm(false);
       } else {
-        const result = await response.json();
+        const result = await response.json().catch(() => ({}));
         setError(result.error || 'Failed to update documentation');
       }
     } catch (error) {
@@ -344,6 +367,20 @@ export default function AdminDashboard({ onBackToMain }: AdminDashboardProps) {
     }
     setLoading(false);
   };
+
+  // Escape closes the editor modals (without saving)
+  useEffect(() => {
+    if (!showForm && !showDocForm) return;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setShowForm(false);
+        setShowDocForm(false);
+        setError('');
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [showForm, showDocForm]);
 
   useEffect(() => {
     if (isAuthenticated && adminToken) {
@@ -416,7 +453,7 @@ export default function AdminDashboard({ onBackToMain }: AdminDashboardProps) {
               className="px-4 py-2 text-black border border-gray-300 transition-all duration-300 hover:opacity-70"
               style={{ backgroundColor: '#ffffff' }}
             >
-              ← Back to Landing Page
+              ← Back to MoonGazers
             </button>
           </div>
         </div>
@@ -425,19 +462,20 @@ export default function AdminDashboard({ onBackToMain }: AdminDashboardProps) {
   }
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#ffffff', padding: '2rem' }}>
+    <div className="min-h-screen p-4 sm:p-8" style={{ backgroundColor: '#ffffff' }}>
       <div className="max-w-6xl mx-auto">
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
           <h1 className="text-3xl" style={{ color: '#000000' }}>
             Admin Dashboard
           </h1>
-          <div className="flex gap-4">
+          <div className="flex flex-wrap gap-3">
             <button
-              onClick={() => setShowForm(true)}
-              className="px-6 py-2 text-black border border-gray-300 transition-all duration-300 hover:opacity-70"
+              onClick={handleEdit}
+              disabled={!landingLoaded}
+              className="px-6 py-2 text-black border border-gray-300 transition-all duration-300 hover:opacity-70 disabled:opacity-50 disabled:cursor-wait"
               style={{ backgroundColor: '#ffffff' }}
             >
-              {landingPage ? 'Edit Landing Page' : 'Create Landing Page'}
+              {!landingLoaded ? 'Loading…' : landingPage ? 'Edit Landing Page' : 'Create Landing Page'}
             </button>
             {landingPage && (
               <button
@@ -449,7 +487,7 @@ export default function AdminDashboard({ onBackToMain }: AdminDashboardProps) {
               </button>
             )}
             <button
-              onClick={() => setShowDocForm(true)}
+              onClick={openDocForm}
               className="px-6 py-2 text-black border border-gray-300 transition-all duration-300 hover:opacity-70"
               style={{ backgroundColor: '#ffffff' }}
             >
@@ -460,9 +498,9 @@ export default function AdminDashboard({ onBackToMain }: AdminDashboardProps) {
 
         {/* Landing Page Toggle */}
         <div className="mb-6 p-6 bg-white border border-gray-300 rounded-lg">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-4">
             <div>
-              <h2 className="text-lg font-semibold text-black mb-2">Landing Page Visibility</h2>
+              <h2 id="landing-visibility" className="text-lg font-semibold text-black mb-2">Landing Page Visibility</h2>
               <p className="text-sm text-gray-600">
                 {showLandingPageEnabled 
                   ? 'Landing page is currently enabled. New visitors will see the landing page first.' 
@@ -470,8 +508,13 @@ export default function AdminDashboard({ onBackToMain }: AdminDashboardProps) {
               </p>
             </div>
             <button
+              type="button"
+              role="switch"
+              aria-checked={showLandingPageEnabled}
+              aria-labelledby="landing-visibility"
               onClick={toggleLandingPage}
-              className={`relative inline-flex items-center h-8 w-16 rounded-full transition-colors ${
+              disabled={savingToggle}
+              className={`relative shrink-0 inline-flex items-center h-8 w-16 rounded-full transition-colors disabled:opacity-60 ${
                 showLandingPageEnabled ? 'bg-green-500' : 'bg-gray-300'
               }`}
             >
@@ -490,7 +533,7 @@ export default function AdminDashboard({ onBackToMain }: AdminDashboardProps) {
             className="px-4 py-2 text-black border border-gray-300 transition-all duration-300 hover:opacity-70"
             style={{ backgroundColor: '#ffffff' }}
           >
-            ← Back to Landing Page
+            ← Back to MoonGazers
           </button>
         </div>
 
@@ -512,10 +555,11 @@ export default function AdminDashboard({ onBackToMain }: AdminDashboardProps) {
             <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-gray-300 shadow-lg">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl" style={{ color: '#000000' }}>
-                  Edit Landing Page
+                  {landingPage ? 'Edit Landing Page' : 'Create Landing Page'}
                 </h2>
                 <button
                   onClick={resetForm}
+                  aria-label="Close without saving"
                   className="text-black hover:text-gray-600 text-2xl"
                 >
                   ✕
@@ -598,6 +642,13 @@ export default function AdminDashboard({ onBackToMain }: AdminDashboardProps) {
                   />
                 </div>
 
+                {/* Next to the Save button so it's seen even after scrolling the form */}
+                {error && (
+                  <div role="alert" className="p-3 bg-red-50 border border-red-200 text-red-700 rounded">
+                    {error}
+                  </div>
+                )}
+
                 <div className="flex gap-4 pt-4">
                   <button
                     type="submit"
@@ -605,7 +656,7 @@ export default function AdminDashboard({ onBackToMain }: AdminDashboardProps) {
                     className="px-6 py-2 text-black border border-gray-300 transition-all duration-300 hover:opacity-70"
                     style={{ backgroundColor: '#ffffff' }}
                   >
-                    {loading ? 'Saving...' : 'Update'}
+                    {loading ? 'Saving...' : landingPage ? 'Save changes' : 'Create'}
                   </button>
                   <button
                     type="button"
@@ -630,7 +681,8 @@ export default function AdminDashboard({ onBackToMain }: AdminDashboardProps) {
                   Edit Documentation
                 </h2>
                 <button
-                  onClick={() => setShowDocForm(false)}
+                  onClick={() => { setShowDocForm(false); setError(''); }}
+                  aria-label="Close without saving"
                   className="text-black hover:text-gray-600 text-2xl"
                 >
                   ✕
@@ -650,7 +702,8 @@ export default function AdminDashboard({ onBackToMain }: AdminDashboardProps) {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-2" style={{ color: '#000000' }}>Content (Markdown)</label>
+                  <label className="block text-sm font-medium mb-1" style={{ color: '#000000' }}>Content (Markdown)</label>
+                  <p className="text-xs text-gray-600 mb-2">Press Enter once for a new line, twice for a new paragraph.</p>
                   <div className="border border-gray-300 rounded" style={{ minHeight: '400px' }}>
                     <MDEditor
                       value={docContent}
@@ -662,6 +715,13 @@ export default function AdminDashboard({ onBackToMain }: AdminDashboardProps) {
                     />
                   </div>
                 </div>
+
+                {/* Next to the Save button so it's seen even after scrolling the form */}
+                {error && (
+                  <div role="alert" className="p-3 bg-red-50 border border-red-200 text-red-700 rounded">
+                    {error}
+                  </div>
+                )}
 
                 <div className="flex gap-4 pt-4">
                   <button
@@ -775,7 +835,7 @@ export default function AdminDashboard({ onBackToMain }: AdminDashboardProps) {
                 </div>
                 <div className="flex gap-2 ml-4">
                   <button
-                    onClick={() => setShowDocForm(true)}
+                    onClick={openDocForm}
                     className="px-4 py-2 text-black border border-gray-300 transition-all duration-300 hover:opacity-70"
                     style={{ backgroundColor: '#ffffff' }}
                   >

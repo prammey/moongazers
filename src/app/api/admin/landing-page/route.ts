@@ -3,6 +3,18 @@ import { prisma } from '../../../../lib/prisma';
 import { uploadToCloudinary, deleteFromCloudinary, extractPublicIdFromUrl } from '../../../../lib/cloudinary';
 import { verifyAdminToken } from '../../../../lib/adminSession';
 
+// Without these, Cloudinary fails with a vague error; say what's missing
+const UPLOADS_NOT_SET_UP =
+  'Image upload isn\'t set up: CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET are missing. Nothing was saved. To save just the text, close the editor, reopen it and save without picking an image.';
+
+function cloudinaryConfigured(): boolean {
+  return Boolean(
+    process.env.CLOUDINARY_CLOUD_NAME &&
+    process.env.CLOUDINARY_API_KEY &&
+    process.env.CLOUDINARY_API_SECRET
+  );
+}
+
 function isAuthenticated(request: NextRequest): boolean {
   const authHeader = request.headers.get('authorization');
   const token = authHeader?.split(' ')[1];
@@ -42,13 +54,16 @@ export async function POST(request: NextRequest) {
 
     // If a new image file is provided, upload to Cloudinary
     if (imageFile) {
+      if (!cloudinaryConfigured()) {
+        return NextResponse.json({ success: false, error: UPLOADS_NOT_SET_UP }, { status: 400 });
+      }
       try {
         const uploadResult = await uploadToCloudinary(imageFile);
         finalImageUrl = uploadResult.secure_url;
       } catch (uploadError) {
         console.error('Image upload failed:', uploadError);
         return NextResponse.json(
-          { success: false, error: 'Failed to upload image' },
+          { success: false, error: 'The image upload failed. Nothing was saved. Try a smaller JPG or PNG.' },
           { status: 400 }
         );
       }
@@ -114,6 +129,9 @@ export async function PUT(request: NextRequest) {
 
     // If a new image file is provided, upload to Cloudinary
     if (imageFile) {
+      if (!cloudinaryConfigured()) {
+        return NextResponse.json({ success: false, error: UPLOADS_NOT_SET_UP }, { status: 400 });
+      }
       try {
         // Delete old image if it's from Cloudinary
         if (existingLandingPage.imageUrl.includes('cloudinary.com')) {
@@ -128,7 +146,7 @@ export async function PUT(request: NextRequest) {
       } catch (uploadError) {
         console.error('Image upload failed:', uploadError);
         return NextResponse.json(
-          { success: false, error: 'Failed to upload image' },
+          { success: false, error: 'The image upload failed. Nothing was saved. Try a smaller JPG or PNG.' },
           { status: 400 }
         );
       }
