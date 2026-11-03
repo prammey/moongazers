@@ -352,9 +352,7 @@ export default function Home() {
                 
                 <div className="mt-8 pt-6 border-t border-gray-200">
                   <p className="text-gray-500 text-xs leading-relaxed">
-                    <strong>Disclaimer:</strong> Weather data from Open-Meteo; locations from OpenStreetMap.
-                    Moon, planet and star positions are calculated with Astronomy Engine and are approximate; conditions may vary depending on local light pollution.
-                    Built with Next.js, Tailwind CSS and a Neon Postgres database.
+                    Forecasts from Open-Meteo, places from OpenStreetMap, sky positions from Astronomy Engine. Approximate; your local light pollution matters.
                   </p>
                 </div>
               </div>

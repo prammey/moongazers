@@ -138,7 +138,6 @@ export default function InlineResults({
         )}
         <p className="text-xs text-gray-500 mt-3">
           Cloud cover: 0–15% none · 16–35% low · 36–60% medium · 60%+ high.
-          Moon data calculated with Astronomy Engine.
         </p>
       </div>
 
@@ -284,13 +283,6 @@ export default function InlineResults({
           })}
         </div>
       )}
-      
-      {/* Disclaimer */}
-      <div className="mt-12 text-xs px-4 py-4 rounded-lg bg-gray-50 border border-gray-200">
-        <p className="text-gray-600 max-w-3xl mx-auto text-center leading-relaxed">
-          Forecast data from Open-Meteo; transformed for astronomy use. Results are provided &ldquo;as is&rdquo; and may be inaccurate or outdated. This tool is educational and not for operational or commercial use. Not affiliated with or endorsed by Open-Meteo.
-        </p>
-      </div>
     </div>
   );
 }
