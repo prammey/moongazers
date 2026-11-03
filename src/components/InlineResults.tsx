@@ -209,7 +209,8 @@ export default function InlineResults({
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Wind:</span>
                     <span className="font-semibold text-gray-900">
-                      {window.weather.wind} mph
+                      {/* Open-Meteo reports wind in km/h */}
+                      {window.weather.wind} km/h
                     </span>
                   </div>
                 </div>
@@ -286,7 +287,7 @@ export default function InlineResults({
       {/* Disclaimer */}
       <div className="mt-10 text-xs sm:text-sm px-4 py-4 rounded-lg bg-gray-50 border border-gray-100">
         <p className="text-gray-600 max-w-3xl mx-auto text-center leading-relaxed">
-          Forecast data from Astrospheric and Open-Meteo; transformed for astronomy use. Results are provided &ldquo;as is&rdquo; and may be inaccurate or outdated. This tool is educational and not for operational or commercial use. Not affiliated with or endorsed by Astrospheric or Open-Meteo.
+          Forecast data from Open-Meteo; transformed for astronomy use. Results are provided &ldquo;as is&rdquo; and may be inaccurate or outdated. This tool is educational and not for operational or commercial use. Not affiliated with or endorsed by Open-Meteo.
         </p>
       </div>
     </div>

@@ -9,6 +9,7 @@ import InlineResults from '@/components/InlineResults';
 import LandingPage from '@/components/LandingPage';
 import Image from 'next/image';
 import ReactMarkdown from 'react-markdown';
+import remarkSoftBreaks from '@/lib/remarkSoftBreaks';
 
 interface StargazingData {
   location: string;
@@ -46,6 +47,7 @@ export default function Home() {
     title: string;
     content: string;
   } | null>(null);
+  const [docError, setDocError] = useState(false);
   
   // Fetch site configuration on mount
   useEffect(() => {
@@ -79,19 +81,20 @@ export default function Home() {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [router]);
   
-  // Handle Escape key for Doc modal
+  // Escape closes the Doc and Contact dialogs
   useEffect(() => {
-    if (!showDocDialog) return;
+    if (!showDocDialog && !showContactDialog) return;
     
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         setShowDocDialog(false);
+        setShowContactDialog(false);
       }
     };
     
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [showDocDialog]);
+  }, [showDocDialog, showContactDialog]);
   
   // Handle launching the main app from landing page
   const handleLaunchApp = () => {
@@ -105,14 +108,15 @@ export default function Home() {
 
   // Fetch documentation from API
   const fetchDocumentation = async () => {
+    setDocError(false);
     try {
       const response = await fetch('/api/admin/documentation');
-      if (response.ok) {
-        const data = await response.json();
-        setDocumentation(data);
-      }
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      setDocumentation(await response.json());
     } catch (error) {
+      // Without this the dialog said "Loading documentation..." forever
       console.error('Failed to fetch documentation:', error);
+      setDocError(true);
     }
   };
 
@@ -150,12 +154,12 @@ export default function Home() {
         }),
       });
 
+      // The API explains what went wrong (unknown place, weather service down)
+      const data = await response.json().catch(() => ({}));
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to fetch data');
+        throw new Error(data.error || 'Something went wrong. Please try again.');
       }
 
-      const data = await response.json();
       setStargazingData(data);
       
       // Set current weather data if available
@@ -167,20 +171,14 @@ export default function Home() {
         });
       }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'An error occurred';
-      
-      // Check if the error is related to ZIP/postal code validation
-      if (errorMessage.toLowerCase().includes('location not found') || 
-          errorMessage.toLowerCase().includes('not found') ||
-          errorMessage.toLowerCase().includes('invalid') ||
-          errorMessage.toLowerCase().includes('zip') ||
-          errorMessage.toLowerCase().includes('postal')) {
-        const codeType = country === 'USA' ? 'ZIP code' : 'postal code';
-        const example = country === 'USA' ? '10001 or 90210' : 'M5H 2N2 or V6B 1A1';
-        setError(`Please check the provided ${codeType}. Make sure it's a valid ${country} ${codeType} (e.g., ${example}).`);
-      } else {
-        setError(errorMessage);
-      }
+      // A failed fetch (offline) is a TypeError with a browser-specific message
+      setError(
+        err instanceof TypeError
+          ? "Couldn't reach MoonGazers. Check your connection and try again."
+          : err instanceof Error ? err.message : 'Something went wrong. Please try again.'
+      );
+      setStargazingData(null);
+      setCurrentWeatherData(null);
     } finally {
       setLoading(false);
     }
@@ -271,12 +269,13 @@ export default function Home() {
                 {/* Main Input Form - centered */}
                 <div className="w-full max-w-72 sm:max-w-80">
                   <form onSubmit={handleSubmit}>
-                    <div className="flex items-center bg-white rounded-lg border-2" style={{
+                    <div className="flex items-center bg-white rounded-lg border-2 focus-within:ring-2 focus-within:ring-blue-600 focus-within:ring-offset-2" style={{
                       borderColor: '#000000',
                       boxShadow: '0 8px 16px -4px rgba(0, 0, 0, 0.2), 0 4px 8px -2px rgba(0, 0, 0, 0.12)'
                     }}>
                       {/* Country Selector */}
                       <select
+                        aria-label="Country"
                         value={country}
                         onChange={(e) => setCountry(e.target.value as 'USA' | 'Canada')}
                         className="p-3 text-sm sm:text-base bg-transparent text-gray-900 focus:outline-none border-r border-gray-300 rounded-l-lg cursor-pointer"
@@ -292,7 +291,8 @@ export default function Home() {
                         type="text"
                         value={location}
                         onChange={(e) => setLocation(e.target.value)}
-                        placeholder={country === 'USA' ? 'Enter ZIP code...' : 'Enter postal code...'}
+                        aria-label="ZIP code, postal code or city"
+                        placeholder={country === 'USA' ? 'ZIP code or city...' : 'Postal code or city...'}
                         className="flex-1 p-3 text-sm sm:text-base bg-transparent text-gray-900 placeholder-gray-500 focus:outline-none min-w-0"
                         disabled={loading}
                       />
@@ -300,6 +300,7 @@ export default function Home() {
                       {/* Submit Button with Enhanced Enter Symbol */}
                       <button
                         type="submit"
+                        aria-label="Find stargazing times"
                         disabled={loading || !location.trim()}
                         className={`p-3 transition-all ${
                           loading || !location.trim()
@@ -344,14 +345,6 @@ export default function Home() {
                 </div>
               </div>
 
-              {error && (
-                <div className="mt-6 p-6 rounded-xl bg-white/90 border border-gray-200 text-gray-700 max-w-lg mx-auto text-center shadow-lg backdrop-blur-sm" style={{ fontFamily: 'Helvetica Neue, Arial, sans-serif' }}>
-                  <div className="text-2xl mb-3 text-amber-500">⚠</div>
-                  <p className="text-sm leading-relaxed">
-                    {error}
-                  </p>
-                </div>
-              )}
             </div>
 
             {/* Results Section - Always show heading when we have data, error, or loading */}
@@ -430,9 +423,9 @@ export default function Home() {
                 
                 <div className="mt-8 pt-6 border-t border-gray-200">
                   <p className="text-gray-500 text-xs leading-relaxed">
-                    <strong>Disclaimer:</strong> Data provided by Astrospheric API and Open-Meteo. 
-                    Moon illumination values are approximate; conditions may vary depending on local light pollution. 
-                    Built with Next.js, Tailwind CSS, NeonDB, and Vercel Cron.
+                    <strong>Disclaimer:</strong> Weather data from Open-Meteo; locations from OpenStreetMap.
+                    Moon, planet and star positions are calculated with Astronomy Engine and are approximate; conditions may vary depending on local light pollution.
+                    Built with Next.js, Tailwind CSS and a Neon Postgres database.
                   </p>
                 </div>
               </div>
@@ -457,6 +450,9 @@ export default function Home() {
           />
           {/* Modal */}
           <div 
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="contact-title"
             className="bg-white rounded-lg border-2 border-gray-800 w-full max-w-sm relative"
             style={{
               boxShadow: '4px 4px 8px rgba(0, 0, 0, 0.15)'
@@ -464,9 +460,11 @@ export default function Home() {
           >
             {/* Header */}
             <div className="bg-white border-b-2 border-gray-800 px-3 py-2 rounded-t-lg flex justify-between items-center">
-              <h2 className="text-base font-bold text-black" style={{ fontFamily: 'Helvetica Neue, Arial, sans-serif' }}>Contact</h2>
+              <h2 id="contact-title" className="text-base font-bold text-black" style={{ fontFamily: 'Helvetica Neue, Arial, sans-serif' }}>Contact</h2>
               <button
                 onClick={() => setShowContactDialog(false)}
+                aria-label="Close contact"
+                autoFocus
                 className="w-8 h-8 bg-red-600 text-white flex items-center justify-center hover:bg-red-700 transition-colors text-lg font-bold"
                 style={{ borderRadius: '0' }}
               >
@@ -515,12 +513,13 @@ export default function Home() {
           />
 
           {/* Modal */}
-          <div className="relative bg-white rounded-lg border border-gray-200 shadow-lg w-full max-w-4xl max-h-[85vh] overflow-hidden">
+          <div role="dialog" aria-modal="true" aria-labelledby="doc-title" className="relative bg-white rounded-lg border border-gray-200 shadow-lg w-full max-w-4xl max-h-[85vh] overflow-hidden">
             {/* Header */}
             <div className="flex items-center justify-between p-4 border-b border-gray-100" style={{ boxShadow: '0 6px 8px -6px rgba(0,0,0,0.25)' }}>
-              <h3 className="text-lg font-semibold text-gray-900">Documentation</h3>
+              <h3 id="doc-title" className="text-lg font-semibold text-gray-900">Documentation</h3>
               <button
                 type="button"
+                autoFocus
                 onClick={() => setShowDocDialog(false)}
                 aria-label="Close documentation"
                 className="w-9 h-9 flex items-center justify-center bg-red-600 text-white font-bold transition-shadow hover:bg-red-700 cursor-pointer"
@@ -541,6 +540,7 @@ export default function Home() {
                   <h2 className="text-2xl font-bold mb-6 text-black border-b pb-3">{documentation.title}</h2>
                   <div className="prose prose-slate max-w-none text-black">
                     <ReactMarkdown
+                      remarkPlugins={[remarkSoftBreaks]}
                       components={{
                         h1: ({children}) => <h1 className="text-3xl font-bold mb-6 text-black">{children}</h1>,
                         h2: ({children}) => <h2 className="text-2xl font-bold mb-4 text-black">{children}</h2>,
@@ -560,6 +560,17 @@ export default function Home() {
                     </ReactMarkdown>
                   </div>
                 </>
+              ) : docError ? (
+                <div className="text-center py-8">
+                  <p className="text-black mb-4">Couldn&apos;t load the documentation.</p>
+                  <button
+                    type="button"
+                    onClick={fetchDocumentation}
+                    className="px-4 py-2 border-2 border-black rounded-md text-black hover:bg-black hover:text-white transition-colors cursor-pointer"
+                  >
+                    Try again
+                  </button>
+                </div>
               ) : (
                 <div className="text-center py-8">
                   <p className="text-black">Loading documentation...</p>
