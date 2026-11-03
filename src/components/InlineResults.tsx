@@ -130,9 +130,6 @@ export default function InlineResults({
             Times are local to this location ({zoneLabel(data.windows[0].start, locationZone)})
           </p>
         )}
-        <p className="text-xs text-gray-500 mt-3">
-          Cloud cover: 0–15% none · 16–35% low · 36–60% medium · 60%+ high.
-        </p>
       </div>
 
       {/* Results Content */}
