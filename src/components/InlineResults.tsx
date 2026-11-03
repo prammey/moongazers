@@ -93,14 +93,8 @@ export default function InlineResults({
           style={{ fontFamily: "Helvetica Neue, Arial, sans-serif" }}
         >
           <div className="w-12 h-12 mx-auto mb-5 flex items-center justify-center rounded-full border-2 border-black text-xl font-bold text-black" aria-hidden="true">!</div>
-          <h3 className="text-xl font-semibold mb-4 text-gray-800">
-            Unable to fetch stargazing data
-          </h3>
           <p className="text-gray-800 text-base leading-relaxed max-w-md mx-auto">
             {error}
-          </p>
-          <p className="text-gray-500 text-xs mt-4">
-            Please try again with a different location or check your connection.
           </p>
         </div>
       </div>

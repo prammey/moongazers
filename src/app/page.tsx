@@ -19,6 +19,8 @@ function withoutRepeatedTitle(content: string, title: string): string {
   return normalize(match[1]) === normalize(title) ? content.slice(match[0].length) : content;
 }
 
+const SERVICE_DOWN_MESSAGE = "Couldn't reach the weather service. Try again in a minute.";
+
 interface StargazingData {
   location: string;
   windows: any[]; // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -108,7 +110,7 @@ export default function Home() {
       // The API explains what went wrong (unknown place, weather service down)
       const data = await response.json().catch(() => ({}));
       if (!response.ok) {
-        throw new Error(data.error || 'Something went wrong. Please try again.');
+        throw new Error(data.error || SERVICE_DOWN_MESSAGE);
       }
 
       setStargazingData(data);
@@ -124,9 +126,7 @@ export default function Home() {
     } catch (err) {
       // A failed fetch (offline) is a TypeError with a browser-specific message
       setError(
-        err instanceof TypeError
-          ? "Couldn't reach MoonGazers. Check your connection and try again."
-          : err instanceof Error ? err.message : 'Something went wrong. Please try again.'
+        err instanceof TypeError || !(err instanceof Error) ? SERVICE_DOWN_MESSAGE : err.message
       );
       setStargazingData(null);
       setCurrentWeatherData(null);
