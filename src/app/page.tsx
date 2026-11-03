@@ -230,7 +230,7 @@ export default function Home() {
                   alt="Moon"
                   width={128}
                   height={128}
-                  className="w-24 h-24 sm:w-32 sm:h-32 object-contain cursor-pointer hover:scale-105 transition-transform"
+                  className="w-24 h-24 sm:w-32 sm:h-32 object-contain hover:scale-105 transition-transform"
                   />
                   {/* Tooltip */}
                   <div className="absolute top-full right-0 mt-2 px-3 py-1 bg-white border border-gray-300 text-gray-800 text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap shadow-lg">
@@ -347,10 +347,13 @@ export default function Home() {
             {/* Results Section - Always show heading when we have data, error, or loading */}
             {(stargazingData || error || loading) && (
               <div className="w-full mb-12 sm:px-6 lg:px-8">
-                <h2 className="text-xl sm:text-2xl md:text-3xl text-center mb-8 sm:mb-10 md:mb-12" style={{ color: '#111827' }}>
-                  Here are the best days to go out and stargaze...
-                </h2>
-                
+                {/* No "best days" promise above an error message */}
+                {!error && (
+                  <h2 className="text-xl sm:text-2xl md:text-3xl text-center mb-8 sm:mb-10 md:mb-12" style={{ color: '#111827' }}>
+                    Here are the best days to go out and stargaze...
+                  </h2>
+                )}
+
                 {loading ? (
                   <div className="text-center py-12 text-gray-600 animate-pulse" role="status">
                     [ fetching the sky... ]
