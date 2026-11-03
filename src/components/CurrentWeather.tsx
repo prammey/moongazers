@@ -3,21 +3,13 @@
 import { useState, useEffect } from 'react';
 import { useWeather } from '@/contexts/WeatherContext';
 
-interface CurrentWeatherData {
-  location: string;
-  temperature: number;
-  skyQuality: string;
-}
-
-interface CurrentWeatherProps {
-  weatherData?: CurrentWeatherData;
-}
-
-export default function CurrentWeather({ weatherData }: CurrentWeatherProps) {
+// The visitor's own clock and temperature, not the searched place's
+export default function CurrentWeather() {
   const { formatTime, formatTemperature } = useWeather();
   // Start empty and fill in after mount: the server's clock never matches the
   // browser's, which caused a React hydration error (#418)
   const [currentTime, setCurrentTime] = useState<Date | null>(null);
+  const [temperature, setTemperature] = useState<number | null>(null);
 
   useEffect(() => {
     setCurrentTime(new Date());
@@ -26,6 +18,15 @@ export default function CurrentWeather({ weatherData }: CurrentWeatherProps) {
     }, 1000);
 
     return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    fetch('/api/local-weather')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (typeof data?.temperature === 'number') setTemperature(data.temperature);
+      })
+      .catch(() => {});
   }, []);
 
   const formatDate = (date: Date) => {
@@ -39,23 +40,15 @@ export default function CurrentWeather({ weatherData }: CurrentWeatherProps) {
   return (
     <div className="absolute top-2 sm:top-4 left-2 sm:left-4 z-10">
       <div className="text-black">
-        {/* URL Link */}
-        <div className="text-xs sm:text-sm md:text-base font-bold mb-1" style={{ 
-          color: '#000000',
-          fontFamily: "'Kosugi Maru', sans-serif"
-        }}>
-          https://moongazers.prameet.space/
-        </div>
-        
         {/* Date and Time on same line */}
         <div className="text-xs sm:text-sm md:text-base font-bold mb-2" style={{ 
           color: '#000000',
           fontFamily: "'Kosugi Maru', sans-serif"
         }}>
           {currentTime ? `${formatDate(currentTime)} ${formatTime(currentTime)}` : "\u00a0"}{" "}
-          {weatherData && (
+          {temperature !== null && (
             <>
-              <span style={{ textShadow: '2px 2px 4px rgba(0, 0, 0, 0.3)' }}>☁️</span> {formatTemperature(weatherData.temperature, 'celsius')}
+              <span style={{ textShadow: '2px 2px 4px rgba(0, 0, 0, 0.3)' }}>☁️</span> {formatTemperature(temperature, 'celsius')}
             </>
           )}
         </div>

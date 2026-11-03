@@ -38,11 +38,6 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [stargazingData, setStargazingData] = useState<StargazingData | null>(null);
-  const [currentWeatherData, setCurrentWeatherData] = useState<{
-    location: string;
-    temperature: number;
-    skyQuality: string;
-  } | null>(null);
   const [showContactDialog, setShowContactDialog] = useState(false);
   const [showDocDialog, setShowDocDialog] = useState(false);
   const [documentation, setDocumentation] = useState<{
@@ -114,22 +109,12 @@ export default function Home() {
       }
 
       setStargazingData(data);
-      
-      // Set current weather data if available
-      if (data.currentWeather) {
-        setCurrentWeatherData({
-          location: data.location,
-          temperature: data.currentWeather.temperature,
-          skyQuality: data.currentWeather.skyQuality
-        });
-      }
     } catch (err) {
       // A failed fetch (offline) is a TypeError with a browser-specific message
       setError(
         err instanceof TypeError || !(err instanceof Error) ? SERVICE_DOWN_MESSAGE : err.message
       );
       setStargazingData(null);
-      setCurrentWeatherData(null);
     } finally {
       setLoading(false);
     }
@@ -145,7 +130,7 @@ export default function Home() {
         }}
       >
         {/* Current Weather Display - Top Left */}
-        <CurrentWeather weatherData={currentWeatherData || undefined} />
+        <CurrentWeather />
 
         {/* Rocket GIF - Top Right */}
         <div className="absolute top-2 right-4 sm:top-3 sm:right-6 lg:top-4 lg:right-8 flex items-center gap-3">
@@ -285,13 +270,7 @@ export default function Home() {
             {/* Results Section - Always show heading when we have data, error, or loading */}
             {(stargazingData || error || loading) && (
               <div className="w-full mb-12 sm:px-6 lg:px-8">
-                {/* No "best days" promise above an error message */}
-                {!error && (
-                  <h2 className="text-xl sm:text-2xl md:text-3xl text-center mb-8 sm:mb-10 md:mb-12" style={{ color: '#111827' }}>
-                    Here are the best days to go out and stargaze...
-                  </h2>
-                )}
-
+                {/* Results carry their own "Best Stargazing Times" heading */}
                 {loading ? (
                   <div className="text-center py-12 text-gray-600 animate-pulse" role="status">
                     [ fetching the sky... ]
@@ -480,6 +459,11 @@ export default function Home() {
                   >
                     {withoutRepeatedTitle(documentation.content, documentation.title)}
                   </ReactMarkdown>
+                  {/* Moved here from the results so they start sooner on phones */}
+                  <h2 className="text-2xl font-bold mb-4 text-black">Cloud cover levels</h2>
+                  <p className="text-black mb-4 leading-relaxed">
+                    0–15% none · 16–35% low · 36–60% medium · 60%+ high.
+                  </p>
                 </div>
               ) : docError ? (
                 <div className="text-center py-8">
