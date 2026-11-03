@@ -10,6 +10,15 @@ import Image from 'next/image';
 import ReactMarkdown from 'react-markdown';
 import remarkSoftBreaks from '@/lib/remarkSoftBreaks';
 
+// The dialog bar already says "Documentation", so a leading "# <title>" in the
+// content would just repeat it
+function withoutRepeatedTitle(content: string, title: string): string {
+  const match = content.match(/^\s*#[ \t]+(.+?)[ \t#]*(?:\r?\n|$)/);
+  if (!match) return content;
+  const normalize = (text: string) => text.trim().toLowerCase();
+  return normalize(match[1]) === normalize(title) ? content.slice(match[0].length) : content;
+}
+
 interface StargazingData {
   location: string;
   windows: any[]; // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -451,30 +460,27 @@ export default function Home() {
                    scrollbarColor: '#4B5563 #F3F4F6',
                  }}>
               {documentation ? (
-                <>
-                  <h2 className="text-2xl font-bold mb-6 text-black border-b-2 border-black pb-3">{documentation.title}</h2>
-                  <div className="prose prose-slate max-w-none text-black">
-                    <ReactMarkdown
-                      remarkPlugins={[remarkSoftBreaks]}
-                      components={{
-                        h1: ({children}) => <h1 className="text-3xl font-bold mb-6 text-black">{children}</h1>,
-                        h2: ({children}) => <h2 className="text-2xl font-bold mb-4 text-black">{children}</h2>,
-                        h3: ({children}) => <h3 className="text-xl font-semibold mb-3 text-black">{children}</h3>,
-                        h4: ({children}) => <h4 className="text-lg font-medium mb-2 text-black">{children}</h4>,
-                        p: ({children}) => <p className="text-black mb-4 leading-relaxed">{children}</p>,
-                        ul: ({children}) => <ul className="list-disc pl-5 text-black space-y-2 mb-4">{children}</ul>,
-                        ol: ({children}) => <ol className="list-decimal pl-5 text-black space-y-3 mb-4">{children}</ol>,
-                        li: ({children}) => <li className="text-black">{children}</li>,
-                        strong: ({children}) => <strong className="font-semibold text-black">{children}</strong>,
-                        blockquote: ({children}) => <div className="bg-gray-50 border-l-4 border-black px-4 pt-4 pb-0.5 my-4">{children}</div>,
-                        code: ({children}) => <code className="bg-gray-100 px-2 py-1 rounded text-sm">{children}</code>,
-                        pre: ({children}) => <pre className="bg-gray-50 border border-gray-200 rounded p-4 overflow-x-auto">{children}</pre>,
-                      }}
-                    >
-                      {documentation.content}
-                    </ReactMarkdown>
-                  </div>
-                </>
+                <div className="prose prose-slate max-w-none text-black">
+                  <ReactMarkdown
+                    remarkPlugins={[remarkSoftBreaks]}
+                    components={{
+                      h1: ({children}) => <h1 className="text-3xl font-bold mb-6 text-black">{children}</h1>,
+                      h2: ({children}) => <h2 className="text-2xl font-bold mb-4 text-black">{children}</h2>,
+                      h3: ({children}) => <h3 className="text-xl font-semibold mb-3 text-black">{children}</h3>,
+                      h4: ({children}) => <h4 className="text-lg font-medium mb-2 text-black">{children}</h4>,
+                      p: ({children}) => <p className="text-black mb-4 leading-relaxed">{children}</p>,
+                      ul: ({children}) => <ul className="list-disc pl-5 text-black space-y-2 mb-4">{children}</ul>,
+                      ol: ({children}) => <ol className="list-decimal pl-5 text-black space-y-3 mb-4">{children}</ol>,
+                      li: ({children}) => <li className="text-black">{children}</li>,
+                      strong: ({children}) => <strong className="font-semibold text-black">{children}</strong>,
+                      blockquote: ({children}) => <div className="bg-gray-50 border-l-4 border-black px-4 pt-4 pb-0.5 my-4">{children}</div>,
+                      code: ({children}) => <code className="bg-gray-100 px-2 py-1 rounded text-sm">{children}</code>,
+                      pre: ({children}) => <pre className="bg-gray-50 border border-gray-200 rounded p-4 overflow-x-auto">{children}</pre>,
+                    }}
+                  >
+                    {withoutRepeatedTitle(documentation.content, documentation.title)}
+                  </ReactMarkdown>
+                </div>
               ) : docError ? (
                 <div className="text-center py-8">
                   <p className="text-black mb-4">Couldn&apos;t load the documentation.</p>
