@@ -6,7 +6,6 @@ import { useWeather } from '@/contexts/WeatherContext';
 import CurrentWeather from '@/components/CurrentWeather';
 import ToggleSwitch from '@/components/ToggleSwitch';
 import InlineResults from '@/components/InlineResults';
-import LandingPage from '@/components/LandingPage';
 import Image from 'next/image';
 import ReactMarkdown from 'react-markdown';
 import remarkSoftBreaks from '@/lib/remarkSoftBreaks';
@@ -24,13 +23,6 @@ interface StargazingData {
 export default function Home() {
   const { temperatureUnit, timeFormat, toggleTemperatureUnit, toggleTimeFormat } = useWeather();
   const router = useRouter();
-  // Landing page starts hidden and only appears if the admin setting says so;
-  // starting it visible made it flash on every load even when switched off.
-  // The app stays invisible until the setting loads so neither view flashes.
-  const [showLandingPage, setShowLandingPage] = useState(false);
-  const [landingPageEnabled, setLandingPageEnabled] = useState(false);
-  const [siteConfigLoaded, setSiteConfigLoaded] = useState(false);
-  const [isLaunchingApp, setIsLaunchingApp] = useState(false);
   const [location, setLocation] = useState('');
   const [country, setCountry] = useState<'USA' | 'Canada'>('USA');
   const [loading, setLoading] = useState(false);
@@ -48,25 +40,6 @@ export default function Home() {
     content: string;
   } | null>(null);
   const [docError, setDocError] = useState(false);
-  
-  // Fetch site configuration on mount
-  useEffect(() => {
-    const fetchSiteConfig = async () => {
-      try {
-        const response = await fetch('/api/site-config');
-        if (response.ok) {
-          const config = await response.json();
-          setLandingPageEnabled(config.showLandingPage);
-          setShowLandingPage(config.showLandingPage);
-        }
-      } catch (error) {
-        console.error('Failed to fetch site config:', error);
-      } finally {
-        setSiteConfigLoaded(true);
-      }
-    };
-    fetchSiteConfig();
-  }, []);
   
   // Handle admin access with keyboard shortcut (Ctrl+Shift+A)
   useEffect(() => {
@@ -96,16 +69,6 @@ export default function Home() {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [showDocDialog, showContactDialog]);
   
-  // Handle launching the main app from landing page
-  const handleLaunchApp = () => {
-    setIsLaunchingApp(true);
-    // Wait for slow, visible slide-up animation to complete before hiding landing page
-    setTimeout(() => {
-      setShowLandingPage(false);
-      setIsLaunchingApp(false);
-    }, 2500); // Increased time for slow, visible slide-up animation
-  };
-
   // Fetch documentation from API
   const fetchDocumentation = async () => {
     setDocError(false);
@@ -119,23 +82,6 @@ export default function Home() {
       setDocError(true);
     }
   };
-
-  // Prevent body scroll when landing page is active, but allow it during animation
-  useEffect(() => {
-    if (showLandingPage && !isLaunchingApp) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      // Allow scroll when launching or when landing page is closed
-      document.body.style.overflow = '';
-      // Force a small reflow to ensure scrollbars appear immediately
-      void document.body.offsetHeight;
-    }
-    
-    // Cleanup on unmount
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [showLandingPage, isLaunchingApp]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -186,9 +132,9 @@ export default function Home() {
 
   return (
     <div style={{ backgroundColor: '#ffffff', position: 'relative' }}>
-      {/* Main App - Always rendered but behind landing page when needed */}
+      {/* Main App */}
       <div 
-        className={`relative transition-opacity duration-300 ${siteConfigLoaded ? 'opacity-100' : 'opacity-0'}`}
+        className="relative"
         style={{ 
           backgroundColor: '#ffffff'
         }}
@@ -432,13 +378,6 @@ export default function Home() {
             </footer>
           </div>
         </div>
-
-        {/* Landing Page Overlay - slides up to reveal main app */}
-        {showLandingPage && landingPageEnabled && (
-          <div className="fixed inset-0 z-50">
-            <LandingPage onLaunch={handleLaunchApp} isLaunching={isLaunchingApp} />
-          </div>
-        )}
 
       {/* Contact Dialog */}
       {showContactDialog && (

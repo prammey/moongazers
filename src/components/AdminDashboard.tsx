@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import Image from 'next/image';
 import dynamic from 'next/dynamic';
 
 // Dynamically import the markdown editor to avoid SSR issues
@@ -9,19 +8,6 @@ const MDEditor = dynamic(() => import('@uiw/react-md-editor'), {
   ssr: false,
   loading: () => <div className="w-full h-96 bg-gray-100 animate-pulse rounded"></div>
 });
-
-interface LandingPageData {
-  id: string;
-  title: string;
-  description: string;
-  imageUrl: string;
-  imageAlt: string;
-  buttonText: string;
-  footerText?: string; // Optional footer text
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
 
 interface DocumentationData {
   id: string;
@@ -37,7 +23,6 @@ interface AdminDashboardProps {
 }
 
 export default function AdminDashboard({ onBackToMain }: AdminDashboardProps) {
-  const [landingPage, setLandingPage] = useState<LandingPageData | null>(null);
   const [documentation, setDocumentation] = useState<DocumentationData | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [adminUsername, setAdminUsername] = useState('');
@@ -46,64 +31,9 @@ export default function AdminDashboard({ onBackToMain }: AdminDashboardProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [showForm, setShowForm] = useState(false);
   const [showDocForm, setShowDocForm] = useState(false);
   const [docContent, setDocContent] = useState('');
   const [docTitle, setDocTitle] = useState('');
-  const [showLandingPageEnabled, setShowLandingPageEnabled] = useState(true);
-  const [landingLoaded, setLandingLoaded] = useState(false);
-  const [savingToggle, setSavingToggle] = useState(false);
-
-  // Form state
-  const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    imageUrl: '',
-    imageAlt: '',
-    buttonText: '',
-    footerText: '',
-    imageFile: ''
-  });
-
-  const [imagePreview, setImagePreview] = useState('');
-
-  const fetchLandingPage = useCallback(async () => {
-    setLoading(true);
-    try {
-      const response = await fetch('/api/admin/landing-page', {
-        headers: {
-          'Authorization': `Bearer ${adminToken}`,
-        },
-      });
-
-      if (response.ok) {
-        const result = await response.json();
-        const pages = result.data || [];
-        // Get the active landing page (should be only one)
-        const activePage = pages.find((p: LandingPageData) => p.isActive) || pages[0] || null;
-        setLandingPage(activePage);
-        if (activePage) {
-          setFormData({
-            title: activePage.title,
-            description: activePage.description,
-            imageUrl: activePage.imageUrl,
-            imageAlt: activePage.imageAlt,
-            buttonText: activePage.buttonText,
-            footerText: activePage.footerText || '',
-            imageFile: ''
-          });
-          setImagePreview(activePage.imageUrl);
-        }
-      } else {
-        setError('Failed to fetch landing page');
-      }
-    } catch (error) {
-      console.error('Failed to fetch landing page:', error);
-      setError('Failed to fetch landing page');
-    }
-    setLoading(false);
-    setLandingLoaded(true);
-  }, [adminToken]);
 
   const fetchDocumentation = useCallback(async () => {
     try {
@@ -122,112 +52,6 @@ export default function AdminDashboard({ onBackToMain }: AdminDashboardProps) {
       setError('Failed to fetch documentation');
     }
   }, []);
-
-  const fetchSiteConfig = useCallback(async () => {
-    try {
-      const response = await fetch('/api/admin/site-config', {
-        headers: {
-          'Authorization': `Bearer ${adminToken}`,
-        },
-      });
-
-      if (response.ok) {
-        const config = await response.json();
-        setShowLandingPageEnabled(config.showLandingPage ?? true);
-      }
-    } catch (error) {
-      console.error('Failed to fetch site config:', error);
-    }
-  }, [adminToken]);
-
-  const toggleLandingPage = async () => {
-    setError('');
-    setSavingToggle(true);
-    try {
-      const newValue = !showLandingPageEnabled;
-      const response = await fetch('/api/admin/site-config', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${adminToken}`,
-        },
-        body: JSON.stringify({
-          showLandingPage: newValue
-        }),
-      });
-
-      if (response.ok) {
-        setShowLandingPageEnabled(newValue);
-        setSuccess(`Landing page ${newValue ? 'enabled' : 'disabled'} successfully!`);
-        setTimeout(() => setSuccess(''), 3000);
-      } else {
-        setError('Failed to update landing page setting');
-      }
-    } catch (error) {
-      console.error('Failed to toggle landing page:', error);
-      setError('Failed to update landing page setting');
-    }
-    setSavingToggle(false);
-  };
-
-  const handleResetToDefault = async () => {
-    if (!landingPage?.id) {
-      setError('No custom landing page to reset');
-      return;
-    }
-
-    if (!confirm('Are you sure you want to reset to the default landing page? This will delete your custom landing page. This action cannot be undone.')) {
-      return;
-    }
-
-    setLoading(true);
-    setError('');
-
-    try {
-      const response = await fetch(`/api/admin/landing-page?id=${landingPage.id}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${adminToken}`,
-        },
-      });
-
-      if (response.ok) {
-        setSuccess('Reset to default landing page successfully!');
-        setTimeout(() => setSuccess(''), 3000);
-        setLandingPage(null);
-        fetchLandingPage();
-      } else {
-        const result = await response.json();
-        setError(result.error || 'Failed to reset to default landing page');
-      }
-    } catch (error) {
-      console.error('Error resetting to default:', error);
-      setError('Failed to reset to default landing page');
-    }
-    setLoading(false);
-  };
-
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    // Vercel rejects request bodies over 4.5 MB, and sending the image as
-    // base64 makes it a third bigger, so 3 MB is the real limit
-    if (file.size > 3 * 1024 * 1024) {
-      setError('Image must be smaller than 3 MB.');
-      e.target.value = '';
-      return;
-    }
-    setError('');
-
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const result = reader.result as string;
-      setImagePreview(result);
-      setFormData(prev => ({ ...prev, imageFile: result }));
-    };
-    reader.readAsDataURL(file);
-  };
 
   const authenticate = async () => {
     setLoading(true);
@@ -262,12 +86,6 @@ export default function AdminDashboard({ onBackToMain }: AdminDashboardProps) {
     setLoading(false);
   };
 
-  // Opening an editor always starts from what's saved (Escape closes without saving)
-  const handleEdit = () => {
-    resetForm();
-    setShowForm(true);
-  };
-
   const openDocForm = () => {
     if (documentation) {
       setDocTitle(documentation.title);
@@ -275,62 +93,6 @@ export default function AdminDashboard({ onBackToMain }: AdminDashboardProps) {
     }
     setError('');
     setShowDocForm(true);
-  };
-
-  const resetForm = () => {
-    if (landingPage) {
-      setFormData({
-        title: landingPage.title,
-        description: landingPage.description,
-        imageUrl: landingPage.imageUrl,
-        imageAlt: landingPage.imageAlt,
-        buttonText: landingPage.buttonText,
-        footerText: landingPage.footerText || '',
-        imageFile: ''
-      });
-      setImagePreview(landingPage.imageUrl);
-    }
-    setError('');
-    setShowForm(false);
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
-
-    try {
-      const method = landingPage ? 'PUT' : 'POST';
-      const body = landingPage 
-        ? { ...formData, id: landingPage.id }
-        : formData;
-
-      const response = await fetch('/api/admin/landing-page', {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${adminToken}`,
-        },
-        body: JSON.stringify(body),
-      });
-
-      if (response.ok) {
-        const result = await response.json();
-        const action = landingPage ? 'updated' : 'created';
-        setSuccess(`Landing page ${action} successfully!`);
-        setTimeout(() => setSuccess(''), 3000);
-        setLandingPage(result.data);
-        fetchLandingPage();
-        setShowForm(false);
-      } else {
-        const result = await response.json().catch(() => ({}));
-        setError(result.error || `Failed to ${landingPage ? 'update' : 'create'} landing page`);
-      }
-    } catch (error) {
-      console.error('Error submitting form:', error);
-      setError(`Failed to ${landingPage ? 'update' : 'create'} landing page`);
-    }
-    setLoading(false);
   };
 
   const handleDocumentationSubmit = async (e: React.FormEvent) => {
@@ -368,27 +130,24 @@ export default function AdminDashboard({ onBackToMain }: AdminDashboardProps) {
     setLoading(false);
   };
 
-  // Escape closes the editor modals (without saving)
+  // Escape closes the editor modal (without saving)
   useEffect(() => {
-    if (!showForm && !showDocForm) return;
+    if (!showDocForm) return;
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
-        setShowForm(false);
         setShowDocForm(false);
         setError('');
       }
     };
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [showForm, showDocForm]);
+  }, [showDocForm]);
 
   useEffect(() => {
     if (isAuthenticated && adminToken) {
-      fetchLandingPage();
       fetchDocumentation();
-      fetchSiteConfig();
     }
-  }, [isAuthenticated, adminToken, fetchLandingPage, fetchDocumentation, fetchSiteConfig]);
+  }, [isAuthenticated, adminToken, fetchDocumentation]);
 
   if (!isAuthenticated) {
     return (
@@ -468,57 +227,10 @@ export default function AdminDashboard({ onBackToMain }: AdminDashboardProps) {
           </h1>
           <div className="flex flex-wrap gap-3">
             <button
-              onClick={handleEdit}
-              disabled={!landingLoaded}
-              className="px-6 py-2 rounded-md text-black bg-white border-2 border-black shadow-[3px_3px_0_0_#000] hover:bg-black hover:text-white active:translate-x-px active:translate-y-px active:shadow-[1px_1px_0_0_#000] focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {!landingLoaded ? 'Loading…' : landingPage ? 'Edit Landing Page' : 'Create Landing Page'}
-            </button>
-            {landingPage && (
-              <button
-                onClick={handleResetToDefault}
-                disabled={loading}
-                className="px-6 py-2 rounded-md text-red-700 bg-white border-2 border-red-700 shadow-[3px_3px_0_0_#b91c1c] hover:bg-red-700 hover:text-white active:translate-x-px active:translate-y-px active:shadow-[1px_1px_0_0_#b91c1c] focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Reset to Default
-              </button>
-            )}
-            <button
               onClick={openDocForm}
               className="px-6 py-2 rounded-md text-black bg-white border-2 border-black shadow-[3px_3px_0_0_#000] hover:bg-black hover:text-white active:translate-x-px active:translate-y-px active:shadow-[1px_1px_0_0_#000] focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Edit Documentation
-            </button>
-          </div>
-        </div>
-
-        {/* Landing Page Toggle */}
-        <div className="mb-6 p-5 sm:p-6 bg-white border-2 border-black rounded-xl shadow-[4px_4px_0_0_#000]">
-          <div className="flex items-center justify-between gap-4">
-            <div>
-              <h2 id="landing-visibility" className="text-lg font-semibold text-black mb-2">Landing Page Visibility</h2>
-              <p className="text-sm text-gray-600">
-                {showLandingPageEnabled 
-                  ? 'Landing page is currently enabled. New visitors will see the landing page first.' 
-                  : 'Landing page is currently disabled. Users will go directly to the main app.'}
-              </p>
-            </div>
-            <button
-              type="button"
-              role="switch"
-              aria-checked={showLandingPageEnabled}
-              aria-labelledby="landing-visibility"
-              onClick={toggleLandingPage}
-              disabled={savingToggle}
-              className={`relative shrink-0 inline-flex items-center h-8 w-16 rounded-full border-2 border-black transition-colors cursor-pointer disabled:opacity-60 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 ${
-                showLandingPageEnabled ? 'bg-green-500' : 'bg-gray-300'
-              }`}
-            >
-              <span
-                className={`inline-block w-6 h-6 transform rounded-full bg-white border border-black transition-transform ${
-                  showLandingPageEnabled ? 'translate-x-8' : 'translate-x-1'
-                }`}
-              />
             </button>
           </div>
         </div>
@@ -541,127 +253,6 @@ export default function AdminDashboard({ onBackToMain }: AdminDashboardProps) {
         {success && (
           <div className="mb-4 p-4 bg-green-50 border-2 border-green-700 text-green-800 rounded-md">
             {success}
-          </div>
-        )}
-
-        {/* Form Modal */}
-        {showForm && (
-          <div className="fixed inset-0 bg-black/30 backdrop-blur-[2px] flex items-center justify-center z-50 p-3 sm:p-4">
-            <div className="bg-white rounded-xl p-4 sm:p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto border-2 border-black shadow-[6px_6px_0_0_#000]">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl" style={{ color: '#000000' }}>
-                  {landingPage ? 'Edit Landing Page' : 'Create Landing Page'}
-                </h2>
-                <button
-                  onClick={resetForm}
-                  aria-label="Close without saving"
-                  className="w-9 h-9 flex items-center justify-center bg-red-600 text-white font-bold border-2 border-black rounded-md hover:bg-red-700 transition-colors cursor-pointer"
-                >
-                  ✕
-                </button>
-              </div>
-
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium mb-2" style={{ color: '#000000' }}>Title</label>
-                  <input
-                    type="text"
-                    value={formData.title}
-                    onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                    className="w-full px-3 py-2 border-2 border-black rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-1 text-black"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-2" style={{ color: '#000000' }}>Description</label>
-                  <textarea
-                    value={formData.description}
-                    onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                    className="w-full px-3 py-2 border-2 border-black rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-1 h-32 text-black"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-2" style={{ color: '#000000' }}>Button Text</label>
-                  <input
-                    type="text"
-                    value={formData.buttonText}
-                    onChange={(e) => setFormData(prev => ({ ...prev, buttonText: e.target.value }))}
-                    className="w-full px-3 py-2 border-2 border-black rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-1 text-black"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-2" style={{ color: '#000000' }}>Footer Text (Optional)</label>
-                  <input
-                    type="text"
-                    value={formData.footerText}
-                    onChange={(e) => setFormData(prev => ({ ...prev, footerText: e.target.value }))}
-                    className="w-full px-3 py-2 border-2 border-black rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-1 text-black"
-                    placeholder="Enter optional footer text (e.g., disclaimer, note, etc.)"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-2" style={{ color: '#000000' }}>Image</label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    className="w-full px-3 py-2 border-2 border-black rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-1 text-black"
-                  />
-                  {imagePreview && (
-                    <div className="mt-2">
-                      <Image
-                        src={imagePreview}
-                        alt="Preview"
-                        width={200}
-                        height={150}
-                        className="rounded border border-gray-200"
-                      />
-                    </div>
-                  )}
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-2" style={{ color: '#000000' }}>Image Alt Text</label>
-                  <input
-                    type="text"
-                    value={formData.imageAlt}
-                    onChange={(e) => setFormData(prev => ({ ...prev, imageAlt: e.target.value }))}
-                    className="w-full px-3 py-2 border-2 border-black rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-1 text-black"
-                    placeholder="Describe the image for accessibility"
-                  />
-                </div>
-
-                {/* Next to the Save button so it's seen even after scrolling the form */}
-                {error && (
-                  <div role="alert" className="p-3 bg-red-50 border-2 border-red-700 text-red-800 rounded-md">
-                    {error}
-                  </div>
-                )}
-
-                <div className="flex gap-4 pt-4">
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="px-6 py-2 rounded-md text-black bg-white border-2 border-black shadow-[3px_3px_0_0_#000] hover:bg-black hover:text-white active:translate-x-px active:translate-y-px active:shadow-[1px_1px_0_0_#000] focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {loading ? 'Saving...' : landingPage ? 'Save changes' : 'Create'}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={resetForm}
-                    className="px-6 py-2 rounded-md text-black bg-white border-2 border-black shadow-[3px_3px_0_0_#000] hover:bg-black hover:text-white active:translate-x-px active:translate-y-px active:shadow-[1px_1px_0_0_#000] focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </form>
-            </div>
           </div>
         )}
 
@@ -737,62 +328,8 @@ export default function AdminDashboard({ onBackToMain }: AdminDashboardProps) {
           </div>
         )}
 
-        {/* Current Landing Page */}
-        <div className="space-y-4">
-          <h2 className="text-2xl mb-4" style={{ color: '#000000' }}>
-            Current Landing Page
-          </h2>
-          
-          {loading && !landingPage ? (
-            <div className="text-center py-8" style={{ color: '#000000' }}>Loading...</div>
-          ) : !landingPage ? (
-            <div className="text-center py-8 text-black">
-              No landing page found. Click Edit Landing Page to create one!
-            </div>
-          ) : (
-            <div className="bg-white border-2 border-black rounded-xl shadow-[4px_4px_0_0_#000] p-5 sm:p-6">
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2">
-                    <h3 className="text-xl font-semibold text-black">{landingPage.title}</h3>
-                    {landingPage.isActive && (
-                      <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded">
-                        Active
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-black mb-4">{landingPage.description}</p>
-                  <div className="flex items-center gap-4 mb-4">
-                    <Image
-                      src={landingPage.imageUrl}
-                      alt={landingPage.imageAlt}
-                      width={120}
-                      height={80}
-                      className="rounded border border-gray-200"
-                    />
-                    <div>
-                      <p className="text-sm text-black mb-1">Button Text:</p>
-                      <p className="font-medium text-black">{landingPage.buttonText}</p>
-                      <p className="text-sm text-black mb-1 mt-2">Footer Text:</p>
-                      <p className="font-medium text-xs text-black">{landingPage.footerText || '(None)'}</p>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex gap-2 ml-4">
-                  <button
-                    onClick={handleEdit}
-                    className="px-4 py-2 rounded-md text-black bg-white border-2 border-black shadow-[3px_3px_0_0_#000] hover:bg-black hover:text-white active:translate-x-px active:translate-y-px active:shadow-[1px_1px_0_0_#000] focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    Edit
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-
         {/* Current Documentation */}
-        <div className="space-y-4 mt-8">
+        <div className="space-y-4">
           <h2 className="text-2xl mb-4" style={{ color: '#000000' }}>
             Current Documentation
           </h2>
