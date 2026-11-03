@@ -32,7 +32,7 @@ if (!TIMEZONEDB_KEY) {
 // Cache functions
 const getCachedGeocode = unstable_cache(
   async (location: string) => await geocodeLocation(location),
-  ['geocode-v2'], // Changed cache key to force refresh
+  ['geocode-v3'], // bumped: ZIPs are now looked up as postcodes
   { revalidate: 60 * 60 * 24 * 30 } // 30 days
 );
 
@@ -47,6 +47,13 @@ const getCachedForecast = unstable_cache(
   { revalidate: 60 * 60 * 6 } // 6 hours
 );
 
+// A place's time zone doesn't change; cache it like geocoding
+const getCachedTimezone = unstable_cache(
+  async (lat: number, lng: number) => await getTimezone(lat, lng),
+  ['timezone'],
+  { revalidate: 60 * 60 * 24 * 30 } // 30 days
+);
+
 const getCachedSkyData = unstable_cache(
   async (lat: number, lng: number, dateTime: string, timezone: string, provider: string) => {
     if (provider === 'astrospheric') {
@@ -54,9 +61,14 @@ const getCachedSkyData = unstable_cache(
     }
     return await getFallbackSkyData(lat, lng, dateTime);
   },
-  ['sky'],
+  ['sky-v2'], // bumped: real moon/planet/star positions
   { revalidate: 60 * 60 * 12 } // 12 hours
 );
+
+// Bad input from the visitor (shown to them as a 400)
+class BadInputError extends Error {}
+// A weather/location service failed (shown as a 502)
+class UpstreamError extends Error {}
 
 // Geocoding with international support including Canada
 async function geocodeLocation(location: string): Promise<{ coordinates: Coordinates; location: string }> {
@@ -79,109 +91,6 @@ async function geocodeLocation(location: string): Promise<{ coordinates: Coordin
 
   const locationType = detectLocationType(trimmedLocation);
   console.log(`[Geocoding] Detected location type: ${locationType} for "${trimmedLocation}"`);
-
-  // For US locations, try US Census first
-  if (locationType === 'us_zip') {
-    try {
-      console.log('[Geocoding] Attempting US Census geocoding...');
-      
-      // First try the onelineaddress endpoint
-      let url = `https://geocoding.geo.census.gov/geocoder/locations/onelineaddress?address=${encodeURIComponent(trimmedLocation)}&benchmark=Public_AR_Current&format=json`;
-      
-      let response = await fetch(url);
-      if (response.ok) {
-        const data = await response.json();
-        console.log('[Geocoding] US Census response:', JSON.stringify(data, null, 2));
-        
-        if (data.result?.addressMatches?.length) {
-          const match = data.result.addressMatches[0];
-          
-          // Enhance US location with additional details
-          let enhancedLocation = match.matchedAddress;
-          
-          // Try to get more details from the address components
-          if (match.addressComponents) {
-            const components = match.addressComponents;
-            const details = [];
-            
-            // Add city and state details
-            if (components.city && components.state) {
-              enhancedLocation = `${components.city}, ${components.state}`;
-              
-              // Add state district if available
-              if (match.tigerLine?.side && match.tigerLine.side.district) {
-                details.push(`[District: ${match.tigerLine.side.district}]`);
-              }
-              
-              // Add details if we have them
-              if (details.length > 0) {
-                enhancedLocation = `${enhancedLocation} (${details.join(' • ')})`;
-              }
-            }
-          }
-          
-          console.log('[Geocoding] Enhanced US location:', enhancedLocation);
-          
-          return {
-            coordinates: {
-              lat: parseFloat(match.coordinates.y),
-              lng: parseFloat(match.coordinates.x)
-            },
-            location: enhancedLocation || match.matchedAddress
-          };
-        }
-      }
-
-      // Try ZIP code with USA appended
-      url = `https://geocoding.geo.census.gov/geocoder/locations/onelineaddress?address=${encodeURIComponent(trimmedLocation + ', USA')}&benchmark=Public_AR_Current&format=json`;
-      
-      response = await fetch(url);
-      if (response.ok) {
-        const data = await response.json();
-        console.log('[Geocoding] US Census with USA response:', JSON.stringify(data, null, 2));
-        
-        if (data.result?.addressMatches?.length) {
-          const match = data.result.addressMatches[0];
-          
-          // Enhance US location with additional details
-          let enhancedLocation = match.matchedAddress;
-          
-          // Try to get more details from the address components
-          if (match.addressComponents) {
-            const components = match.addressComponents;
-            const details = [];
-            
-            // Add city and state details
-            if (components.city && components.state) {
-              enhancedLocation = `${components.city}, ${components.state}`;
-              
-              // Add state district if available
-              if (match.tigerLine?.side && match.tigerLine.side.district) {
-                details.push(`[District: ${match.tigerLine.side.district}]`);
-              }
-              
-              // Add details if we have them
-              if (details.length > 0) {
-                enhancedLocation = `${enhancedLocation} (${details.join(' • ')})`;
-              }
-            }
-          }
-          
-          console.log('[Geocoding] Enhanced US location (with USA):', enhancedLocation);
-          
-          return {
-            coordinates: {
-              lat: parseFloat(match.coordinates.y),
-              lng: parseFloat(match.coordinates.x)
-            },
-            location: enhancedLocation || match.matchedAddress
-          };
-        }
-      }
-    } catch (error) {
-      console.log('[Geocoding] US Census failed, falling back to international search:', error);
-    }
-  }
 
   // International geocoding using OpenStreetMap Nominatim (supports all countries)
   console.log('[Geocoding] Using international OpenStreetMap geocoding...');
@@ -213,93 +122,108 @@ async function geocodeLocation(location: string): Promise<{ coordinates: Coordin
       break;
   }
 
-  const nominatimUrl = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(searchQuery)}${countryHint}&addressdetails=1`;
+  // A US ZIP is searched as a postcode only: as free text, an unknown ZIP
+  // like "00000" matched a random bus stop in Belleville, IL.
+  const queryPart = locationType === 'us_zip'
+    ? `postalcode=${encodeURIComponent(trimmedLocation.slice(0, 5))}`
+    : `q=${encodeURIComponent(searchQuery)}`;
+  const nominatimUrl = `https://nominatim.openstreetmap.org/search?format=json&limit=1&${queryPart}${countryHint}&addressdetails=1`;
   
+  let nominatimResponse: Response;
   try {
-    const nominatimResponse = await fetch(nominatimUrl, {
+    nominatimResponse = await fetch(nominatimUrl, {
       headers: {
-        'User-Agent': 'Moongazers-App/1.0'
+        'User-Agent': 'Moongazers-App/1.0',
+        // English place names ("Tokyo, Japan", not "東京都, 日本")
+        'Accept-Language': 'en'
       }
     });
-    
-    if (nominatimResponse.ok) {
-      const nominatimData = await nominatimResponse.json();
-      console.log('[Geocoding] Nominatim response:', nominatimData);
-      
-      if (nominatimData.length > 0) {
-        const place = nominatimData[0];
-        
-        // Build a detailed location name with district info
-        let locationName = place.display_name;
-        if (place.address) {
-          const addr = place.address;
-          const parts = [];
-          const details = [];
-          
-          // Add district/neighborhood info
-          if (addr.suburb) details.push(`[Suburb: ${addr.suburb}]`);
-          else if (addr.neighbourhood) details.push(`[Neighborhood: ${addr.neighbourhood}]`);
-          else if (addr.district) details.push(`[District: ${addr.district}]`);
-          else if (addr.quarter) details.push(`[Quarter: ${addr.quarter}]`);
-          
-          // Add city/town/village
-          if (addr.city) parts.push(addr.city);
-          else if (addr.town) parts.push(addr.town);
-          else if (addr.village) parts.push(addr.village);
-          else if (addr.municipality) parts.push(addr.municipality);
-          
-          // Add state/province
-          if (addr.state) parts.push(addr.state);
-          else if (addr.province) parts.push(addr.province);
-          else if (addr.region) parts.push(addr.region);
-          
-          // Add country
-          if (addr.country) parts.push(addr.country);
-          
-          // Build the final location string
-          if (parts.length > 0) {
-            locationName = parts.join(', ');
-            
-            // Add detailed info if available
-            if (details.length > 0) {
-              locationName = `${locationName} (${details.join(' • ')})`;
-            }
-          }
-          
-          console.log('[Geocoding] Built detailed location:', locationName);
-        }
-        
-        return {
-          coordinates: {
-            lat: parseFloat(place.lat),
-            lng: parseFloat(place.lon)
-          },
-          location: locationName
-        };
-      }
-    }
   } catch (error) {
     console.error('[Geocoding] Nominatim error:', error);
+    throw new UpstreamError('The location service is not responding. Please try again in a minute.');
   }
 
-  throw new Error(`Location not found: ${trimmedLocation}. Please try a more specific address, city name, or postal/ZIP code.`);
+  if (nominatimResponse.ok) {
+    const nominatimData = await nominatimResponse.json();
+    
+    if (nominatimData.length > 0) {
+      const place = nominatimData[0];
+      
+      // Build a detailed location name with district info
+      let locationName = place.display_name;
+      if (place.address) {
+        const addr = place.address;
+        const parts = [];
+        const details = [];
+        
+        // Add district/neighborhood info
+        if (addr.suburb) details.push(`[Suburb: ${addr.suburb}]`);
+        else if (addr.neighbourhood) details.push(`[Neighborhood: ${addr.neighbourhood}]`);
+        else if (addr.district) details.push(`[District: ${addr.district}]`);
+        else if (addr.quarter) details.push(`[Quarter: ${addr.quarter}]`);
+        
+        // Add city/town/village
+        if (addr.city) parts.push(addr.city);
+        else if (addr.town) parts.push(addr.town);
+        else if (addr.village) parts.push(addr.village);
+        else if (addr.municipality) parts.push(addr.municipality);
+        
+        // Add state/province
+        if (addr.state) parts.push(addr.state);
+        else if (addr.province) parts.push(addr.province);
+        else if (addr.region) parts.push(addr.region);
+        
+        // Add country
+        if (addr.country) parts.push(addr.country);
+        
+        // Build the final location string
+        if (parts.length > 0) {
+          locationName = parts.join(', ');
+          
+          // Add detailed info if available
+          if (details.length > 0) {
+            locationName = `${locationName} (${details.join(' • ')})`;
+          }
+        }
+        
+        console.log('[Geocoding] Built detailed location:', locationName);
+      }
+      
+      return {
+        coordinates: {
+          lat: parseFloat(place.lat),
+          lng: parseFloat(place.lon)
+        },
+        location: locationName
+      };
+    }
+  } else {
+    throw new UpstreamError('The location service is busy. Please try again in a minute.');
+  }
+
+  throw new BadInputError(
+    `We couldn't find "${trimmedLocation}". Try a US ZIP code (e.g. 10001), a Canadian postal code (e.g. M5H 2N2), or a city name (e.g. Paris, France).`
+  );
 }
 
 // Get timezone using TimeZoneDB with intelligent fallbacks
 async function getTimezone(lat: number, lng: number): Promise<string> {
-  try {
-    const url = `http://api.timezonedb.com/v2.1/get-time-zone?key=${TIMEZONEDB_KEY}&format=json&lat=${lat}&lng=${lng}`;
+  // No key (e.g. local dev): skip the call, it can only fail
+  if (TIMEZONEDB_KEY) {
+    try {
+      const url = `https://api.timezonedb.com/v2.1/get-time-zone?key=${TIMEZONEDB_KEY}&format=json&lat=${lat}&lng=${lng}`;
     
-    const response = await fetch(url);
-    if (response.ok) {
-      const data = await response.json();
-      if (data.zoneName) {
-        console.log(`[Timezone] Found timezone: ${data.zoneName}`);
-        return data.zoneName;
+      const response = await fetch(url);
+      if (response.ok) {
+        const data = await response.json();
+        if (data.zoneName) {
+          console.log(`[Timezone] Found timezone: ${data.zoneName}`);
+          return data.zoneName;
+        }
       }
+    } catch (error) {
+      console.log('[Timezone] TimeZoneDB failed, using fallback logic:', error);
     }
-  } catch (error) {
-    console.log('[Timezone] TimeZoneDB failed, using fallback logic:', error);
   }
 
   // Intelligent fallback based on coordinates
@@ -404,30 +328,55 @@ async function getOpenMeteoForecast(lat: number, lng: number): Promise<OpenMeteo
   return await response.json();
 }
 
-// Fallback sky data using simplified calculations
+// Sky data calculated with Astronomy Engine for this place and moment.
+// (It used to return placeholders: always Jupiter + Saturn, the first five
+// stars in the CSV, and a moon phase read in the wrong units, so every night
+// said "Waning Crescent, 0%".)
+const NAKED_EYE_PLANETS = [
+  astronomy.Body.Mercury,
+  astronomy.Body.Venus,
+  astronomy.Body.Mars,
+  astronomy.Body.Jupiter,
+  astronomy.Body.Saturn,
+];
+// Lower objects sit in haze and behind trees/buildings
+const MIN_PLANET_ALTITUDE = 5;
+const MIN_STAR_ALTITUDE = 10;
+
 async function getFallbackSkyData(lat: number, lng: number, dateTime: string) {
   // dateTime is a UTC timestamp without the trailing "Z"; read it as UTC
   const date = new Date(dateTime.endsWith('Z') ? dateTime : `${dateTime}Z`);
-  
-  // Get moon data using astronomy engine
-  const moonPhase = astronomy.MoonPhase(date);
-  const moonIllumination = Math.max(0, Math.min(100, Math.round(100 * (1 - Math.abs(0.5 - moonPhase) * 2))));
-  
-  // Simplified planet visibility (this would need more complex calculations)
-  const planets: string[] = ['Jupiter', 'Saturn']; // Placeholder
-  
-  // Get bright stars
+  const observer = new astronomy.Observer(lat, lng, 0);
+
+  const altitudeOf = (body: astronomy.Body) => {
+    const equ = astronomy.Equator(body, date, observer, true, true);
+    return astronomy.Horizon(date, observer, equ.ra, equ.dec, 'normal').altitude;
+  };
+
+  // MoonPhase is the Moon-Sun angle in degrees: 0 new, 90 first quarter, 180 full
+  const moonPhase = astronomy.MoonPhase(date) / 360;
+  const moonIllumination = Math.round(
+    astronomy.Illumination(astronomy.Body.Moon, date).phase_fraction * 100
+  );
+
+  const planets = NAKED_EYE_PLANETS
+    .filter((body) => altitudeOf(body) > MIN_PLANET_ALTITUDE)
+    .map((body) => String(body));
+
+  // The five brightest naked-eye stars above the horizon right then
   const brightStars = await getBrightStars();
   const visibleStars: string[] = brightStars
-    .filter(star => star.mag <= 2.0)
-    .slice(0, 5) // Simplified - take first 5 bright stars
-    .map(star => star.name);
-  
+    .filter((star) => star.mag <= 2.0)
+    .filter((star) => astronomy.Horizon(date, observer, star.ra, star.dec, 'normal').altitude > MIN_STAR_ALTITUDE)
+    .sort((x, y) => x.mag - y.mag)
+    .slice(0, 5)
+    .map((star) => star.name);
+
   return {
     moon: {
       phase: getMoonPhaseName(moonPhase),
       illumination: moonIllumination,
-      altitude: 45 // Placeholder
+      altitude: altitudeOf(astronomy.Body.Moon)
     },
     planets,
     stars: visibleStars
@@ -543,36 +492,52 @@ function groupTimeWindows(slots: TimeSlot[]): GroupedWindow[] {
 
 export async function POST(request: NextRequest) {
   try {
-    const { location } = await request.json();
+    let body: unknown;
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json({ error: 'Send JSON like {"location": "10001"}' }, { status: 400 });
+    }
+    const location = (body as { location?: unknown } | null)?.location;
     
-    if (!location) {
-      return NextResponse.json({ error: 'Location is required' }, { status: 400 });
+    if (typeof location !== 'string' || !location.trim()) {
+      return NextResponse.json({ error: 'Please enter a ZIP code, postal code or city.' }, { status: 400 });
+    }
+    if (location.trim().length > 100) {
+      return NextResponse.json({ error: 'That location is too long. Try a ZIP code or a city name.' }, { status: 400 });
     }
     
     console.log(`[API] Processing request for location: ${location}`);
     
     // Step 1: Geocode location
-    const { coordinates, location: formattedLocation } = await getCachedGeocode(location);
+    const { coordinates, location: formattedLocation } = await getCachedGeocode(location.trim());
     const { lat, lng } = coordinates;
     
     console.log(`[API] Coordinates: ${lat}, ${lng}`);
     
     // Step 2: Get timezone
-    const timezone = await getTimezone(lat, lng);
+    const timezone = await getCachedTimezone(lat, lng);
     console.log(`[API] Timezone: ${timezone}`);
     
     let provider = 'astrospheric';
     let forecastData: OpenMeteoForecast | unknown;
     
-    // Step 3: Try Astrospheric first
+    // Step 3: Try Astrospheric first (only when there's a key; without one
+    // it can only fail, after a wasted request)
     try {
+      if (!ASTROSPHERIC_KEY) throw new Error('No ASTROSPHERIC_KEY');
       console.log('[API] Attempting Astrospheric forecast...');
       forecastData = await getCachedForecast(lat, lng, 'astrospheric');
       console.log('[API] Astrospheric forecast successful');
     } catch {
-      console.log('[API] Astrospheric failed, falling back to Open-Meteo');
+      console.log('[API] Using Open-Meteo forecast');
       provider = 'open-meteo';
-      forecastData = await getCachedForecast(lat, lng, 'open-meteo');
+      try {
+        forecastData = await getCachedForecast(lat, lng, 'open-meteo');
+      } catch (error) {
+        console.error('[API] Open-Meteo failed:', error);
+        throw new UpstreamError('The weather service is not responding. Please try again in a minute.');
+      }
     }
     
     // Step 4: Process forecast data and score time slots
@@ -610,9 +575,10 @@ export async function POST(request: NextRequest) {
     for (let i = 0; i < hourlyData.time.length; i++) {
       const localTime = DateTime.fromISO(hourlyData.time[i], { zone: locationZone });
       const time = localTime.toJSDate();
-      const cloudCover = hourlyData.cloudcover[i] || 0;
-      const temperature = hourlyData.temperature_2m[i] || 70;
-      const windSpeed = hourlyData.wind_speed_10m[i] || 5;
+      // ?? not ||: a real 0 °C or 0 km/h must not become the default
+      const cloudCover = hourlyData.cloudcover[i] ?? 0;
+      const temperature = hourlyData.temperature_2m[i] ?? 10;
+      const windSpeed = hourlyData.wind_speed_10m[i] ?? 5;
 
       // Skip hours that are already over (forecast starts at local midnight today)
       if (localTime.plus({ hours: 1 }) <= now) continue;
@@ -723,9 +689,15 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(response);
     
   } catch (error) {
+    if (error instanceof BadInputError) {
+      return NextResponse.json({ error: error.message }, { status: 400 });
+    }
+    if (error instanceof UpstreamError) {
+      return NextResponse.json({ error: error.message }, { status: 502 });
+    }
     console.error('[API] Error:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch moongazing data' },
+      { error: 'Something went wrong while building your forecast. Please try again.' },
       { status: 500 }
     );
   }
