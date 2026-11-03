@@ -24,7 +24,6 @@ export default function Home() {
   const { temperatureUnit, timeFormat, toggleTemperatureUnit, toggleTimeFormat } = useWeather();
   const router = useRouter();
   const [location, setLocation] = useState('');
-  const [country, setCountry] = useState<'USA' | 'Canada'>('USA');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [stargazingData, setStargazingData] = useState<StargazingData | null>(null);
@@ -94,10 +93,7 @@ export default function Home() {
       const response = await fetch('/api/best-windows', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          location: location.trim(),
-          country: country 
-        }),
+        body: JSON.stringify({ location: location.trim() }),
       });
 
       // The API explains what went wrong (unknown place, weather service down)
@@ -216,26 +212,13 @@ export default function Home() {
                 <div className="w-full max-w-72 sm:max-w-80">
                   <form onSubmit={handleSubmit}>
                     <div className="flex items-center bg-white rounded-lg border-2 border-black shadow-[4px_4px_0_0_#000] focus-within:ring-2 focus-within:ring-blue-600 focus-within:ring-offset-2 transition-shadow">
-                      {/* Country Selector */}
-                      <select
-                        aria-label="Country"
-                        value={country}
-                        onChange={(e) => setCountry(e.target.value as 'USA' | 'Canada')}
-                        className="p-3 text-sm sm:text-base bg-transparent text-gray-900 focus:outline-none border-r-2 border-black rounded-l-lg cursor-pointer"
-                        disabled={loading}
-                        style={{ minWidth: '60px' }}
-                      >
-                        <option value="USA">US</option>
-                        <option value="Canada">CA</option>
-                      </select>
-
                       {/* ZIP Code Input */}
                       <input
                         type="text"
                         value={location}
                         onChange={(e) => setLocation(e.target.value)}
                         aria-label="ZIP code, postal code or city"
-                        placeholder={country === 'USA' ? 'ZIP code or city...' : 'Postal code or city...'}
+                        placeholder="ZIP, postal code or city..."
                         className="flex-1 p-3 text-sm sm:text-base bg-transparent text-gray-900 placeholder-gray-500 focus:outline-none min-w-0"
                         disabled={loading}
                       />
