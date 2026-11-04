@@ -8,13 +8,12 @@ This file gives targeted, actionable guidance for AI coding agents working in th
 
 2) Where to make feature edits
 - Public UI: `src/app/page.tsx`, `src/components/InlineResults.tsx`, `src/components/CurrentWeather.tsx`.
-- Admin UI: `src/app/admin/page.tsx` + `src/components/AdminDashboard.tsx` (markdown editor dynamically imported).
+- Admin UI: none here. `src/app/admin/page.tsx` redirects to the prameet.space admin panel, which edits the Doc.
 - Server logic: `src/app/api/*` (public vs `src/app/api/admin/*` for authenticated admin endpoints).
 
 3) Authentication & admin flows to respect
-- Admin login endpoint: `src/app/api/admin/auth/route.ts`. It checks `ADMIN_USERNAME` + bcrypt `ADMIN_PASSWORD_HASH` (made with `node scripts/set-admin-password.mjs`) and returns a 7-day token signed with `ADMIN_SECRET` (`src/lib/adminSession.ts`).
-- Admin APIs validate the token with `verifyAdminToken` from `src/lib/adminSession.ts`.
-- Fallback when `ADMIN_PASSWORD_HASH` is unset: the `users` table, bcrypt-hashed passwords only.
+- No login in this app: sign-in happens in the prameet.space admin panel.
+- `PUT /api/admin/documentation` requires `Authorization: Bearer <ADMIN_BRIDGE_SECRET>` (the same value is set in both Vercel projects).
 
 4) Build / dev / deploy specifics (exact commands)
 - Local dev (fast): `npm run dev` (uses Turbopack in package.json).
@@ -25,11 +24,10 @@ This file gives targeted, actionable guidance for AI coding agents working in th
   - For production, run `npx prisma migrate deploy` against the Neon DB before deploying or make it part of the Vercel build command.
 
 5) Environment variables required (set in Vercel)
-- `DATABASE_URL`, `ADMIN_SECRET`, `ADMIN_USERNAME`, `ADMIN_PASSWORD_HASH`, `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`, `ASTROSPHERIC_KEY`, `TIMEZONEDB_KEY`, `NEXT_PUBLIC_BASE_URL`.
+- `DATABASE_URL`, `ADMIN_BRIDGE_SECRET`, `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`, `ASTROSPHERIC_KEY`, `TIMEZONEDB_KEY`, `NEXT_PUBLIC_BASE_URL`.
 
 6) Project conventions & important patterns
 - Use TailwindCSS v4 and minimal white theme. Keep styles inline for a few components (consistent with existing code).
-- Dynamic import for heavy client-only libraries: Admin markdown editor uses `dynamic(..., { ssr: false })` in `AdminDashboard.tsx`.
 - API caching: `unstable_cache` used in `best-windows` route. Keep cache timeoffs when editing forecasting logic.
 - Passwords: only bcrypt hashes are accepted; plain-text passwords no longer work.
 

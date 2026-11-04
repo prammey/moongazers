@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
-import { verifyAdminToken } from '../../../../lib/adminSession';
+import { timingSafeEqual } from 'node:crypto';
 
 const prisma = new PrismaClient();
 
@@ -84,8 +84,14 @@ Location data entered is used solely for providing forecasts and is not stored p
 
 Built with Next.js 15, React, TypeScript, and Tailwind CSS. For questions or concerns about this application, please use the Contact information provided.`;
 
+// Editing happens in the prameet.space admin panel, which signs people in and
+// calls this API with the secret both Vercel projects share.
 function isValidToken(token: string): boolean {
-  return verifyAdminToken(token);
+  const secret = process.env.ADMIN_BRIDGE_SECRET;
+  if (!secret) return false;
+  const given = Buffer.from(token);
+  const expected = Buffer.from(secret);
+  return given.length === expected.length && timingSafeEqual(given, expected);
 }
 
 // GET - Fetch current documentation

@@ -1,18 +1,6 @@
-'use client';
+import { redirect } from 'next/navigation';
 
-import { useRouter } from 'next/navigation';
-import AdminDashboard from '@/components/AdminDashboard';
-
+// MoonGazers is edited from the prameet.space admin panel (one login for both sites)
 export default function AdminPage() {
-  const router = useRouter();
-
-  const handleBackToMain = () => {
-    router.push('/');
-  };
-
-  return (
-    <div className="min-h-screen bg-white">
-      <AdminDashboard onBackToMain={handleBackToMain} />
-    </div>
-  );
+  redirect('https://prameet.space/admin#moongazers');
 }
